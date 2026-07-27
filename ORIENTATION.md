@@ -11,6 +11,50 @@
 
 ---
 
+## Checklist traceability
+
+Every question in the assignment's *Codebase Orientation Checklist*, and where it is answered.
+
+| # | Checklist question | Answered in | Status |
+| --- | --- | --- | --- |
+| **1** | Clone and run locally; document every step, **including anything not in the README** | §1.1, §1.2 | ✅ 6 README defects; working sequence recorded |
+| **1** | Read every file in `docs/`; summarise the key architectural decisions in your own words | §1.5 | ✅ + doc-vs-code drift inventory |
+| **1** | Read `shared/`: what types are defined, how are they used across frontend and backend? | §1.4 | ✅ `Document` imported by **zero** files |
+| **1** | Diagram how `web/`, `api/`, `shared/` relate | §1.3 | ✅ Mermaid + tsconfig asymmetry |
+| **2** | Find the schema; map tables and relationships | §2 | ✅ Mermaid ER |
+| **2** | How does one table serve docs, issues, projects and sprints? | §2 | ✅ `properties` JSONB + escape-hatch columns |
+| **2** | What is `document_type`? How is it used in queries? | §2 | ✅ real Postgres ENUM, 10 labels |
+| **2** | How are document relationships handled (linking, parent-child, membership)? | §2 | ✅ 3 mechanisms + an undocumented 4th |
+| **3** | Trace one user action: component → API route → DB → back | §3 | ✅ create-issue, 20 hops |
+| **3** | Identify the middleware chain | §3 | ✅ 11 layers, in order |
+| **3** | How does auth work? What happens to an unauthenticated request? | §3 | ✅ 7 rejection paths with status codes |
+| **4** | How is the WebSocket connection established? | §4 | ✅ upgrade handler, rate-limit, session, visibility |
+| **4** | How does Yjs sync state between users? | §4 | ✅ hand-rolled server, non-standard 4th message type |
+| **4** | What happens when two users edit the same document at once? | §4 | ✅ CRDT for body, **LWW** for properties/REST |
+| **4** | How does the server persist Yjs state? | §4 | ✅ 2s trailing debounce, no max wait |
+| **5** | TypeScript version | §5 | ✅ declared `^5.7.2`, resolves **5.9.3** |
+| **5** | tsconfig settings; is strict mode on? | §5 | ✅ on in all 3; `web/` opts out of the extras |
+| **5** | How are types shared frontend↔backend? | §5, §1.4 | ✅ built output, not source |
+| **5** | Find generics, discriminated unions, utility types, type guards | §5 | ✅ incl. **zero** DUs, `satisfies` used once |
+| **5** | Any patterns you do not recognise? Research them | §5 | ✅ module augmentation, TipTap command typing |
+| **6** | How are the Playwright tests structured? What fixtures? | §6 | ✅ per-worker testcontainers |
+| **6** | How does the test DB get set up and torn down? | §6, §10 | ✅ + the `TRUNCATE CASCADE` hazard |
+| **6** | **Run the full suite. How long? Do all tests pass?** | §6 | ⚠️ **partial** — api 451/451 in 61 s; web 138/151 in 13 s; **E2E cannot start on this host** |
+| **7** | Read the Dockerfile — what does the build produce? | §7 | ✅ 3 files, none multi-stage or non-root |
+| **7** | Read docker-compose — what services start? | §7 | ✅ two files, incompatible ports |
+| **7** | Read `terraform/`: what is declared, which provider, versions pinned? | §7 | ✅ aws-only; **5.100.0 vs 6.28.0 split** |
+| **7** | How does the CI/CD pipeline work? | §7 | ✅ **there is none** — removed twice |
+| **8** | 3 strongest architectural decisions, and why | §8 | ✅ |
+| **8** | 3 weakest points; where would you focus? | §8 | ✅ |
+| **8** | What would you tell a new engineer first? | §8 | ✅ |
+| **8** | What breaks first at 10× users? | §8 | ✅ collaboration layer, silently |
+
+**One item is open:** the full E2E suite (869 tests, 59% of all tests) cannot start on Windows as
+shipped — two defects documented in §6. A Linux environment is being provisioned to measure it without
+editing the repo, so the "unrunnable as shipped" finding stays intact as a genuine before-state.
+
+An interactive version of this document is published separately for presentation.
+
 ## 0. Method
 
 Seven checklist areas were explored in parallel by four independent read-only passes (repository
