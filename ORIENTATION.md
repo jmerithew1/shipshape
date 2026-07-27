@@ -490,6 +490,33 @@ succeeds (verified — 2 users, 5 programs, ~40 issues, 32 weekly plans). The re
 This is exactly why the "get it running" step matters: static reading found a real bug in 033, but only
 running it found the bug that actually fires — and found that the failure is *silent*.
 
+### 9.2 The "6 empty tests" are false positives — the detector is broken
+
+Recorded prominently because I reported this wrongly during the orientation commit, and the
+correction inverts the finding.
+
+**What I said:** the repo ships 6 empty tests that pass silently, and `.husky/pre-commit` correctly
+blocks commits until they are fixed.
+
+**What is actually true:** ✅ all six contain real `expect()` assertions. `scripts/check-empty-tests.sh`
+terminates a test body at the first line matching `/^\s*}\);/` — which matches the close of **any
+indented nested callback** (`page.route(...)`, `page.on(...)`, `page.evaluate(...)`). Any test that
+opens a callback before its first `expect(` is falsely flagged.
+
+Verified on `e2e/autosave-race-conditions.spec.ts`: the test at `:179` is flagged, but the scan stops
+at the `});` on `:195` (closing a `page.route` handler) — while the test's three real assertions live at
+`:214`, `:219`, `:220`. Same mechanism for the other five (`critical-blockers.spec.ts:118,143`,
+`session-timeout.spec.ts:505,1099`).
+
+**Why the corrected version is worse, not better.** The hook runs under `set -e` and ✅ **exits 1 today**
+— confirmed. With no CI anywhere, this hook is the repo's *only* automated gate, and it fails on every
+commit regardless of content. That means it is routinely bypassed with `--no-verify`, which is exactly
+what commit `ac06480` ("prevent `--no-verify` bypasses") was written to stop and `ac0c8ee` reverted.
+
+**Effective automated quality enforcement in this repository is zero.** The fix is a one-line regex in
+the detector, not test edits — and my earlier framing ("fix the 6 empty tests later") was wrong, because
+there is nothing to fix in those tests.
+
 ### Corrections made during verification
 
 Recording these because a wrong number in a graded report is worse than a missing one:
@@ -504,6 +531,11 @@ Recording these because a wrong number in a graded report is worse than a missin
 - **Test count — left approximate on purpose.** One pass reported 866 `test()` declarations, my grep
   found 882. Published as "~866–882, to be pinned with a documented method in the audit" rather than
   asserting a number I cannot yet reproduce exactly.
+- **"6 empty tests block the pre-commit hook" — WITHDRAWN, inverted.** I reported (and put in the
+  orientation commit message) that the repo ships 6 assertion-free tests. All six have real assertions;
+  the *detector* has a body-termination bug. The hook still fails on every commit, so the bypass was
+  justified — but for the opposite reason to the one I gave. Full detail in §9.2. This is the most
+  consequential correction in this document: I asserted a defect in the tests that does not exist.
 - **"Fresh installs are broken" — mechanism corrected, severity re-scoped.** I predicted migration
   `033` aborts a fresh install. Running it showed the loop dies at `010` instead, **silently, with exit
   code 0** — and that the app is nevertheless usable because `schema.sql` carries the complete DDL. The
