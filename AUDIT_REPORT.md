@@ -36,6 +36,27 @@ saturation behaviour are the durable findings.**
 
 ---
 
+## What this audit got wrong, and how it found out
+
+Read this before the findings, because it is the only direct evidence that a *process* ran rather
+than a list being asserted. **Nine claims did not survive verification** and were withdrawn or
+corrected — full table at the end.
+
+Three worth knowing up front:
+
+- **I reported six e2e tests as empty. All six contain real assertions** — the *detector* has a
+  body-termination bug. The corrected finding is worse than the original: the repo's only automated
+  gate fails on every commit regardless of content. Recorded as its own commit, `425f8bc`.
+- **I predicted migration `033` breaks fresh installs.** Running it showed the loop dies 23
+  migrations earlier, at `010`, **silently, with exit code 0**. The conclusion held; the mechanism,
+  location and blast radius were all wrong.
+- **I ranked the unusable GIN index as the #1 optimisation target.** A second category then measured
+  its actual cost at **0.34 ms** and it was demoted to a scaling landmine. Dramatic, but not today's
+  bottleneck.
+
+Every number below carries the command that produced it (see [`bench/`](bench/README.md)), so any of
+this can be re-checked rather than taken on trust.
+
 ## Summary of findings
 
 Eight categories measured. **41 distinct findings**, ranked below by consequence rather than by
@@ -1187,7 +1208,7 @@ plan diff against a live environment, or a policy tool (`tflint`, `checkov`, OPA
 # Corrections made during this audit
 
 Recorded rather than smoothed over. **A wrong number in a pass/fail report is worse than a missing
-one**, and six claims did not survive verification.
+one**, and nine claims did not survive verification.
 
 | Claim | Outcome |
 | --- | --- |
