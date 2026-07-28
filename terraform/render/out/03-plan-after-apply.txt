@@ -1,0 +1,82 @@
+render_project.ship: Refreshing state... [id=prj-d9keaotg1s2s73futqeg]
+render_postgres.ship: Refreshing state... [id=dpg-d9keaortqb8s73bbtjag-a]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # render_web_service.api will be created
+  + resource "render_web_service" "api" {
+      + active_custom_domains         = (known after apply)
+      + env_vars                      = {
+          + "CORS_ORIGIN" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "DATABASE_URL" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "NODE_ENV" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "NODE_VERSION" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "PORT" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "SESSION_SECRET" = {
+              + generate_value = true
+              + value          = (sensitive value)
+            },
+        }
+      + environment_id                = "evm-d9keaotg1s2s73futqf0"
+      + health_check_path             = "/health"
+      + id                            = (known after apply)
+      + log_stream_override           = (known after apply)
+      + maintenance_mode              = {
+          + enabled = false
+          + uri     = ""
+        }
+      + max_shutdown_delay_seconds    = (known after apply)
+      + name                          = "ship-api"
+      + notification_override         = (known after apply)
+      + num_instances                 = (known after apply)
+      + plan                          = "free"
+      + previews                      = (known after apply)
+      + pull_request_previews_enabled = (known after apply)
+      + region                        = "oregon"
+      + root_directory                = (known after apply)
+      + runtime_source                = {
+          + native_runtime = {
+              + auto_deploy         = true
+              + auto_deploy_trigger = (known after apply)
+              + branch              = "main"
+              + build_command       = "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build:api"
+              + repo_url            = "https://labs.gauntletai.com/jamesmerithew/shipshape"
+              + runtime             = "node"
+            }
+        }
+      + slug                          = (known after apply)
+      + start_command                 = "node api/dist/db/migrate.js && node api/dist/index.js"
+      + url                           = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + api_docs_url     = (known after apply)
+  + api_url          = (known after apply)
+  + health_check_url = (known after apply)
+  + web_service_id   = (known after apply)
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

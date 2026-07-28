@@ -1,0 +1,9 @@
+# The parent terraform/.gitignore already excludes .terraform/, *.tfstate and
+# *.tfvars. That matters more here than anywhere else in this repo: Render
+# state contains the generated SESSION_SECRET and the Postgres password.
+
+# ...but DO commit the provider lock file. The exact version pin in
+# versions.tf is only half of reproducibility; the lock file records the
+# provider checksums. This negates the `.terraform.lock.hcl` rule in
+# terraform/.gitignore.
+!.terraform.lock.hcl

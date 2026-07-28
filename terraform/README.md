@@ -516,3 +516,56 @@ For production, consider:
 - Taking a final Aurora snapshot
 - Backing up S3 bucket contents
 - Exporting CloudWatch logs
+
+---
+
+## Sibling configurations: `local/` and `render/`
+
+The AWS stack documented above is the production target. Two additional,
+fully independent configurations live alongside it. Neither reads, writes, nor
+shares state with the AWS stack.
+
+| Directory | Provider | Pinned version | Purpose |
+|---|---|---|---|
+| `terraform/local/` | `hashicorp/local` | `2.5.2` (exact) | Drift-detection demo over two managed files. No credentials. |
+| `terraform/render/` | `render-oss/render` | `1.9.1` (exact) | Deploys the API tier (web service + Postgres) to Render. |
+
+Both pin the provider **exactly** rather than with `~>`, and both commit
+`.terraform.lock.hcl` (each directory's `.gitignore` negates the
+`.terraform.lock.hcl` rule in `terraform/.gitignore`). The version constraint
+says what to fetch; the lock file says exactly which bytes. Both were verified
+with Terraform **v1.15.8** — `.terraform-version` pins 1.6.0, and every
+`required_version` in this tree is `>= 1.6.0`.
+
+### `terraform/local/` — drift detection
+
+`./run-drift-demo.sh` runs the full loop and captures every step to `out/`:
+init → `fmt -check` → validate → plan → apply → plan (clean) → tamper with a
+managed file outside Terraform → plan (drift detected) → diff → apply
+(reconcile) → plan (clean again).
+
+Worth knowing: `local_file` reports drift as **"has been deleted" → `1 to
+add`**, not `~ update in-place`. The provider's `Read` compares
+`content_sha256` and drops the resource from state on mismatch, so the plan
+shows the *desired* content and never surfaces the tampered value. Drift is
+caught and reconciled either way, but the report loses the "what it drifted
+to" half of the diff that a real cloud provider would show. See
+`terraform/local/README.md`.
+
+### `terraform/render/` — Render deployment
+
+Intended to replace manual deploy steps: `terraform apply` builds the repo on
+Render's native Node runtime and wires it to a managed Postgres instance.
+Docker is deliberately not used — the repo's `Dockerfile` `COPY`s
+`shared/dist` and `api/dist`, which are gitignored and absent from a clean
+checkout.
+
+**Current status: 2 of 3 resources deployed.** The project and the database
+applied cleanly. The web service was rejected by the Render API because
+**Render only builds from `github.com` or `gitlab.com`**, and this fork's
+origin is a self-hosted GitLab. Mirroring the fork to a supported host and
+passing `-var repo_url=...` is the only change required.
+
+Full detail, including the `NODE_ENV`/AWS-SSM coupling that prevents the app
+from running in production mode off AWS, is in
+[`docs/deployment-render.md`](../docs/deployment-render.md).
