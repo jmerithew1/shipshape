@@ -1,0 +1,66 @@
+local_file.config: Refreshing state... [id=8302365e2f7608995e9ec64003e79b262f0cb3a3]
+local_file.readme: Refreshing state... [id=130cd1991385eb382fa10233d66d59080a033f5c]
+
+Note: Objects have changed outside of Terraform
+
+Terraform detected the following changes made outside of Terraform since the
+last "terraform apply" which may have affected this plan:
+
+  # local_file.config has been deleted
+  - resource "local_file" "config" {
+      - content_sha256       = "6f663aac6bef566ba303d7961da32147680dc1de1a4551f7a869bd0bcabaf523" -> null
+        id                   = "8302365e2f7608995e9ec64003e79b262f0cb3a3"
+        # (9 unchanged attributes hidden)
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the
+relevant attributes using ignore_changes, the following plan may include
+actions to undo or respond to these changes.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # local_file.config will be created
+  + resource "local_file" "config" {
+      + content              = jsonencode(
+            {
+              + env      = "drift-demo"
+              + logLevel = "info"
+              + replicas = 2
+              + service  = "ship-api"
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0644"
+      + filename             = "./managed/app-config.json"
+      + id                   = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  ~ config_sha    = "6f663aac6bef566ba303d7961da32147680dc1de1a4551f7a869bd0bcabaf523" -> (known after apply)
+local_file.config: Creating...
+local_file.config: Creation complete after 0s [id=8302365e2f7608995e9ec64003e79b262f0cb3a3]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+config_sha = "6f663aac6bef566ba303d7961da32147680dc1de1a4551f7a869bd0bcabaf523"
+managed_files = [
+  "./managed/app-config.json",
+  "./managed/README.txt",
+]

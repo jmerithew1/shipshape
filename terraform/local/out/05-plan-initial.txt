@@ -1,0 +1,60 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # local_file.config will be created
+  + resource "local_file" "config" {
+      + content              = jsonencode(
+            {
+              + env      = "drift-demo"
+              + logLevel = "info"
+              + replicas = 2
+              + service  = "ship-api"
+            }
+        )
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0644"
+      + filename             = "./managed/app-config.json"
+      + id                   = (known after apply)
+    }
+
+  # local_file.readme will be created
+  + resource "local_file" "readme" {
+      + content              = <<-EOT
+            This file is managed by Terraform (hashicorp/local).
+            Do not edit by hand - Terraform will detect and revert changes.
+        EOT
+      + content_base64sha256 = (known after apply)
+      + content_base64sha512 = (known after apply)
+      + content_md5          = (known after apply)
+      + content_sha1         = (known after apply)
+      + content_sha256       = (known after apply)
+      + content_sha512       = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0644"
+      + filename             = "./managed/README.txt"
+      + id                   = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + config_sha    = (known after apply)
+  + managed_files = [
+      + "./managed/app-config.json",
+      + "./managed/README.txt",
+    ]
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

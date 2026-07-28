@@ -1,0 +1,2 @@
+Terraform v1.15.8
+on windows_amd64

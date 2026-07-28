@@ -1,0 +1,1 @@
+{"env":"drift-demo","logLevel":"debug","replicas":9,"service":"ship-api"}

@@ -1,0 +1,7 @@
+local_file.config: Refreshing state... [id=8302365e2f7608995e9ec64003e79b262f0cb3a3]
+local_file.readme: Refreshing state... [id=130cd1991385eb382fa10233d66d59080a033f5c]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
