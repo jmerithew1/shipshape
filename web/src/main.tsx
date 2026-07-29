@@ -23,7 +23,13 @@ import { IssuesPage } from '@/pages/Issues';
 import { ProgramsPage } from '@/pages/Programs';
 import { TeamModePage } from '@/pages/TeamMode';
 import { TeamDirectoryPage } from '@/pages/TeamDirectory';
-import { PersonEditorPage } from '@/pages/PersonEditor';
+// Lazy: PersonEditor and UnifiedDocumentPage are the two routes that pull in
+// the whole editor stack (TipTap + ProseMirror + Yjs + lowlight/highlight.js —
+// the bulk of the audit's 92.1%-of-JS main chunk, Cat 2). Splitting them moves
+// that stack out of the initial page load; every other route renders without it.
+const PersonEditorPage = React.lazy(() =>
+  import('@/pages/PersonEditor').then((m) => ({ default: m.PersonEditorPage }))
+);
 import { FeedbackEditorPage } from '@/pages/FeedbackEditor';
 import { PublicFeedbackPage } from '@/pages/PublicFeedback';
 import { ProjectsPage } from '@/pages/Projects';
@@ -33,7 +39,9 @@ import { AdminDashboardPage } from '@/pages/AdminDashboard';
 import { AdminWorkspaceDetailPage } from '@/pages/AdminWorkspaceDetail';
 import { WorkspaceSettingsPage } from '@/pages/WorkspaceSettings';
 import { ConvertedDocumentsPage } from '@/pages/ConvertedDocuments';
-import { UnifiedDocumentPage } from '@/pages/UnifiedDocumentPage';
+const UnifiedDocumentPage = React.lazy(() =>
+  import('@/pages/UnifiedDocumentPage').then((m) => ({ default: m.UnifiedDocumentPage }))
+);
 import { StatusOverviewPage } from '@/pages/StatusOverviewPage';
 import { ReviewsPage } from '@/pages/ReviewsPage';
 import { OrgChartPage } from '@/pages/OrgChartPage';
@@ -216,7 +224,14 @@ function AppRoutes() {
         <Route path="my-week" element={<MyWeekPage />} />
         <Route path="docs" element={<DocumentsPage />} />
         <Route path="docs/:id" element={<DocumentRedirect />} />
-        <Route path="documents/:id/*" element={<UnifiedDocumentPage />} />
+        <Route
+          path="documents/:id/*"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-muted">Loading editor…</div>}>
+              <UnifiedDocumentPage />
+            </React.Suspense>
+          }
+        />
         <Route path="issues" element={<IssuesPage />} />
         <Route path="issues/:id" element={<DocumentRedirect />} />
         <Route path="projects" element={<ProjectsPage />} />
@@ -239,7 +254,14 @@ function AppRoutes() {
         <Route path="team/reviews" element={<ReviewsPage />} />
         <Route path="team/org-chart" element={<OrgChartPage />} />
         {/* Person profile stays in Teams context - no redirect to /documents */}
-        <Route path="team/:id" element={<PersonEditorPage />} />
+        <Route
+          path="team/:id"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-muted">Loading editor…</div>}>
+              <PersonEditorPage />
+            </React.Suspense>
+          }
+        />
         <Route path="feedback/:id" element={<FeedbackEditorPage />} />
         <Route path="settings" element={<WorkspaceSettingsPage />} />
         <Route path="settings/conversions" element={<ConvertedDocumentsPage />} />

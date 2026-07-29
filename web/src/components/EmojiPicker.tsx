@@ -1,6 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
-import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import type { Theme, EmojiClickData } from 'emoji-picker-react';
 import { cn } from '@/lib/cn';
+
+// Lazy: emoji-picker-react is 266.7 kB minified — 11.7% of the whole bundle
+// (AUDIT_REPORT.md Cat 2) — and this popover is consumed by the always-visible
+// sidebar, which used to pull the library into the initial chunk. The picker
+// body now loads on first open. Imports above are type-only so they don't
+// retain the implementation; Theme is a runtime enum, so the dark value is
+// supplied as a checked literal below instead of via the enum object.
+const EmojiPicker = lazy(() => import('emoji-picker-react'));
+const DARK_THEME = 'dark' as Theme;
 
 interface EmojiPickerPopoverProps {
   value?: string | null;
@@ -73,15 +82,23 @@ export function EmojiPickerPopover({ value, onChange, children, className }: Emo
                 Remove emoji
               </button>
             )}
-            <EmojiPicker
-              onEmojiClick={handleEmojiClick}
-              skinTonesDisabled={true}
-              theme={Theme.DARK}
-              height={350}
-              width={300}
-              searchPlaceholder="Search emoji..."
-              previewConfig={{ showPreview: false }}
-            />
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center text-sm text-muted" style={{ height: 350, width: 300 }}>
+                  Loading emoji…
+                </div>
+              }
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                skinTonesDisabled={true}
+                theme={DARK_THEME}
+                height={350}
+                width={300}
+                searchPlaceholder="Search emoji..."
+                previewConfig={{ showPreview: false }}
+              />
+            </Suspense>
           </div>
         </div>
       )}
