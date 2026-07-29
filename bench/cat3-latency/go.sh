@@ -3,9 +3,13 @@
 # Order matters: wait for a FRESH rate-limit window FIRST, then login, then measure.
 set -u
 export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
-SD="C:/Users/merit/AppData/Local/Temp/claude/C--Users-merit-OneDrive-Desktop-openemr-base-clean/b393c457-c63f-4f54-ad08-ecdf98562e8c/scratchpad"
-cd "$SD"; mkdir -p results
+# Repo-relative since 2026-07-29: the audit-era script pointed at a session
+# scratchpad that no longer exists. Results land in out/ per the bench
+# evidence convention; set LABEL (e.g. "rebaseline-<sha>") to tag the run.
+SD="$(cd "$(dirname "$0")" && pwd)"
+cd "$SD"; mkdir -p out
 NAME=$1; PQ=$2; C=$3; AMOUNT=${4:-600}; WARM=${5:-40}
+LABEL=${LABEL:-run}
 J="$SD/j_run.txt"; rm -f "$J"
 
 # 1. gate on a fresh window (unauthenticated, cheap)
@@ -26,4 +30,4 @@ SID=$(grep session_id "$J" | awk '{print $7}' | tr -d '\r\n ')
 [ -z "$SID" ] && { echo "LOGIN FAILED"; exit 1; }
 
 # 3. measure
-node loadgen.js "$PQ" "$C" "$AMOUNT" "$SID" "$WARM" | tee "results/${NAME}_c${C}.json"
+node loadgen.js "$PQ" "$C" "$AMOUNT" "$SID" "$WARM" | tee "out/${LABEL}_${NAME}_c${C}.json"
