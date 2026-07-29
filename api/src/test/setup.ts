@@ -8,6 +8,23 @@ beforeAll(async () => {
   // Ensure test environment
   process.env.NODE_ENV = 'test'
 
+  // Guard: this file TRUNCATEs 15 tables in whatever database DATABASE_URL
+  // points at. Run unguarded against a dev database, `pnpm test` silently
+  // destroys it — which happened for real on 2026-07-29 (ship_dev wiped;
+  // see bench/cat3-latency/out/NOTES-2026-07-29.md). Tests refuse to run
+  // unless the database name is explicitly a test database.
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set; tests need a *_test database to run against')
+  }
+  const dbName = new URL(process.env.DATABASE_URL).pathname.slice(1)
+  if (!/(_test$|^test_)/.test(dbName)) {
+    throw new Error(
+      `Refusing to run tests against database "${dbName}": the test suite ` +
+      `TRUNCATEs all tables. Point DATABASE_URL at a test database (name ` +
+      `ending in _test), e.g. postgresql://ship:ship_dev_password@localhost:5433/ship_test`
+    )
+  }
+
   // Clean up test data from previous runs to prevent duplicate key errors
   // Use TRUNCATE CASCADE which is faster and bypasses row-level triggers
   // (audit_logs has AU-9 compliance triggers preventing DELETE)
