@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DetailsExtension } from './DetailsExtension';
+import { DetailsExtension, DetailsSummary, DetailsContent } from './DetailsExtension';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -10,11 +10,18 @@ describe('DetailsExtension', () => {
     expect(extension.name).toBe('details');
   });
 
-  it('should be configured as a block node with content', () => {
+  it('should be configured as a block node containing summary and content', () => {
     const extension = DetailsExtension;
     expect(extension.config.group).toBe('block');
-    expect(extension.config.content).toBe('block+');
+    expect(extension.config.content).toBe('detailsSummary detailsContent');
     expect(extension.config.defining).toBe(true);
+  });
+
+  it('should ship companion summary and content nodes', () => {
+    expect(DetailsSummary.name).toBe('detailsSummary');
+    expect(DetailsSummary.config.content).toBe('inline*');
+    expect(DetailsContent.name).toBe('detailsContent');
+    expect(DetailsContent.config.content).toBe('block+');
   });
 
   it('should have addAttributes function defined', () => {
@@ -54,8 +61,10 @@ describe('DetailsExtension', () => {
   });
 
   it('should work in editor context', () => {
+    // The details node's content expression references detailsSummary and
+    // detailsContent, so the schema only compiles with all three registered.
     const editor = new Editor({
-      extensions: [StarterKit, DetailsExtension],
+      extensions: [StarterKit, DetailsExtension, DetailsSummary, DetailsContent],
       content: '<p>Test content</p>',
     });
 
@@ -67,7 +76,7 @@ describe('DetailsExtension', () => {
 
   it('should allow inserting details via command', () => {
     const editor = new Editor({
-      extensions: [StarterKit, DetailsExtension],
+      extensions: [StarterKit, DetailsExtension, DetailsSummary, DetailsContent],
       content: '<p>Test content</p>',
     });
 
