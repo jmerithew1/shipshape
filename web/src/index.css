@@ -23,9 +23,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Focus styles for accessibility */
+/* Focus styles for accessibility.
+   accent-hover (#0071bc), not accent (#005ea2): the darker logo blue measures
+   2.89:1 against the #0d0d0d background — below the 3:1 WCAG 1.4.11 minimum
+   for non-text indicators (AUDIT_REPORT.md Cat 7). #0071bc measures 3.78:1. */
 :focus-visible {
-  outline: 2px solid #005ea2; /* Logo blue */
+  outline: 2px solid #0071bc;
   outline-offset: 2px;
 }
 

@@ -646,10 +646,12 @@ function DocumentsTree({ documents, activeId, onSelect }: { documents: WikiDocum
               />
             ))
           ) : (
-            <li className="px-2 py-1 text-sm text-muted">No workspace documents</li>
+            <li role="presentation" className="px-2 py-1 text-sm text-muted">No workspace documents</li>
           )}
           {workspaceHiddenCount > 0 && (
-            <li>
+            /* role=treeitem: a bare li inside role=tree violates
+               aria-required-children (axe critical) and listitem (serious) */
+            <li role="treeitem">
               <Link
                 to="/docs?filter=workspace"
                 className="block px-2 py-1.5 text-sm text-muted hover:text-foreground hover:bg-border/30 rounded-md transition-colors"
@@ -678,7 +680,8 @@ function DocumentsTree({ documents, activeId, onSelect }: { documents: WikiDocum
               />
             ))}
             {privateHiddenCount > 0 && (
-              <li>
+              /* role=treeitem: bare li inside role=tree violates aria-required-children */
+              <li role="treeitem">
                 <Link
                   to="/docs?filter=private"
                   className="block px-2 py-1.5 text-sm text-muted hover:text-foreground hover:bg-border/30 rounded-md transition-colors"

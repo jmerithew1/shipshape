@@ -12,6 +12,10 @@ export default {
         border: '#262626',
         accent: '#005ea2', // Logo blue
         'accent-hover': '#0071bc', // Lighter blue for hover
+        // Accent for TEXT on dark/tinted surfaces. #005ea2 text on a
+        // bg-accent/20 chip measures ~2.6:1 (axe serious, Cat 7); this
+        // value measures 6.8:1 on that chip and 7.6:1 on the background.
+        'accent-bright': '#61a8e8',
       },
       fontFamily: {
         sans: [
