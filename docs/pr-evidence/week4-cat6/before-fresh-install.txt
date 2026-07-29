@@ -1,0 +1,25 @@
+Running database migrations...
+✅ Schema applied
+  Running migration: 001_properties_jsonb.sql
+  ✅ 001_properties_jsonb.sql applied
+  Running migration: 002_person_membership_decoupling.sql
+  ✅ 002_person_membership_decoupling.sql applied
+  Running migration: 003_document_history.sql
+  ✅ 003_document_history.sql applied
+  Running migration: 004_fix_person_user_id_backfill.sql
+  ✅ 004_fix_person_user_id_backfill.sql applied
+  Running migration: 005_create_missing_person_documents.sql
+  ✅ 005_create_missing_person_documents.sql applied
+  Running migration: 006_document_visibility.sql
+  ✅ 006_document_visibility.sql applied
+  Running migration: 007_archived_and_deleted_at.sql
+  ✅ 007_archived_and_deleted_at.sql applied
+  Running migration: 007b_remove_prefix_add_emoji.sql
+  ✅ 007b_remove_prefix_add_emoji.sql applied
+  Running migration: 008_consolidate_feedback.sql
+  ✅ 008_consolidate_feedback.sql applied
+  Running migration: 009_audit_logs_nullable_actor.sql
+  ✅ 009_audit_logs_nullable_actor.sql applied
+  Running migration: 010_oauth_state.sql
+Database schema already exists, continuing...
+exit=0

@@ -1,0 +1,4 @@
+Running database migrations...
+✅ Schema applied
+✅ Fresh install: schema.sql is the current snapshot; stamped 42 migrations as applied
+exit=0

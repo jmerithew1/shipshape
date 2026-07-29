@@ -1,0 +1,28 @@
+-- second run: existing database path
+Running database migrations...
+✅ Schema applied
+  Running migration: 999_broken_repro.sql
+  ❌ Migration 999_broken_repro.sql FAILED and was rolled back
+Database migration failed: error: syntax error at or near "THIS"
+    at C:\Users\merit\OneDrive\Desktop\shipshape\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async migrate (C:\Users\merit\OneDrive\Desktop\shipshape\api\src\db\migrate.ts:128:9) {
+  length: 92,
+  severity: 'ERROR',
+  code: '42601',
+  detail: undefined,
+  hint: undefined,
+  position: '1',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'scan.l',
+  line: '1244',
+  routine: 'scanner_yyerror'
+}
+exit=1
