@@ -49,8 +49,9 @@ export function ProjectCombobox({
   // Group projects by program
   const projectsByProgram = projects.reduce<Record<string, Project[]>>((acc, project) => {
     const key = project.programId || '__unassigned__';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(project);
+    const group = acc[key] ?? [];
+    group.push(project);
+    acc[key] = group;
     return acc;
   }, {});
 
@@ -58,8 +59,8 @@ export function ProjectCombobox({
   const sortedProgramKeys = Object.keys(projectsByProgram).sort((a, b) => {
     if (a === '__unassigned__') return 1;
     if (b === '__unassigned__') return -1;
-    const nameA = projectsByProgram[a][0]?.programName || '';
-    const nameB = projectsByProgram[b][0]?.programName || '';
+    const nameA = projectsByProgram[a]?.[0]?.programName || '';
+    const nameB = projectsByProgram[b]?.[0]?.programName || '';
     return nameA.localeCompare(nameB);
   });
 
@@ -221,7 +222,7 @@ export function ProjectCombobox({
 
               {/* Projects grouped by program */}
               {sortedProgramKeys.map((programKey) => {
-                const programProjects = projectsByProgram[programKey];
+                const programProjects = projectsByProgram[programKey] ?? [];
                 const firstProject = programProjects[0];
                 const programName = programKey === '__unassigned__'
                   ? 'Not assigned to a program'

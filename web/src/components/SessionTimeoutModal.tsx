@@ -38,6 +38,7 @@ export function SessionTimeoutModal({
       }, 50);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [open]);
 
   // Screen reader announcements at key intervals

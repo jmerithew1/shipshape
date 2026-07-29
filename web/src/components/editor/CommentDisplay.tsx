@@ -70,16 +70,21 @@ function InlineCommentThread({
   onReply: ((commentId: string, content: string) => void) | null;
   onResolve: ((commentId: string, resolved: boolean) => void) | null;
 }) {
-  const root = thread[0];
-  const replies = thread.slice(1);
-  const isResolved = root.resolved_at !== null;
-
   const container = document.createElement('div');
 
   // Create a simple DOM structure (no React inside decorations for simplicity)
   container.className = 'comment-thread-inline';
-  container.setAttribute('data-comment-thread', root.comment_id);
   container.contentEditable = 'false';
+
+  const root = thread[0];
+  if (!root) {
+    return container;
+  }
+
+  const replies = thread.slice(1);
+  const isResolved = root.resolved_at !== null;
+
+  container.setAttribute('data-comment-thread', root.comment_id);
 
   if (isResolved) {
     container.innerHTML = `
@@ -208,7 +213,8 @@ export const CommentDisplayExtension = Extension.create<Record<string, never>, C
 
             // Add inline decorations to dim resolved comment highlights
             for (const [commentId, thread] of threads.entries()) {
-              const isResolved = thread[0].resolved_at !== null;
+              const rootComment = thread[0];
+              const isResolved = rootComment !== undefined && rootComment.resolved_at !== null;
               if (isResolved) {
                 doc.descendants((node: any, pos: number) => {
                   if (node.isText) {
@@ -254,7 +260,7 @@ export const CommentDisplayExtension = Extension.create<Record<string, never>, C
                 });
               }, {
                 side: 1, // Render after the position
-                key: `comment-${commentId}-${thread.length}-${thread[0].resolved_at || 'open'}`,
+                key: `comment-${commentId}-${thread.length}-${thread[0]?.resolved_at || 'open'}`,
               });
 
               decorations.push(widget);

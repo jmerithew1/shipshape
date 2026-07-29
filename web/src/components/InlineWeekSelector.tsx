@@ -50,6 +50,7 @@ export function InlineWeekSelector({
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return undefined;
   }, [isOpen]);
 
   // Close on Escape
@@ -63,6 +64,7 @@ export function InlineWeekSelector({
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
+    return undefined;
   }, [isOpen]);
 
   const handleSelect = (sprintId: string | null) => {

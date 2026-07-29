@@ -150,6 +150,18 @@ interface SelectedCell {
   cell: ReviewCell;
 }
 
+// Default cell used when an optimistic update targets a week with no existing cell
+const EMPTY_REVIEW_CELL: ReviewCell = {
+  planApproval: null,
+  reviewApproval: null,
+  reviewRating: null,
+  hasPlan: false,
+  hasRetro: false,
+  sprintId: null,
+  planDocId: null,
+  retroDocId: null,
+};
+
 // Batch review mode state
 interface BatchMode {
   type: 'plans' | 'retros';
@@ -214,7 +226,7 @@ export function ReviewsPage() {
       const updated = { ...prev, reviews: { ...prev.reviews } };
       updated.reviews[personId] = { ...updated.reviews[personId] };
       updated.reviews[personId][weekNumber] = {
-        ...updated.reviews[personId][weekNumber],
+        ...(updated.reviews[personId][weekNumber] ?? EMPTY_REVIEW_CELL),
         planApproval: {
           state: 'approved',
           approved_by: null,
@@ -247,7 +259,7 @@ export function ReviewsPage() {
       const updated = { ...prev, reviews: { ...prev.reviews } };
       updated.reviews[personId] = { ...updated.reviews[personId] };
       updated.reviews[personId][weekNumber] = {
-        ...updated.reviews[personId][weekNumber],
+        ...(updated.reviews[personId][weekNumber] ?? EMPTY_REVIEW_CELL),
         [approvalField]: { state: 'changes_requested', approved_by: null, approved_at: new Date().toISOString(), feedback },
       };
       return updated;
@@ -272,7 +284,7 @@ export function ReviewsPage() {
       const updated = { ...prev, reviews: { ...prev.reviews } };
       updated.reviews[personId] = { ...updated.reviews[personId] };
       updated.reviews[personId][weekNumber] = {
-        ...updated.reviews[personId][weekNumber],
+        ...(updated.reviews[personId][weekNumber] ?? EMPTY_REVIEW_CELL),
         reviewApproval: {
           state: 'approved',
           approved_by: null,

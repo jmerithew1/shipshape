@@ -92,7 +92,7 @@ export function WorkspaceSettingsPage() {
 
     // Check if this is the last admin
     const admins = members.filter(m => m.role === 'admin');
-    if (admins.length === 1 && admins[0].userId === userId && newRole === 'member') {
+    if (admins.length === 1 && admins[0]?.userId === userId && newRole === 'member') {
       alert('Cannot demote the last admin. Promote another member first.');
       return;
     }

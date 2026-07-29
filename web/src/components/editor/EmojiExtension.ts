@@ -161,6 +161,7 @@ export const EmojiExtension = Node.create({
         // Modifying state.tr in place applies the transformation
         const textNode = state.schema.text(emoji.emoji + ' ');
         state.tr.replaceWith(range.from, range.to, textNode);
+        return undefined;
       },
     });
 

@@ -78,7 +78,7 @@ export function CommandPalette({ open, onOpenChange, currentDocument, onConvertD
         nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
       }
 
-      focusableElements[nextIndex].focus();
+      focusableElements[nextIndex]?.focus();
     };
 
     // Fallback: if focus escapes to anywhere outside dialog, bring it back immediately
@@ -86,7 +86,7 @@ export function CommandPalette({ open, onOpenChange, currentDocument, onConvertD
       if (!dialog.contains(e.target as Node)) {
         const focusableElements = getFocusableElements();
         if (focusableElements.length > 0) {
-          focusableElements[0].focus();
+          focusableElements[0]?.focus();
         }
       }
     };
@@ -167,22 +167,29 @@ export function CommandPalette({ open, onOpenChange, currentDocument, onConvertD
 
   // Group documents by type for display
   const groupedDocuments = useMemo(() => {
+    const issue: SearchableDocument[] = [];
+    const wiki: SearchableDocument[] = [];
+    const program: SearchableDocument[] = [];
+    const project: SearchableDocument[] = [];
+    const sprint: SearchableDocument[] = [];
+    const person: SearchableDocument[] = [];
     const groups: Record<string, SearchableDocument[]> = {
-      issue: [],
-      wiki: [],
-      program: [],
-      project: [],
-      sprint: [],
-      person: [],
+      issue,
+      wiki,
+      program,
+      project,
+      sprint,
+      person,
     };
 
     for (const doc of documents) {
-      if (groups[doc.document_type]) {
-        groups[doc.document_type].push(doc);
+      const group = groups[doc.document_type];
+      if (group) {
+        group.push(doc);
       }
     }
 
-    return groups;
+    return { issue, wiki, program, project, sprint, person };
   }, [documents]);
 
   // Get route for document type

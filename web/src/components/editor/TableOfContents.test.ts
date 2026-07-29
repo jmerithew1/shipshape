@@ -82,10 +82,10 @@ describe('TableOfContentsExtension', () => {
     });
 
     expect(headings).toHaveLength(2);
-    expect(headings[0].text).toBe('First Heading');
-    expect(headings[0].level).toBe(1);
-    expect(headings[1].text).toBe('Second Heading');
-    expect(headings[1].level).toBe(2);
+    expect(headings[0]?.text).toBe('First Heading');
+    expect(headings[0]?.level).toBe(1);
+    expect(headings[1]?.text).toBe('Second Heading');
+    expect(headings[1]?.level).toBe(2);
 
     editor.destroy();
   });
@@ -235,9 +235,9 @@ describe('TableOfContentsExtension', () => {
     });
 
     expect(headings).toHaveLength(3);
-    expect(headings[0].level).toBe(1);
-    expect(headings[1].level).toBe(2);
-    expect(headings[2].level).toBe(3);
+    expect(headings[0]?.level).toBe(1);
+    expect(headings[1]?.level).toBe(2);
+    expect(headings[2]?.level).toBe(3);
 
     editor.destroy();
   });

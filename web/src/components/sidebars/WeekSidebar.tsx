@@ -246,7 +246,7 @@ export function WeekSidebar({
                           ? 'bg-accent text-white'
                           : 'bg-border/40 text-muted hover:bg-border'
                       }`}
-                      title={OPM_RATING_LABELS[rating].label}
+                      title={OPM_RATING_LABELS[rating]?.label}
                     >
                       {rating}
                     </button>

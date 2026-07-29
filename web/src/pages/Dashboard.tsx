@@ -125,6 +125,7 @@ export function DashboardPage() {
 
   // Filter overdue items for blocking banner
   const overdueItems = actionItems.filter(item => item.urgency === 'overdue');
+  const singleOverdueItem = overdueItems.length === 1 ? overdueItems[0] : undefined;
 
   return (
     <div className="h-full overflow-auto pb-20">
@@ -132,13 +133,13 @@ export function DashboardPage() {
       {overdueItems.length > 0 && (
         <div className="bg-red-600 text-white px-6 py-3">
           <div className="mx-auto max-w-6xl">
-            {overdueItems.length === 1 ? (
+            {singleOverdueItem ? (
               <Link
-                to={`/documents/${overdueItems[0].sprint_id}`}
+                to={`/documents/${singleOverdueItem.sprint_id}`}
                 className="flex items-center gap-2 hover:underline"
               >
                 <span className="font-medium">
-                  {overdueItems[0].program_name} Week {overdueItems[0].sprint_number} is missing a {overdueItems[0].type}
+                  {singleOverdueItem.program_name} Week {singleOverdueItem.sprint_number} is missing a {singleOverdueItem.type}
                 </span>
                 <span className="text-red-200">&rarr; Write now</span>
               </Link>

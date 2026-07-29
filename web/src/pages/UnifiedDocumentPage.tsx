@@ -484,7 +484,7 @@ export function UnifiedDocumentPage() {
         <div className="border-b border-border px-4">
           <TabBar
             tabs={tabs}
-            activeTab={activeTab || tabs[0]?.id}
+            activeTab={activeTab || tabs[0]?.id || ''}
             onTabChange={(tab) => {
               // Navigate to new URL - first tab gets clean URL, others get tab suffix
               if (tab === tabConfig[0]?.id) {

@@ -8,14 +8,16 @@ interface VisibilityDropdownProps {
   disabled?: boolean;
 }
 
+const workspaceOption = { value: 'workspace' as const, label: 'Workspace', icon: GlobeIcon };
+
 const options = [
   { value: 'private' as const, label: 'Private', icon: LockIcon },
-  { value: 'workspace' as const, label: 'Workspace', icon: GlobeIcon },
+  workspaceOption,
 ];
 
 export function VisibilityDropdown({ value, onChange, disabled = false }: VisibilityDropdownProps) {
   const [open, setOpen] = useState(false);
-  const selected = options.find((o) => o.value === value) || options[1];
+  const selected = options.find((o) => o.value === value) || workspaceOption;
   const SelectedIcon = selected.icon;
 
   return (

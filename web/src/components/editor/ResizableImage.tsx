@@ -46,6 +46,7 @@ function ResizableImageComponent({ node, updateAttributes, selected }: NodeViewP
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
+    return undefined;
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
   const width = node.attrs.width || 'auto';
