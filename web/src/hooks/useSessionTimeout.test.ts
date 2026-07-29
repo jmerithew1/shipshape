@@ -17,7 +17,11 @@ const ABSOLUTE_SESSION_TIMEOUT_MS = 12 * 60 * 60 * 1000; // 12 hours
 const ABSOLUTE_WARNING_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before absolute timeout
 const ACTIVITY_THROTTLE_MS = 30 * 1000; // 30 seconds
 
-// Mock fetch globally
+// Mock fetch globally. Mocked responses must be Response-shaped (status +
+// headers.get) because resetTimer's extend-session call goes through
+// fetchWithCsrf, which reads res.status and res.headers.get('content-type');
+// a bare { ok, json } mock throws there and masquerades as a network error,
+// which forces logout via onTimeout.
 const mockFetch = vi.fn();
 
 describe('useSessionTimeout', () => {
@@ -28,6 +32,8 @@ describe('useSessionTimeout', () => {
     // Default: return successful session info
     mockFetch.mockResolvedValue({
       ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
       json: async () => ({
         success: true,
         data: {
@@ -146,7 +152,7 @@ describe('useSessionTimeout', () => {
     it('does NOT call onTimeout if dismissed before 0', async () => {
       const onTimeout = vi.fn();
       // Mock successful extend-session response
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -174,7 +180,7 @@ describe('useSessionTimeout', () => {
   describe('Activity Reset', () => {
     it('resetTimer() hides warning modal', async () => {
       const onTimeout = vi.fn();
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -195,7 +201,7 @@ describe('useSessionTimeout', () => {
 
     it('resetTimer() resets lastActivity to now', async () => {
       const onTimeout = vi.fn();
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
       const initialActivity = result.current.lastActivity;
@@ -215,7 +221,7 @@ describe('useSessionTimeout', () => {
 
     it('after resetTimer(), warning appears 14 min later (not sooner)', async () => {
       const onTimeout = vi.fn();
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -249,7 +255,7 @@ describe('useSessionTimeout', () => {
 
     it('resetTimer() clears countdown interval', async () => {
       const onTimeout = vi.fn();
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -282,6 +288,8 @@ describe('useSessionTimeout', () => {
       const sessionCreatedAt = new Date().toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -314,6 +322,8 @@ describe('useSessionTimeout', () => {
       const sessionCreatedAt = new Date().toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -344,6 +354,8 @@ describe('useSessionTimeout', () => {
       const sessionCreatedAt = new Date().toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -389,6 +401,8 @@ describe('useSessionTimeout', () => {
       ).toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -437,6 +451,8 @@ describe('useSessionTimeout', () => {
       ).toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -469,6 +485,8 @@ describe('useSessionTimeout', () => {
       const sessionCreatedAt = new Date(Date.now() - (ABSOLUTE_SESSION_TIMEOUT_MS - 10 * 60 * 1000)).toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -622,7 +640,7 @@ describe('useSessionTimeout', () => {
 
     it('clears interval when warning dismissed', async () => {
       const onTimeout = vi.fn();
-      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+      mockFetch.mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
       const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -666,6 +684,8 @@ describe('useSessionTimeout', () => {
       ).toISOString();
       mockFetch.mockResolvedValue({
         ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
         json: async () => ({
           success: true,
           data: {
@@ -719,6 +739,8 @@ describe('useSessionTimeout - Edge Cases', () => {
     vi.useFakeTimers();
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
       json: async () => ({
         success: true,
         data: {
@@ -776,7 +798,7 @@ describe('useSessionTimeout - Edge Cases', () => {
 
   it('handles resetTimer called when not showing warning', async () => {
     const onTimeout = vi.fn();
-    (global.fetch as Mock).mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+    (global.fetch as Mock).mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
     const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
@@ -792,7 +814,7 @@ describe('useSessionTimeout - Edge Cases', () => {
 
   it('handles multiple resetTimer calls in quick succession', async () => {
     const onTimeout = vi.fn();
-    (global.fetch as Mock).mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+    (global.fetch as Mock).mockResolvedValue({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ success: true }) });
 
     const { result } = renderHook(() => useSessionTimeout(onTimeout));
 
