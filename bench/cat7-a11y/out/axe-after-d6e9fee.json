@@ -1,0 +1,45 @@
+{
+  "sha": "d6e9fee",
+  "label": "after",
+  "date": "2026-07-29T21:07:04.215Z",
+  "results": [
+    {
+      "page": "/login",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/docs",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/my-week",
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7,
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "targets": [
+            ".text-accent.font-medium.text-xs",
+            ".opacity-40.py-2\\.5.bg-surface:nth-child(4) > .w-20.flex-shrink-0 > .font-medium.text-xs",
+            ".opacity-40.py-2\\.5.bg-surface:nth-child(4) > .w-20.flex-shrink-0 > .ml-1.text-xs",
+            ".opacity-40.py-2\\.5.bg-surface:nth-child(4) > .min-w-0.flex-1 > .italic.text-xs",
+            ".opacity-40.py-2\\.5.bg-surface:nth-child(5) > .w-20.flex-shrink-0 > .font-medium.text-xs"
+          ]
+        }
+      ]
+    }
+  ]
+}

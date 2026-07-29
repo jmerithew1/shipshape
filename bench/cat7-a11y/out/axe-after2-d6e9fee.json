@@ -1,0 +1,31 @@
+{
+  "sha": "d6e9fee",
+  "label": "after2",
+  "date": "2026-07-29T21:13:22.045Z",
+  "results": [
+    {
+      "page": "/login",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/docs",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/my-week",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "sha": "d6e9fee",
+  "label": "rebaseline",
+  "date": "2026-07-29T20:56:30.610Z",
+  "results": [
+    {
+      "page": "/login",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/docs",
+      "critical": 1,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "violations": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "nodes": 1,
+          "help": "Certain ARIA roles must contain particular children",
+          "targets": [
+            "ul[aria-label=\"Workspace documents\"]"
+          ]
+        },
+        {
+          "id": "listitem",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "<li> elements must be contained in a <ul> or <ol>",
+          "targets": [
+            "ul[aria-label=\"Workspace documents\"] > li:nth-child(11)"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "/my-week",
+      "critical": 0,
+      "serious": 1,
+      "moderate": 0,
+      "minor": 0,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 12,
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "targets": [
+            ".bg-accent\\/20.py-0\\.5.px-1\\.5",
+            ".items-start.gap-2\\.5.py-1\\.5:nth-child(1) > .text-\\[11px\\].text-muted\\/50.text-right",
+            ".items-start.gap-2\\.5.py-1\\.5:nth-child(2) > .text-\\[11px\\].text-muted\\/50.text-right",
+            ".items-start.gap-2\\.5.py-1\\.5:nth-child(3) > .text-\\[11px\\].text-muted\\/50.text-right",
+            ".items-start.gap-2\\.5.py-1\\.5:nth-child(4) > .text-\\[11px\\].text-muted\\/50.text-right"
+          ]
+        }
+      ]
+    }
+  ]
+}
