@@ -32,7 +32,7 @@
     "db:migrate": "pnpm --filter @ship/api db:migrate",
     "db:orphan-check": "pnpm --filter @ship/api db:orphan-check",
     "prepare": "husky",
-    "postinstall": "git config merge.ours.driver true && (command -v comply >/dev/null 2>&1 || echo '\\n⚠️  comply CLI not installed - pre-commit hooks require it\\n   Install with: pip install comply-cli\\n')",
+    "postinstall": "node -e \"const{execSync}=require('child_process');try{execSync('git rev-parse --git-dir',{stdio:'ignore'});execSync('git config merge.ours.driver true',{stdio:'ignore'})}catch{};try{execSync('comply --version',{stdio:'ignore'})}catch{console.warn('comply CLI not installed - pre-commit hooks require it. Install: pip install comply-cli')}\"",
     "test:api": "pnpm --filter @ship/api test",
     "test:web": "pnpm --filter @ship/web test",
     "test:coverage": "pnpm --filter @ship/api test:coverage"

@@ -1,0 +1,11 @@
+# Railway auto-detects a Dockerfile and prefers it over the source builder.
+# This repo's Dockerfile is NOT self-contained: it COPYs shared/dist and
+# api/dist, which are gitignored build output absent from a clean checkout,
+# so a Docker build fails with "/api/dist: not found".
+#
+# Excluding it here forces Railway to build from source via railway.json,
+# which runs the real build (build:shared -> build:api -> build:web).
+# The Dockerfile stays in the repo; this only affects what Railway receives.
+Dockerfile
+Dockerfile.dev
+Dockerfile.web
