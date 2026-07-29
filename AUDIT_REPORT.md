@@ -6,7 +6,9 @@
 **Phase:** 1 of 2 — diagnosis. **Nothing was fixed.** No source file, index, query, test, or
 Terraform config was modified. `git status` was verified clean after every measurement.
 
-> **Companion document:** [`ORIENTATION.md`](ORIENTATION.md) — the mental model this audit was built
+> **Companion documents:** [`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md) — root-cause synthesis,
+> fix ordering, what is deliberately not being built, and the limits of this evidence.
+> [`ORIENTATION.md`](ORIENTATION.md) — the mental model this audit was built
 > on, completed *before* any measurement, with a traceability table for all 32 checklist questions.
 
 ---
