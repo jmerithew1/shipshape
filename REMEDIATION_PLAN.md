@@ -191,6 +191,13 @@ A sequencing hazard that would silently invalidate before/after evidence:
 
 ## 6. Limits of this audit
 
+> **Moved (2026-07-29):** the canonical limits table now lives in
+> [`AUDIT_REPORT.md` § Measurement limits](AUDIT_REPORT.md#measurement-limits) — a limits table
+> belongs in the report that carries the numbers. It gained one row that was missing here entirely
+> (real keyboard traversal), and four rows are being executed post-audit with results recorded in
+> the report's "Post-audit measurement execution" section. The copy below is retained verbatim as
+> the historical record of what was disclosed at the time of writing.
+
 What the evidence does **not** cover. Stated so no one over-reads it.
 
 | Not measured | Why |

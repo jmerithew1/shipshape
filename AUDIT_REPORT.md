@@ -3,13 +3,49 @@
 **Repo:** `jamesmerithew/shipshape` (fork of `US-Department-of-the-Treasury/ship`)
 **Audited at:** `076a183` · orientation notes `e782f94`, `425f8bc`, `535fe92`
 **Date:** 2026-07-27
-**Phase:** 1 of 2 — diagnosis. **Nothing was fixed.** No source file, index, query, test, or
-Terraform config was modified. `git status` was verified clean after every measurement.
+**Phase:** 1 of 2 — diagnosis. All measurements were taken at `076a183` (2026-07-27) with a clean
+working tree, verified via `git status` after every measurement. **Within that measurement window,
+nothing was fixed.** Eight non-documentation commits landed after this report's first draft and
+before it was reconciled with them — see the
+[Post-draft change log](#post-draft-change-log-added-2026-07-29) immediately below.
 
 > **Companion documents:** [`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md) — root-cause synthesis,
 > fix ordering, what is deliberately not being built, and the limits of this evidence.
 > [`ORIENTATION.md`](ORIENTATION.md) — the mental model this audit was built
 > on, completed *before* any measurement, with a traceability table for all 32 checklist questions.
+
+---
+
+## Post-draft change log (added 2026-07-29)
+
+This report's first draft (`97c0fdc`, 2026-07-27 14:49) said "Nothing was fixed. No source file,
+index, query, test, or Terraform config was modified." That was true of the measurement window — and
+then stopped being true of the repository, and the report was not updated. Eight non-documentation
+commits landed on 2026-07-28 between 10:56 and 20:56. Six of them predate this report's final
+pre-review edit (20:17) by hours and should have been reconciled then; the last two landed minutes
+after it. That is a process failure in a report whose core promise is that claims track evidence.
+The table below reconciles every one.
+
+Original baselines are **not** regenerated — they remain the audit-window record. Where a commit
+invalidates a baseline for Phase-2 delta purposes, that is stated here, and Phase-2 comparisons use
+fresh re-baselines captured at a single post-change HEAD (`bench/*/out/rebaseline-*`), never the
+audit-window numbers.
+
+| Commit | 07-28 | What changed | Report claims affected | Baselines invalidated |
+| --- | --- | --- | --- | --- |
+| `0706a13` | 10:56 | Measurement harnesses committed into [`bench/`](bench/README.md) (~22 files); corrections count 6→9 in this report | "Scratch harnesses live outside the repo" (Method notes) — corrected in place | None |
+| `f07264a` | 11:00 | `.gitignore` +14; untracked 4 deploy zips, 6 terraform module locks, `web/dev-dist` | None — but it *implements the remedy* for the corrections-table `.gitignore` finding, which is a fix and out of bounds for Phase 1 | None |
+| `ebd8f95` | 11:08 | Build tooling: cross-platform build scripts, new `api/scripts/copy-db-assets.mjs`, coverage provider installed, root `test` made recursive; `package.json` + lockfile changed | Cat 2 "lockfile verified unchanged"; Cat 2 "build fails on Windows"; Cat 5 "coverage is unmeasurable"; Cat 5 "root test is api-only" — each corrected in place below | Cat 5 test count (451 → 602) and coverage baseline; Cat 2 build path |
+| `fe67e55` | 11:09 | `.gitignore` +4; removed the 87 coverage files `ebd8f95` swept in accidentally | None | None |
+| `cc23a74` | 12:19 | New `terraform/local/` — hashicorp/local 2.5.2 drift demo with captured evidence | Cat 8 "both required providers are fully greenfield" — corrected in place | Cat 8 provider-gap grep results |
+| `0fbe706` | 12:30 | New `terraform/render/` — render-oss/render 1.9.1 deployment config with captured evidence | Same Cat 8 claim | Same |
+| `bba9801` | 20:51 | **Runtime code:** `api/src/app.ts` +36 lines (serve the built SPA from the API); `railway.json` | The header's "no source file was modified" — this commit landed 34 minutes *after* this report's last edit | Cat 1 counts over `api/`; Cat 3 latency comparability (new static-serving middleware sits in the request path) |
+| `95277d0` | 20:56 | `package.json` postinstall hardened; `.railwayignore` | Header claim, as above | None |
+
+Two ways to read this table, both true. The honest one: the diagnose/fix boundary held for the
+measurements but not for the repository, and this report failed to say so for a day. The operational
+one: every Phase-2 before/after comparison is anchored to fresh re-baselines at one post-change HEAD
+precisely because these commits made the audit-window numbers non-comparable.
 
 ---
 
@@ -35,6 +71,32 @@ plus 150 project associations. It changes no application code and no schema.
 **Dev-mode caveat.** The API runs unoptimised with live source maps and a single event loop.
 Absolute latencies are pessimistic versus a production build; **relative rankings and the
 saturation behaviour are the durable findings.**
+
+---
+
+## Measurement limits
+
+What this evidence does **not** cover, stated so no one over-reads it. Moved here from
+[`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md) §6 on 2026-07-29 — a limits table belongs in the report
+that carries the numbers, not in a companion document. One row (real keyboard traversal) was missing
+from the original table entirely and is added below. Rows marked ★ are being executed post-audit;
+results land in [Post-audit measurement execution](#post-audit-measurement-execution-2026-07-2930)
+at the end of this report.
+
+| Not measured | Why |
+| --- | --- |
+| **E2E pass/fail/flaky/runtime** | 869 tests cannot start on this host (two defects, Cat 5). Deliberately not fixed during diagnosis — "unrunnable as shipped" is itself the finding, and its before-state is worth preserving. |
+| **Dependency CVEs** | No `pnpm audit` run recorded. The repo's own `comply` toolchain has its SBOM path **disabled** (`--skip-trivy`, upstream ImportError), so vulnerability scanning has never actually run here. |
+| **Production-mode performance** | All latency measured against a dev server (`tsx watch`, single process, no clustering). Absolute numbers are pessimistic; **relative rankings and the c=10 saturation are the durable findings**. |
+| **Load beyond 50 connections** | Saturation was already reached at 10, so higher concurrency would only measure queue depth. |
+| **Cross-browser / mobile** | Playwright is chromium-only by deliberate project choice; no viewport projects exist. |
+| **Authenticated Lighthouse** | Lighthouse could not carry the session cookie into the SPA's XHR; only `/login` has a valid score. axe-core was used instead on authenticated pages. |
+| **Real multi-user collaboration under load** | The Yjs split-brain risk at 10× is reasoned from the code (in-process Maps, no session stickiness, `MaxSize 4`), **not** observed — it cannot be reproduced on a single instance. |
+| ★ **Concurrent two-user editing** | Not exercised with two simultaneous sessions. The CRDT-vs-last-write-wins split and the multi-instance split-brain risk are derived from the code paths (`collaboration/index.ts`, `documents.ts:484`), not observed. |
+| ★ **3G / throttled-network behaviour** | Not throttled. The 15 silent failures were found via code paths and induced API failures rather than by degrading the connection, so hanging spinners under slow networks specifically remain unmeasured. |
+| ★ **Screen-reader testing** | Not performed. The ~30 ARIA findings come from axe-core plus programmatic tab-order analysis; assistive-technology behaviour is not automatable and was out of reach here. This does not soften the measured findings — the 2.89:1 focus ring and 21 contrast violations stand on their own. |
+| ★ **Real keyboard traversal** | Not performed in Phase 1 — **and, unlike the three rows above, this was never rolled up as a limit until 2026-07-29.** The automation harness could not deliver real keystrokes (verified — Tab did not move focus), so every keyboard result in Categories 6–7 is programmatic analysis of the tabbable set, stated as such in the category prose but easy to misread as observed traversal. |
+| **Terraform plan against live AWS** | No credentials. `init -backend=false`, `validate`, `fmt` and `providers` all ran; blast-radius classification is static reasoning from provider ForceNew semantics and is labelled as such. |
 
 ---
 
@@ -210,9 +272,16 @@ byte attribution uses a dependency-free VLQ decoder measuring **post-minificatio
 `vite-bundle-visualizer` agreed on the ranking. **No devDependency was installed** — `npx --yes`
 only touches the global npm cache; `package.json` and the lockfile were verified unchanged.
 
+> **Correction (2026-07-29):** true at `076a183`. Superseded by `ebd8f95` (07-28), which
+> deliberately changed `package.json` and the lockfile as Phase-2 build tooling — see the
+> Post-draft change log.
+
 **Finding surfaced by the method itself:** `cd web && pnpm build` **fails on Windows**. The script is
 `tsc && VITE_API_URL= vite build`; pnpm spawns via `cmd.exe`, which rejects the POSIX inline-env
 prefix. Pre-existing defect, not introduced here.
+
+> **Update (2026-07-29):** fixed post-draft by `ebd8f95` (cross-platform build scripts, `cross-env`).
+> The finding stands as the audit-window record.
 
 ### Baseline
 
@@ -634,6 +703,10 @@ Also: **252 `describe` blocks**, and **zero** `test.skip` / `.only` / `.fixme` a
 `MISSING DEPENDENCY`. `web/vitest.config.ts` declares no coverage block at all. No thresholds exist
 anywhere, and Playwright collects none. **The honest baseline is that no coverage number exists today.**
 
+> **Correction (2026-07-29):** true at `076a183`. `ebd8f95` (07-28) installed the coverage provider,
+> so coverage is now *measurable*; the audit-window baseline remains "no number existed". See the
+> Post-draft change log.
+
 ### The orphaned suite and its 13 invisible failures
 
 Root `package.json:27` is `"test": "pnpm --filter @ship/api test"` — **api only**. `web` defines a
@@ -646,6 +719,10 @@ Root `package.json:27` is `"test": "pnpm --filter @ship/api test"` — **api onl
 | `web/src/hooks/useSessionTimeout.test.ts` | 1 / 34 |
 
 Contrast: `build`, `type-check` and `lint` all use `--recursive`. Only `test` does not.
+
+> **Correction (2026-07-29):** `ebd8f95` (07-28) made root `test` recursive, so the 13 failures are
+> no longer invisible — they now fail the aggregate run. Fixing them is the first Phase-2
+> workstream. See the Post-draft change log.
 
 ### E2E does not run on this host — two repo defects
 
@@ -1199,6 +1276,10 @@ grep -rni "render-oss|provider \"render\"|render_"          terraform/  -> ZERO
 Both required providers are **fully greenfield**. The existing stack is 100%
 AWS / Elastic Beanstalk / CloudFront, deployed by hand-rolled bash (`scripts/deploy-*.sh`).
 
+> **Correction (2026-07-29):** true at `076a183`. Both greps now hit: `cc23a74` added
+> `terraform/local/` (hashicorp/local 2.5.2) and `0fbe706` added `terraform/render/`
+> (render-oss/render 1.9.1) as Phase-2 work, post-draft — see the Post-draft change log.
+
 ### Honest scope note
 
 `validate` passing on both the root and module trees says **nothing** about the WAF/logging/Bedrock
@@ -1251,5 +1332,42 @@ repo**, so the finding stays intact and the number becomes real. Until then the 
 - **Nothing was fixed.** No source, index, query, test, config or Terraform change. The api test suite
   was run against a throwaway `ship_test` database specifically to avoid the `TRUNCATE` hazard in
   Category 5. Six test documents created during Category 6 were deleted and the seed document restored.
+  *(Correction 2026-07-29: accurate for the measurement window at `076a183`; eight later commits
+  changed the repository before this report was reconciled with them — see the Post-draft change log.)*
 - **Scratch harnesses** (load generator, log parser, type counter, sourcemap attributor, drift demo)
   live outside the repo in the session scratchpad, with reproduction commands quoted in each section.
+  *(Correction 2026-07-29: committed into [`bench/`](bench/README.md) by `0706a13` on 07-28,
+  post-draft — see the Post-draft change log.)*
+
+---
+
+# Post-audit measurement execution (2026-07-29/30)
+
+Four measurements the audit disclosed as unexecuted (★ rows in [Measurement
+limits](#measurement-limits)) are being executed now, after the audit, and recorded here as dated
+post-audit evidence. The original disclosures stand untouched — what the audit knew, and when, is
+part of the record. Each subsection states method, exact command, evidence path, result, and whether
+the Phase-1 reasoned finding was **confirmed** or **revised**.
+
+## Real keyboard traversal — pending execution
+
+*Planned:* `e2e/keyboard-traversal.spec.ts` — real `Tab`/`Shift+Tab`/`Enter`/`Escape` walks over
+login, document list and editor; asserts reachability, focus visibility and trap-freedom; dumps the
+observed focus order to `bench/cat7-a11y/out/`.
+
+## Concurrent two-user editing — pending execution
+
+*Planned:* `e2e/collab-convergence.spec.ts` — two authenticated browser contexts
+(`dev@ship.local`, `bob.martinez@ship.local`) in one Yjs room; asserts convergence of concurrent
+edits and no character loss on same-position conflict; evidence to `bench/cat5-collab/out/`.
+
+## 3G / throttled network — pending execution
+
+*Planned:* `e2e/network-3g.spec.ts` — CDP `Network.emulateNetworkConditions`, Regular-3G and
+Slow-3G profiles over cold login and authenticated flows; asserts every spinner resolves or errors
+within 60 s; evidence to `bench/cat2-bundle/out/`.
+
+## Screen reader (NVDA) — pending execution
+
+*Planned:* manual NVDA session per `docs/nvda-session-script.md`; Speech Viewer transcript and
+per-step pass/fail findings to `bench/cat7-a11y/out/nvda-session-2026-07-29.md`.
