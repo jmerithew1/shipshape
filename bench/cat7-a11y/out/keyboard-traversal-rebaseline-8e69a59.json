@@ -1,0 +1,6 @@
+{
+  "sha": "8e69a59",
+  "label": "rebaseline",
+  "date": "2026-07-29T17:34:22.574Z",
+  "method": "real page.keyboard.press Tab/Shift+Tab/Enter via Playwright + CDP against live dev servers"
+}

@@ -1,0 +1,80 @@
+FILE index-C2vAyoQ1.js  totalBytes=2073.7 kB  attributed=2070.4 kB  unmapped=0.0 kB
+
+--- BY PACKAGE / AREA (raw minified bytes) ---
+    344.1 kB   16.6%  app:src/components
+    266.7 kB   12.9%  npm:emoji-picker-react
+    229.8 kB   11.1%  app:src/pages
+    170.6 kB    8.2%  npm:highlight.js
+    132.2 kB    6.4%  npm:react-dom
+     96.3 kB    4.6%  npm:prosemirror-view
+     67.3 kB    3.2%  npm:yjs
+     66.3 kB    3.2%  npm:@tiptap/core
+     44.6 kB    2.1%  npm:prosemirror-model
+     42.0 kB    2.0%  app:src/hooks
+     40.9 kB    2.0%  npm:@tanstack/query-core
+     40.0 kB    1.9%  npm:@dnd-kit/core
+     37.0 kB    1.8%  npm:react-router
+     35.3 kB    1.7%  npm:prosemirror-tables
+     30.7 kB    1.5%  npm:prosemirror-transform
+     25.2 kB    1.2%  npm:lib0
+     23.4 kB    1.1%  npm:@tiptap/extension-code-block-lowlight
+     20.3 kB    1.0%  npm:@popperjs/core
+     20.1 kB    1.0%  npm:tailwind-merge
+     19.1 kB    0.9%  npm:diff-match-patch
+     19.0 kB    0.9%  npm:y-prosemirror
+     17.7 kB    0.9%  npm:linkifyjs
+     17.7 kB    0.9%  npm:@tiptap/react
+     16.1 kB    0.8%  npm:tippy.js
+     13.6 kB    0.7%  app:src/lib
+     11.9 kB    0.6%  npm:prosemirror-state
+     11.9 kB    0.6%  npm:cmdk
+      9.1 kB    0.4%  npm:prosemirror-commands
+      8.2 kB    0.4%  npm:@floating-ui/core
+      8.0 kB    0.4%  npm:react
+      7.5 kB    0.4%  npm:@radix-ui/react-tooltip
+      7.3 kB    0.4%  npm:@floating-ui/dom
+      6.5 kB    0.3%  npm:@dnd-kit/sortable
+      5.8 kB    0.3%  npm:react-remove-scroll
+      5.8 kB    0.3%  npm:prosemirror-history
+      5.6 kB    0.3%  npm:@tiptap/extension-link
+      5.2 kB    0.3%  npm:@tiptap/extension-table
+      5.1 kB    0.2%  npm:@radix-ui/react-dialog
+      4.8 kB    0.2%  app:src/contexts
+      4.7 kB    0.2%  npm:flairup
+      4.5 kB    0.2%  npm:@radix-ui/react-popover
+      4.5 kB    0.2%  npm:y-websocket
+      4.3 kB    0.2%  npm:@radix-ui/react-popper
+      4.2 kB    0.2%  npm:scheduler
+      4.2 kB    0.2%  app:src/main.tsx
+
+--- TOP 30 INDIVIDUAL SOURCE FILES ---
+    266.7 kB  nm:emoji-picker-react/dist/emoji-picker-react.esm.js
+    131.8 kB  nm:react-dom/cjs/react-dom.production.min.js
+     96.3 kB  nm:prosemirror-view/dist/index.js
+     67.3 kB  nm:yjs/dist/yjs.mjs
+     66.3 kB  nm:@tiptap/core/dist/index.js
+     44.6 kB  nm:prosemirror-model/dist/index.js
+     40.0 kB  nm:@dnd-kit/core/dist/core.esm.js
+     39.2 kB  ../../src/pages/App.tsx
+     37.0 kB  nm:react-router/dist/development/chunk-EPOLDU6W.mjs
+     35.3 kB  nm:prosemirror-tables/dist/index.js
+     30.7 kB  nm:prosemirror-transform/dist/index.js
+     28.5 kB  ../../src/pages/ReviewsPage.tsx
+     28.1 kB  ../../src/components/icons/uswds/Icon.tsx
+     24.3 kB  ../../src/components/IssuesList.tsx
+     23.4 kB  nm:@tiptap/extension-code-block-lowlight/dist/index.js
+     21.8 kB  nm:highlight.js/lib/core.js
+     20.1 kB  nm:tailwind-merge/dist/bundle-mjs.mjs
+     19.1 kB  nm:diff-match-patch/index.js
+     17.7 kB  nm:linkifyjs/dist/linkify.mjs
+     17.7 kB  nm:@tiptap/react/dist/index.js
+     17.4 kB  ../../src/pages/WorkspaceSettings.tsx
+     16.6 kB  ../../src/pages/TeamMode.tsx
+     16.1 kB  nm:tippy.js/dist/tippy.esm.js
+     15.7 kB  ../../src/components/Editor.tsx
+     14.7 kB  ../../src/components/editor/SlashCommands.tsx
+     14.3 kB  nm:highlight.js/es/languages/scss.js
+     14.2 kB  nm:highlight.js/es/languages/less.js
+     13.2 kB  nm:highlight.js/es/languages/css.js
+     12.5 kB  nm:y-prosemirror/src/plugins/sync-plugin.js
+     12.2 kB  ../../src/pages/Projects.tsx

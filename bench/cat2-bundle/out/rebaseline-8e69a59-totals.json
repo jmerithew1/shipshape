@@ -1,0 +1,59 @@
+{
+  "sha": "8e69a59",
+  "date": "2026-07-29T17:25:10.311Z",
+  "totalRawBytes": 2329568,
+  "totalGzipBytes": 712207,
+  "chunkCount": 262,
+  "top10": [
+    {
+      "f": "index-C2vAyoQ1.js",
+      "raw": 2073741,
+      "gzip": 589522
+    },
+    {
+      "f": "index-DJeYp5na.css",
+      "raw": 66512,
+      "gzip": 12922
+    },
+    {
+      "f": "ProgramWeeksTab-BzbUWlt4.js",
+      "raw": 16814,
+      "gzip": 5572
+    },
+    {
+      "f": "WeekReviewTab-DmxN07T1.js",
+      "raw": 12695,
+      "gzip": 3711
+    },
+    {
+      "f": "StandupFeed-BjJLDai5.js",
+      "raw": 9697,
+      "gzip": 2925
+    },
+    {
+      "f": "ProjectRetroTab-BV2rvgoM.js",
+      "raw": 9096,
+      "gzip": 2440
+    },
+    {
+      "f": "ProjectWeeksTab-oE3MioHn.js",
+      "raw": 6707,
+      "gzip": 2353
+    },
+    {
+      "f": "ProgramProjectsTab-eNNvrO8g.js",
+      "raw": 4457,
+      "gzip": 1587
+    },
+    {
+      "f": "ProjectDetailsTab-gSyN3jFM.js",
+      "raw": 3659,
+      "gzip": 1526
+    },
+    {
+      "f": "WeekPlanningTab-DWsXI-LK.js",
+      "raw": 3040,
+      "gzip": 1526
+    }
+  ]
+}

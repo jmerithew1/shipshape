@@ -1349,23 +1349,60 @@ post-audit evidence. The original disclosures stand untouched — what the audit
 part of the record. Each subsection states method, exact command, evidence path, result, and whether
 the Phase-1 reasoned finding was **confirmed** or **revised**.
 
-## Real keyboard traversal — pending execution
+## Real keyboard traversal — executed 2026-07-29
 
-*Planned:* `e2e/keyboard-traversal.spec.ts` — real `Tab`/`Shift+Tab`/`Enter`/`Escape` walks over
-login, document list and editor; asserts reachability, focus visibility and trap-freedom; dumps the
-observed focus order to `bench/cat7-a11y/out/`.
+**Method:** `e2e/keyboard-traversal.spec.ts` — real `page.keyboard.press` keystrokes via Playwright
+against live dev servers. **Command:** `pnpm exec playwright test e2e/keyboard-traversal.spec.ts
+--workers=1`. **Evidence:** `bench/cat7-a11y/out/keyboard-traversal-rebaseline-0bfc3d6.json`
+(app code identical across `0bfc3d6`–`16a351b`; only docs/tests changed between those commits).
 
-## Concurrent two-user editing — pending execution
+**Result: 4/4 pass.** Email, password and Sign-in are all reachable by real Tab presses and
+Shift+Tab reverses; Enter alone submits the form; a 100-Tab walk of `/docs` found **no keyboard
+trap** and visited interactive elements with a **focus-visible ratio of 1.0** (every stop had some
+visible indicator — presence, not contrast, which remains the 2.89:1 Cat-7 finding); exactly **1
+unnamed interactive stop** was recorded; the editor is reachable by Tab on a document page.
 
-*Planned:* `e2e/collab-convergence.spec.ts` — two authenticated browser contexts
-(`dev@ship.local`, `bob.martinez@ship.local`) in one Yjs room; asserts convergence of concurrent
-edits and no character loss on same-position conflict; evidence to `bench/cat5-collab/out/`.
+**Verdict vs Phase-1 reasoning: largely confirmed, one revision.** The programmatic analysis
+predicted reachability, which held. It could not have shown that the harness-level "Tab did not
+move focus" defect was an audit-tooling artifact rather than an app defect — real keystrokes work
+fine. (One recorded no-focus-ring stop is the TanStack Query devtools button, dev-mode only.)
 
-## 3G / throttled network — pending execution
+## Concurrent two-user editing — executed 2026-07-29
 
-*Planned:* `e2e/network-3g.spec.ts` — CDP `Network.emulateNetworkConditions`, Regular-3G and
-Slow-3G profiles over cold login and authenticated flows; asserts every spinner resolves or errors
-within 60 s; evidence to `bench/cat2-bundle/out/`.
+**Method:** `e2e/collab-convergence.spec.ts` — two Playwright contexts, two distinct users
+(`dev@ship.local`, `bob.martinez@ship.local`), same `/documents/:id` = same Yjs room. **Command:**
+`pnpm exec playwright test e2e/collab-convergence.spec.ts --workers=1`. **Evidence:**
+`bench/cat5-collab/out/convergence-rebaseline-0bfc3d6.json`.
+
+**Result: 2/2 pass.** Concurrent edits at different positions were delivered in both directions and
+both editors converged to identical content within **≤ 848 ms**. Same-position concurrent typing
+(10 chars per user at the same caret) lost **zero characters** and converged identically.
+
+**Verdict vs Phase-1 reasoning: confirmed, with one observation reasoning missed.** The CRDT
+no-loss claim held under real concurrent sessions. Newly observed: same-position concurrent typing
+**interleaves the two users' text character-by-character** (e.g. `alphbar-a1v7o8-…`) — correct CRDT
+behavior with no data loss, but a UX surprise no code-reading predicted. The first run of the spec
+also surfaced that each editor renders the *other* user's cursor label into the DOM, which any
+DOM-diffing comparison must strip. The multi-instance split-brain risk remains out of scope
+(single-instance dev server), as § Measurement limits already stated.
+
+## 3G / throttled network — executed 2026-07-29
+
+**Method:** `e2e/network-3g.spec.ts` — CDP `Network.emulateNetworkConditions` with Chrome DevTools
+Regular-3G and Slow-3G presets, against the **production build** served by `vite preview` (API
+proxied to the live dev API). **Command:** `pnpm exec playwright test e2e/network-3g.spec.ts
+--workers=1`. **Evidence:** `bench/cat2-bundle/out/3g-rebaseline-0bfc3d6.json`.
+
+**Result: 4/4 pass.** Cold `/login` becomes usable in **7.2 s on Regular-3G** and **14.3 s on
+Slow-3G** (605 kB transferred — the Cat-2 "before" for code splitting). The authenticated
+docs-to-editor flow completed and **zero loading indicators remained** after settle on both
+profiles — no hanging spinners under pure slow-network conditions.
+
+**Verdict vs Phase-1 reasoning: refined.** The audit's 15 silent failures were found by *inducing
+API errors*; this run shows a merely *slow* network does not by itself reproduce them — the app
+loads and settles. A first attempt against the dev server exceeded 120 s DOMContentLoaded on
+Regular-3G, which is a dev-mode artifact (hundreds of unbundled ESM modules), recorded here so
+nobody mistakes it for the production number.
 
 ## Screen reader (NVDA) — pending execution
 

@@ -1,0 +1,40 @@
+{
+  "sha": "0bfc3d6",
+  "label": "rebaseline",
+  "date": "2026-07-29T18:13:10.148Z",
+  "method": "CDP Network.emulateNetworkConditions (Chrome DevTools 3G presets) against the PRODUCTION build via vite preview; API proxied to the live dev API",
+  "profiles": {
+    "regular-3g": {
+      "latency": 100,
+      "downloadThroughput": 96000,
+      "uploadThroughput": 32000
+    },
+    "slow-3g": {
+      "latency": 400,
+      "downloadThroughput": 51200,
+      "uploadThroughput": 51200
+    }
+  },
+  "runs": {
+    "login-regular-3g": {
+      "domContentLoadedMs": 6774,
+      "formVisibleMs": 7200,
+      "resourceBytesTransferred": 605114
+    },
+    "flow-regular-3g": {
+      "listVisibleMs": 685,
+      "editorVisibleMs": 378,
+      "spinnersRemainingAfterSettle": 0
+    },
+    "login-slow-3g": {
+      "domContentLoadedMs": 12864,
+      "formVisibleMs": 14306,
+      "resourceBytesTransferred": 605114
+    },
+    "flow-slow-3g": {
+      "listVisibleMs": 1935,
+      "editorVisibleMs": 934,
+      "spinnersRemainingAfterSettle": 0
+    }
+  }
+}

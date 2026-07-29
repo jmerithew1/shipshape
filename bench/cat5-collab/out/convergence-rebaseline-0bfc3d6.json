@@ -1,0 +1,15 @@
+{
+  "sha": "0bfc3d6",
+  "label": "rebaseline",
+  "date": "2026-07-29T18:00:20.104Z",
+  "method": "two Playwright contexts, two distinct users, same /documents/:id (same Yjs room) over live dev servers",
+  "docUrl": "http://localhost:5173/documents/7943ba69-d304-4e43-932d-d648a7232978",
+  "differentPositions": {
+    "convergenceMsUpperBound": 848,
+    "finalText": "alpha-1785348027549base-1785348027549 the quick brown fox bravo-1785348027549"
+  },
+  "samePosition": {
+    "converged": true,
+    "finalText": "BBBBBBBBBBAAAAAAAAAA"
+  }
+}
