@@ -1,0 +1,66 @@
+{
+  "sha": "c22fea4",
+  "date": "2026-07-29T20:36:37.372Z",
+  "note": "after code-split: entry+css is the initial page load; editor stack and emoji picker are lazy chunks",
+  "totalRawBytes": 2330230,
+  "totalGzipBytes": 714154,
+  "chunkCount": 267,
+  "entryChunk": {
+    "file": "index-BmhQiIBS.js",
+    "raw": 827869,
+    "gzip": 227486
+  },
+  "initialLoadRawBytes": 892972,
+  "top10": [
+    {
+      "f": "PropertyRow-DqubJgDA.js",
+      "raw": 836641,
+      "gzip": 261926
+    },
+    {
+      "f": "index-BmhQiIBS.js",
+      "raw": 827869,
+      "gzip": 227486
+    },
+    {
+      "f": "emoji-picker-react.esm-eWNYU5Vz.js",
+      "raw": 271171,
+      "gzip": 64154
+    },
+    {
+      "f": "UnifiedDocumentPage-DDx4lzAe.js",
+      "raw": 132688,
+      "gzip": 35140
+    },
+    {
+      "f": "index-D_Rleic7.css",
+      "raw": 65103,
+      "gzip": 12551
+    },
+    {
+      "f": "ProgramWeeksTab-BqDlZq8b.js",
+      "raw": 16881,
+      "gzip": 5603
+    },
+    {
+      "f": "WeekReviewTab-D790inC-.js",
+      "raw": 12734,
+      "gzip": 3729
+    },
+    {
+      "f": "StandupFeed-CRJbHnPw.js",
+      "raw": 9742,
+      "gzip": 2949
+    },
+    {
+      "f": "ProjectRetroTab-DrEmNjra.js",
+      "raw": 9135,
+      "gzip": 2461
+    },
+    {
+      "f": "ProjectWeeksTab-DbYnEucf.js",
+      "raw": 6703,
+      "gzip": 2354
+    }
+  ]
+}
