@@ -1,0 +1,56 @@
+=== GRAND TOTAL (excl. generated) ===
+ALL                                files= 313  any=233  asUnsafe=593  nonNull=55  tsIgnore=0  tsExpectError=1  asConst=71  asUnknownAs=9  angleAssert=0  satisfies=1
+
+=== BY PACKAGE / PROD vs TEST ===
+api TOTAL                          files= 109  any=200  asUnsafe=280  nonNull=22  tsIgnore=0  tsExpectError=0  asConst=12  asUnknownAs=9  angleAssert=0  satisfies=0
+  api prod                         files=  78  any=54  asUnsafe=136  nonNull=18  tsIgnore=0  tsExpectError=0  asConst=11  asUnknownAs=3  angleAssert=0  satisfies=0
+  api test                         files=  31  any=146  asUnsafe=144  nonNull=4  tsIgnore=0  tsExpectError=0  asConst=1  asUnknownAs=6  angleAssert=0  satisfies=0
+web TOTAL                          files= 196  any=33  asUnsafe=313  nonNull=33  tsIgnore=0  tsExpectError=1  asConst=57  asUnknownAs=0  angleAssert=0  satisfies=1
+  web prod                         files= 178  any=29  asUnsafe=297  nonNull=33  tsIgnore=0  tsExpectError=0  asConst=57  asUnknownAs=0  angleAssert=0  satisfies=1
+  web test                         files=  18  any=4  asUnsafe=16  nonNull=0  tsIgnore=0  tsExpectError=1  asConst=0  asUnknownAs=0  angleAssert=0  satisfies=0
+shared TOTAL                       files=   8  any=0  asUnsafe=0  nonNull=0  tsIgnore=0  tsExpectError=0  asConst=2  asUnknownAs=0  angleAssert=0  satisfies=0
+  shared prod                      files=   8  any=0  asUnsafe=0  nonNull=0  tsIgnore=0  tsExpectError=0  asConst=2  asUnknownAs=0  angleAssert=0  satisfies=0
+  shared test                      files=   0  any=0  asUnsafe=0  nonNull=0  tsIgnore=0  tsExpectError=0  asConst=0  asUnknownAs=0  angleAssert=0  satisfies=0
+
+=== GENERATED (excluded above) ===
+generated                          files=   1  any=0  asUnsafe=1  nonNull=0  tsIgnore=0  tsExpectError=0  asConst=1  asUnknownAs=0  angleAssert=0  satisfies=0
+    web/src/components/icons/uswds/types.ts
+
+=== TOP 20 FILES BY TOTAL VIOLATIONS (any + asUnsafe + nonNull + ts-ignore/expect) ===
+  73  any= 29 as= 44 nn=  0 ign=0  loc= 440  TEST  api/src/__tests__/auth.test.ts
+  66  any= 37 as= 28 nn=  1 ign=0  loc= 561  TEST  api/src/__tests__/transformIssueLinks.test.ts
+  49  any= 23 as= 23 nn=  3 ign=0  loc= 375  TEST  api/src/__tests__/activity.test.ts
+  40  any= 20 as= 20 nn=  0 ign=0  loc= 315  TEST  api/src/routes/issues-history.test.ts
+  37  any=  0 as= 36 nn=  1 ign=0  loc= 533  PROD  web/src/pages/UnifiedDocumentPage.tsx
+  36  any= 11 as= 25 nn=  0 ign=0  loc=3157  PROD  api/src/routes/weeks.ts
+  34  any= 17 as= 17 nn=  0 ign=0  loc= 334  TEST  api/src/routes/projects.test.ts
+  28  any=  0 as= 28 nn=  0 ign=0  loc= 499  PROD  web/src/components/UnifiedEditor.tsx
+  25  any= 15 as= 10 nn=  0 ign=0  loc=1736  PROD  api/src/routes/projects.ts
+  24  any=  0 as= 24 nn=  0 ign=0  loc= 621  PROD  web/src/components/sidebars/PropertiesPanel.tsx
+  19  any=  0 as= 19 nn=  0 ign=0  loc= 248  PROD  web/src/components/document-tabs/ProjectDetailsTab.tsx
+  18  any=  9 as=  9 nn=  0 ign=0  loc= 184  TEST  api/src/routes/iterations.test.ts
+  17  any= 15 as=  2 nn=  0 ign=0  loc= 246  PROD  api/src/utils/yjsConverter.ts
+  14  any=  4 as=  7 nn=  3 ign=0  loc=1648  PROD  api/src/routes/issues.ts
+  13  any=  0 as= 12 nn=  1 ign=0  loc=1803  PROD  api/src/routes/admin.ts
+  13  any=  4 as=  8 nn=  1 ign=0  loc= 360  PROD  web/src/components/editor/CommentDisplay.tsx
+  12  any=  0 as= 11 nn=  1 ign=0  loc=1166  PROD  api/src/routes/weekly-plans.ts
+  12  any=  0 as=  4 nn=  8 ign=0  loc= 307  PROD  api/src/utils/extractHypothesis.ts
+  11  any=  0 as= 11 nn=  0 ign=0  loc= 525  PROD  api/src/mcp/server.ts
+  11  any=  0 as= 11 nn=  0 ign=0  loc= 335  PROD  web/src/hooks/useWeeklyReviewActions.ts
+
+=== TOP 15 PROD-ONLY FILES ===
+  37  any=  0 as= 36 nn=  1 ign=0  web/src/pages/UnifiedDocumentPage.tsx
+  36  any= 11 as= 25 nn=  0 ign=0  api/src/routes/weeks.ts
+  28  any=  0 as= 28 nn=  0 ign=0  web/src/components/UnifiedEditor.tsx
+  25  any= 15 as= 10 nn=  0 ign=0  api/src/routes/projects.ts
+  24  any=  0 as= 24 nn=  0 ign=0  web/src/components/sidebars/PropertiesPanel.tsx
+  19  any=  0 as= 19 nn=  0 ign=0  web/src/components/document-tabs/ProjectDetailsTab.tsx
+  17  any= 15 as=  2 nn=  0 ign=0  api/src/utils/yjsConverter.ts
+  14  any=  4 as=  7 nn=  3 ign=0  api/src/routes/issues.ts
+  13  any=  0 as= 12 nn=  1 ign=0  api/src/routes/admin.ts
+  13  any=  4 as=  8 nn=  1 ign=0  web/src/components/editor/CommentDisplay.tsx
+  12  any=  0 as= 11 nn=  1 ign=0  api/src/routes/weekly-plans.ts
+  12  any=  0 as=  4 nn=  8 ign=0  api/src/utils/extractHypothesis.ts
+  11  any=  0 as= 11 nn=  0 ign=0  api/src/mcp/server.ts
+  11  any=  0 as= 11 nn=  0 ign=0  web/src/hooks/useWeeklyReviewActions.ts
+  10  any=  0 as= 10 nn=  0 ign=0  web/src/components/document-tabs/WeekOverviewTab.tsx
