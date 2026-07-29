@@ -10,7 +10,46 @@ deliberately **not** being built, and records the limits of the evidence.
 
 ---
 
-## 1. The 41 findings are ~5 root causes
+## 1. How this analysis was produced
+
+Stated first because it is what makes the rest checkable.
+
+**Measurement.** Eight independent agents, one per audit category, each returning the rubric's exact
+metric table with `file:line` evidence and an explicit brief to **measure only, fix nothing**.
+Categories that share the running system (3, 4, 6, 7) were **serialised, not parallelised** — during
+the audit a load test and a query count corrupted each other, and the assignment requires before/after
+under identical conditions.
+
+**Adversarial verification.** Headline claims were then re-checked by a **separate pass** whose job
+was to refute them. That pass produced **five of the nine corrections**, including one finding the
+auditor had backwards and one severity demotion after a second category measured the actual cost. A
+wrong baseline in a pass/fail report is the worst available failure, so claims that could not be
+reproduced were downgraded or dropped rather than published.
+
+**Three-lens prioritisation.** The fix list was pressure-tested through economics, psychology and
+technology lenses before any ordering was fixed. Each lens ran in parallel under hard constraints:
+**at most 3 findings, ranked; answer only your own lens; do not scope the whole problem; do not write
+code.** The caps exist to keep returns actionable rather than producing three essays that agree with
+each other.
+
+It changed the plan materially rather than confirming it:
+
+| Lens | What it changed |
+| --- | --- |
+| **Economics** | Established that the 40% criterion is **conjunctive** — "hit the target in *all* categories" is pass/fail per category, so overshoot earns nothing. This produced the "cheapest passing route, then stop" rule and most of §4. It also caught that the entire measurement harness was sitting in a Windows `%TEMP%` directory subject to cleanup — including the seed file without which before/after would compare *different databases*. |
+| **Psychology** | Found an arithmetic error in this audit's own corrections count (a nine-row table introduced as "six"), in the one sentence asserting that numbers get checked. Also argued the corrections belonged at the *top* of the report rather than line 1187 of 1232, since they are the only direct evidence a diagnostic process ran. |
+| **Technology** | Identified that **fixes move each other's measurements** (§5) and that the E2E suite is a precondition for validating anything else, not one category among eight. Also killed a planned git-worktree execution model on evidence: two scripts in the repo derive the database name differently, so parallel worktrees would have measured "before" and "after" against different databases. |
+
+**Where the lenses disagreed, both readings are recorded.** Economics rated rescuing the 869-test E2E
+suite the worst available buy — same credit as three new route tests, roughly 15× the cost, against a
+documented 90 GB memory explosion in the config's own history. Technology rated it load-bearing,
+since 59% of the test suite is the only instrument that could detect a regression. Both are correct
+from their own vantage; the synthesis in §4 (fix the blockers, do not run the full suite) is stated
+with its reasoning rather than presented as consensus.
+
+---
+
+## 2. The 41 findings are ~5 root causes
 
 Treating them as 41 separate problems produces 41 shallow patches. They cluster:
 
@@ -74,7 +113,7 @@ weaker checks than the backend.
 
 ---
 
-## 2. Two fixes retire four categories between them
+## 3. Two fixes retire four categories between them
 
 Cost-per-obligation is lowest here, and both are unambiguously root-cause rather than surface.
 
@@ -114,7 +153,7 @@ that migrations run automatically on startup, and a Render deploy inherits the s
 
 ---
 
-## 3. Deliberately not building
+## 4. Deliberately not building
 
 Discipline is part of the plan. Each of these was considered and rejected with a reason.
 
@@ -133,7 +172,7 @@ extra. Effort past a target is effort stolen from an unmet one.
 
 ---
 
-## 4. Fixes that move each other's numbers
+## 5. Fixes that move each other's numbers
 
 A sequencing hazard that would silently invalidate before/after evidence:
 
@@ -150,7 +189,7 @@ A sequencing hazard that would silently invalidate before/after evidence:
 
 ---
 
-## 5. Limits of this audit
+## 6. Limits of this audit
 
 What the evidence does **not** cover. Stated so no one over-reads it.
 
@@ -164,26 +203,3 @@ What the evidence does **not** cover. Stated so no one over-reads it.
 | **Authenticated Lighthouse** | Lighthouse could not carry the session cookie into the SPA's XHR; only `/login` has a valid score. axe-core was used instead on authenticated pages. |
 | **Real multi-user collaboration under load** | The Yjs split-brain risk at 10× is reasoned from the code (in-process Maps, no session stickiness, `MaxSize 4`), **not** observed — it cannot be reproduced on a single instance. |
 | **Terraform plan against live AWS** | No credentials. `init -backend=false`, `validate`, `fmt` and `providers` all ran; blast-radius classification is static reasoning from provider ForceNew semantics and is labelled as such. |
-
----
-
-## 6. How the fix list was produced
-
-Eight independent measurement agents, one per category, each returning the rubric's exact table with
-`file:line` evidence. Headline claims were then **re-verified by a separate pass** — which is where
-five of the nine corrections came from, including one finding the auditor had backwards and one
-severity demotion after a second category measured the actual cost.
-
-Prioritisation was then pressure-tested through three lenses — economics, psychology, technology —
-which changed the plan materially rather than confirming it:
-
-- **Economics** established that the 40% criterion is conjunctive, producing the "cheapest passing
-  route, then stop" rule and most of §3.
-- **Psychology** found an arithmetic error in this audit's own corrections count, and argued the
-  corrections belonged at the top of the report rather than the end.
-- **Technology** identified that fixes move each other's measurements (§4) and that the E2E suite is
-  a precondition for validating anything else, not just one category among eight.
-
-Where two lenses disagreed — economics rated the E2E rescue the worst available buy, technology rated
-it load-bearing — **both readings are recorded** rather than resolved by preference. The synthesis
-(fix the blockers, do not run the full suite) is stated in §3 with its reasoning.
