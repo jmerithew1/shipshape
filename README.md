@@ -260,12 +260,20 @@ docker-compose -f docker-compose.prod.yml up
 
 ## Accessibility
 
-Ship is Section 508 compliant and meets WCAG 2.1 AA standards:
+Ship targets Section 508 / WCAG 2.1 AA conformance. Current measured state
+(2026-07-29, evidence in [`bench/cat7-a11y/out/`](bench/cat7-a11y/out/)):
 
-- All color contrasts meet 4.5:1 minimum
-- Full keyboard navigation
-- Screen reader support
-- Visible focus indicators
+- Zero Critical/Serious axe-core violations on the three primary pages
+  (`/login`, `/docs`, `/my-week`), enforced by `e2e/axe-scan.spec.ts`
+- Full keyboard navigation verified with real keystrokes
+  (`e2e/keyboard-traversal.spec.ts`: reachability, no traps, Enter activation)
+- Focus indicators visible on every traversed stop; focus-ring contrast 3.78:1
+  (≥ the 3:1 WCAG 1.4.11 minimum)
+- Screen-reader behaviour: manual NVDA protocol in
+  [`docs/nvda-session-script.md`](docs/nvda-session-script.md); results recorded
+  as executed — unverified areas are not claimed
+- Remaining known gaps are tracked in `AUDIT_REPORT.md` Category 7 (moderate/minor
+  findings and pages beyond the primary three)
 
 ---
 
