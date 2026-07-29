@@ -49,8 +49,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
     }
 
     const { date } = parsed.data;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Check if standup already exists for this user+date
     const existingResult = await pool.query(
@@ -156,8 +156,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
  */
 router.get('/', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
     const { date_from, date_to } = req.query;
 
     if (!date_from || !date_to) {
@@ -220,8 +220,8 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
  */
 router.get('/status', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get workspace sprint_start_date to calculate current sprint number
     const workspaceResult = await pool.query(
@@ -342,8 +342,8 @@ const updateStandupSchema = z.object({
 router.patch('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     const parsed = updateStandupSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -458,8 +458,8 @@ router.patch('/:id', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);

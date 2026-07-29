@@ -3,14 +3,22 @@ import crypto from 'crypto';
 import { pool } from '../db/client.js';
 import { SESSION_TIMEOUT_MS, ABSOLUTE_SESSION_TIMEOUT_MS, ERROR_CODES, HTTP_STATUS } from '@ship/shared';
 
-// Extend Express Request to include session info
+// Extend Express Request to include session info.
+//
+// Contract: userId, workspaceId and isSuperAdmin are assigned by EVERY path
+// through authMiddleware (session cookie and API token alike) before next()
+// is called, and nothing reads them outside authMiddleware-protected routes.
+// They are therefore declared required — which is what removed the 236
+// scattered non-null assertions on userId/workspaceId this file's
+// optionality used to force (AUDIT_REPORT.md Cat 1). sessionId stays optional:
+// API-token requests have no session.
 declare global {
   namespace Express {
     interface Request {
       sessionId?: string;
-      userId?: string;
-      workspaceId?: string;
-      isSuperAdmin?: boolean;
+      userId: string;
+      workspaceId: string;
+      isSuperAdmin: boolean;
       isApiToken?: boolean; // True when authenticated via API token
     }
   }

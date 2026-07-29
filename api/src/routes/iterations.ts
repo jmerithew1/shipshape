@@ -26,8 +26,8 @@ const listIterationsSchema = z.object({
 router.post('/:id/iterations', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id: sprintId } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     const parsed = createIterationSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -96,8 +96,8 @@ router.post('/:id/iterations', authMiddleware, async (req: Request, res: Respons
 router.get('/:id/iterations', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id: sprintId } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Parse and validate query params
     const queryParsed = listIterationsSchema.safeParse(req.query);

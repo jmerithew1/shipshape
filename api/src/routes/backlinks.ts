@@ -16,8 +16,8 @@ const updateLinksSchema = z.object({
 router.get('/:id/backlinks', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -70,8 +70,8 @@ router.get('/:id/backlinks', authMiddleware, async (req: Request, res: Response)
 router.post('/:id/links', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     const parsed = updateLinksSchema.safeParse(req.body);
     if (!parsed.success) {

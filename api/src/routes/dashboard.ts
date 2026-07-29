@@ -41,8 +41,8 @@ interface WorkItem {
  */
 router.get('/my-work', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -317,8 +317,8 @@ function extractPlanItems(content: unknown): PlanItem[] {
  */
 router.get('/my-focus', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // 1. Look up the user's person document
     const personResult = await pool.query(
@@ -497,8 +497,8 @@ router.get('/my-focus', authMiddleware, async (req: Request, res: Response) => {
  */
 router.get('/my-week', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // 1. Look up the user's person document
     const personResult = await pool.query(
