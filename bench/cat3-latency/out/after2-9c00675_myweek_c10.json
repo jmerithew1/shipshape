@@ -1,0 +1,1 @@
+{"path":"/api/dashboard/my-week","conns":10,"amount":600,"wall_s":3.63,"rps":165,"codes":{"200":600},"kb_per_resp":1.2,"total":{"p50":53.7,"p95":92.3,"p99":105.8,"avg":60.1,"max":130.4},"ttfb":{"p50":53.7,"p95":92.3,"p99":105.8}}
