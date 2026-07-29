@@ -1,0 +1,1 @@
+{"path":"/api/accountability/action-items","conns":25,"amount":600,"wall_s":4.98,"rps":120,"codes":{"200":600},"kb_per_resp":0.5,"total":{"p50":206.8,"p95":265.2,"p99":301.4,"avg":205.9,"max":314},"ttfb":{"p50":206.8,"p95":265.2,"p99":301.4}}
