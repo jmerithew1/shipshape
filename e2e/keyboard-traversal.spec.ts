@@ -48,6 +48,9 @@ async function devServersUp(webUrl: string): Promise<boolean> {
 
 async function login(page: Page, email = 'dev@ship.local', password = 'admin123') {
   await page.context().clearCookies()
+  // Same suppression the isolated-env fixture applies: the Action Items modal
+  // overlay otherwise intercepts pointer events on authenticated pages.
+  await page.addInitScript(() => localStorage.setItem('ship:disableActionItemsModal', 'true'))
   await page.goto('/login')
   await page.locator('#email').fill(email)
   await page.locator('#password').fill(password)

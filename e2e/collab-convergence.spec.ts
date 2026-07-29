@@ -37,6 +37,9 @@ async function devServersUp(webUrl: string): Promise<boolean> {
 }
 
 async function login(page: Page, email: string, password = 'admin123') {
+  // Same suppression the isolated-env fixture applies: the Action Items modal
+  // overlay otherwise intercepts pointer events on authenticated pages.
+  await page.addInitScript(() => localStorage.setItem('ship:disableActionItemsModal', 'true'))
   await page.goto('/login')
   await page.locator('#email').waitFor({ state: 'visible', timeout: 15000 })
   await page.locator('#email').fill(email)
@@ -66,7 +69,21 @@ async function createDocument(page: Page): Promise<string> {
   return page.url()
 }
 
-const editorText = (page: Page) => page.locator('.ProseMirror').innerText()
+/**
+ * Editor text with presence artifacts stripped: each user's editor renders the
+ * OTHER user's collaboration-cursor label (their display name) into the DOM,
+ * so raw innerText of two converged editors is never identical.
+ */
+const editorText = (page: Page) =>
+  page.evaluate(() => {
+    const root = document.querySelector('.ProseMirror')
+    if (!root) return ''
+    const clone = root.cloneNode(true) as HTMLElement
+    clone
+      .querySelectorAll('.ProseMirror-yjs-cursor, [class*="collaboration-cursor"]')
+      .forEach((el) => el.remove())
+    return clone.textContent ?? ''
+  })
 
 const evidence: Record<string, unknown> = {
   sha: SHA,
@@ -109,6 +126,17 @@ test.describe('concurrent two-user editing', () => {
       const stamp = Date.now()
       const textA = `alpha-${stamp}`
       const textB = `bravo-${stamp}`
+
+      // Seed base content first: on an EMPTY document, "start" and "end" are
+      // the same position, and concurrent typing there interleaves character
+      // by character (verified in the first run of this spec). Base content
+      // makes "different positions" real.
+      const base = `base-${stamp} the quick brown fox `
+      await pageA.locator('.ProseMirror').click()
+      await pageA.keyboard.type(base, { delay: 10 })
+      await expect(async () => {
+        expect(await editorText(pageB)).toContain(base.trim())
+      }).toPass({ timeout: 15000 })
 
       // A types at the start; B appends at the end — concurrently.
       const typingDone = Date.now()
