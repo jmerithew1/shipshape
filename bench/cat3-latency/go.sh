@@ -6,7 +6,9 @@ export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
 # Repo-relative since 2026-07-29: the audit-era script pointed at a session
 # scratchpad that no longer exists. Results land in out/ per the bench
 # evidence convention; set LABEL (e.g. "rebaseline-<sha>") to tag the run.
-SD="$(cd "$(dirname "$0")" && pwd)"
+# pwd -W: Windows-style path — MSYS path conversion is disabled above, so a
+# POSIX /c/... path would break curl's cookie jar (-c/-b).
+SD="$(cd "$(dirname "$0")" && pwd -W)"
 cd "$SD"; mkdir -p out
 NAME=$1; PQ=$2; C=$3; AMOUNT=${4:-600}; WARM=${5:-40}
 LABEL=${LABEL:-run}
