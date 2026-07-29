@@ -201,11 +201,20 @@ export async function authMiddleware(
       }
     }
 
-    // Update last activity
-    await pool.query(
-      'UPDATE sessions SET last_activity = $1 WHERE id = $2',
-      [now, sessionId]
-    );
+    // Update last activity (throttled, same pattern as the cookie refresh
+    // below). Unconditional, this put one UPDATE on the shared session row on
+    // EVERY authenticated request — the single largest per-request DB cost and
+    // a same-row write hotspot under concurrency (AUDIT_REPORT.md Cat 3
+    // saturation / Cat 4 "auth tax"). Staleness is bounded by the threshold, so
+    // the 15-minute inactivity timeout can fire at most 30s early; the
+    // extend-session route still writes last_activity unconditionally.
+    const ACTIVITY_WRITE_THRESHOLD_MS = 30 * 1000;
+    if (inactivityMs > ACTIVITY_WRITE_THRESHOLD_MS) {
+      await pool.query(
+        'UPDATE sessions SET last_activity = $1 WHERE id = $2',
+        [now, sessionId]
+      );
+    }
 
     // Refresh cookie with sliding expiration (throttled to avoid overhead)
     // Only refresh if more than 60 seconds since last activity

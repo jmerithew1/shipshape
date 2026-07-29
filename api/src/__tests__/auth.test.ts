@@ -26,7 +26,11 @@ function createMockReqRes(cookies: Record<string, string> = {}) {
 
 describe('authMiddleware', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // resetAllMocks, not clearAllMocks: clear only wipes call history, leaving
+    // unconsumed mockResolvedValueOnce entries to leak into the next test. The
+    // leak was latent while every test consumed its exact queue; the throttled
+    // last_activity write (fewer queries on fresh sessions) exposed it.
+    vi.resetAllMocks();
   });
 
   describe('session validation', () => {
@@ -276,6 +280,63 @@ describe('authMiddleware', () => {
       await authMiddleware(req, res, next);
       expect(res.cookie).not.toHaveBeenCalled();
       expect(next).toHaveBeenCalled();
+    });
+  });
+
+  describe('throttled last_activity writes', () => {
+    // Regression tests for the Cat 3/4 fix: the per-request UPDATE on the
+    // session row is skipped while activity is fresh, so a burst of requests
+    // no longer serializes on one row. Risk mitigated: reintroducing the
+    // unconditional write would silently restore the audit's saturation
+    // behaviour at c>=10.
+    const wasActivityWritten = () =>
+      vi.mocked(pool.query).mock.calls.some(([sql]) =>
+        String(sql).includes('UPDATE sessions SET last_activity')
+      );
+
+    it('writes last_activity when it is staler than the threshold', async () => {
+      const { req, res, next } = createMockReqRes({ session_id: 'valid-session' });
+      const now = new Date();
+      const lastActivity = new Date(now.getTime() - 90 * 1000); // 90s stale
+      vi.mocked(pool.query)
+        .mockResolvedValueOnce({
+          rows: [{
+            id: 'valid-session',
+            user_id: 'user-123',
+            workspace_id: 'ws-123',
+            last_activity: lastActivity,
+            created_at: now,
+            is_super_admin: false,
+          }],
+        } as any)
+        .mockResolvedValueOnce({ rows: [{ id: 'membership-1' }] } as any)
+        .mockResolvedValueOnce({ rows: [] } as any);
+
+      await authMiddleware(req, res, next);
+      expect(next).toHaveBeenCalled();
+      expect(wasActivityWritten()).toBe(true);
+    });
+
+    it('skips the write while activity is fresh', async () => {
+      const { req, res, next } = createMockReqRes({ session_id: 'valid-session' });
+      const now = new Date();
+      const lastActivity = new Date(now.getTime() - 10 * 1000); // 10s fresh
+      vi.mocked(pool.query)
+        .mockResolvedValueOnce({
+          rows: [{
+            id: 'valid-session',
+            user_id: 'user-123',
+            workspace_id: 'ws-123',
+            last_activity: lastActivity,
+            created_at: now,
+            is_super_admin: false,
+          }],
+        } as any)
+        .mockResolvedValueOnce({ rows: [{ id: 'membership-1' }] } as any);
+
+      await authMiddleware(req, res, next);
+      expect(next).toHaveBeenCalled();
+      expect(wasActivityWritten()).toBe(false);
     });
   });
 
