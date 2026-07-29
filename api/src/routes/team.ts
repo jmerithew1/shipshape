@@ -13,8 +13,8 @@ const router: RouterType = Router();
 //   toSprint: number - end of range (default: current + 7)
 router.get('/grid', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -199,8 +199,8 @@ router.get('/grid', authMiddleware, async (req: Request, res: Response) => {
 // Returns projects that can be assigned to team members in the assignments grid
 router.get('/projects', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -237,8 +237,8 @@ router.get('/projects', authMiddleware, async (req: Request, res: Response) => {
 // GET /api/team/programs - Get all programs
 router.get('/programs', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -264,8 +264,8 @@ router.get('/programs', authMiddleware, async (req: Request, res: Response) => {
 //           2) Inferred assignments from issue assignees (fallback)
 router.get('/assignments', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -461,7 +461,7 @@ router.get('/assignments', authMiddleware, async (req: Request, res: Response) =
 // Falls back to userId for backward compatibility
 router.post('/assign', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const workspaceId = req.workspaceId!;
+    const workspaceId = req.workspaceId;
     // Support both projectId (new) and programId (legacy)
     const { personId, userId, projectId, programId, sprintNumber } = req.body;
 
@@ -646,8 +646,8 @@ router.post('/assign', authMiddleware, async (req: Request, res: Response) => {
 // Falls back to userId for backward compatibility
 router.delete('/assign', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const currentUserId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const currentUserId = req.userId;
+    const workspaceId = req.workspaceId;
     const { personId, userId, sprintNumber } = req.body;
 
     // Get visibility context for filtering
@@ -729,8 +729,8 @@ router.delete('/assign', authMiddleware, async (req: Request, res: Response) => 
 // GET /api/team/people - Get all people (person documents)
 router.get('/people', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -770,8 +770,8 @@ router.get('/people', authMiddleware, async (req: Request, res: Response) => {
 // Returns: { people, sprints, metrics } where metrics[userId][sprintNumber] = { committed, completed }
 router.get('/accountability', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Check if user is admin
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
@@ -940,8 +940,8 @@ router.get('/accountability', authMiddleware, async (req: Request, res: Response
 // Only visible to the person themselves or workspace admins
 router.get('/people/:personId/sprint-metrics', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
     const { personId } = req.params;
 
     // Get the person document to find the user_id
@@ -1074,8 +1074,8 @@ router.get('/people/:personId/sprint-metrics', authMiddleware, async (req: Reque
 //   showArchived: boolean - include archived projects (default: false)
 router.get('/accountability-grid-v2', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
     const showArchived = req.query.showArchived === 'true';
 
     // Check if user is admin
@@ -1272,16 +1272,18 @@ router.get('/accountability-grid-v2', authMiddleware, async (req: Request, res: 
     }>();
 
     for (const row of programsResult.rows) {
-      if (!programsMap.has(row.program_id)) {
-        programsMap.set(row.program_id, {
+      let program = programsMap.get(row.program_id);
+      if (!program) {
+        program = {
           id: row.program_id,
           name: row.program_name,
           color: row.program_color || '#6b7280',
           projects: new Map(),
-        });
+        };
+        programsMap.set(row.program_id, program);
       }
       if (row.project_id) {
-        programsMap.get(row.program_id)!.projects.set(row.project_id, {
+        program.projects.set(row.project_id, {
           id: row.project_id,
           title: row.project_title,
           color: row.project_color || '#6b7280',
@@ -1360,8 +1362,8 @@ router.get('/accountability-grid-v2', authMiddleware, async (req: Request, res: 
 // Returns: { people, weeks, reviews, currentSprintNumber }
 router.get('/reviews', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
     const sprintCount = Math.min(parseInt(req.query.sprint_count as string, 10) || 5, 20);
     const showArchived = req.query.showArchived === 'true';
 
@@ -1607,8 +1609,8 @@ router.get('/reviews', authMiddleware, async (req: Request, res: Response) => {
 // Each person's week shows plan/retro status for their allocated project
 router.get('/accountability-grid-v3', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
     const showArchived = req.query.showArchived === 'true';
 
     // Check if user is admin
@@ -1981,12 +1983,9 @@ router.get('/accountability-grid-v3', authMiddleware, async (req: Request, res: 
         weeks: buildPersonWeeks(person.id),
       };
 
-      if (programGroups.has(programId)) {
-        programGroups.get(programId)!.people.push(personData);
-      } else {
-        // Program doesn't exist (maybe archived), add to unassigned
-        programGroups.get('unassigned')!.people.push(personData);
-      }
+      // Program may not exist (maybe archived) — fall back to unassigned
+      const group = programGroups.get(programId) ?? programGroups.get('unassigned');
+      group?.people.push(personData);
     }
 
     // Filter out empty programs and convert to array
@@ -2007,8 +2006,8 @@ router.get('/accountability-grid-v3', authMiddleware, async (req: Request, res: 
 // Returns: { sprints, projects, sprintAccountability } for admin accountability view
 router.get('/accountability-grid', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = req.userId!;
-    const workspaceId = req.workspaceId!;
+    const userId = req.userId;
+    const workspaceId = req.workspaceId;
 
     // Check if user is admin
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
