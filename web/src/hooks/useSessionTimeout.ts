@@ -104,18 +104,28 @@ export function useSessionTimeout(onTimeout: () => void): SessionTimeoutState {
     // Schedule the next inactivity warning
     scheduleInactivityWarningRef.current();
 
-    // Call extend-session API to extend server-side session
+    // Call extend-session API to extend the server-side session.
+    // Only an auth status (401/403) proves the session is actually gone.
+    // Transient failures — a network blip or a 5xx — must NOT force a logout:
+    // the server-side session is typically still alive, and logging the user
+    // out over a wifi hiccup during "Stay logged in" loses their place for no
+    // reason (AUDIT_REPORT.md Cat 6, transient-error-forces-logout).
     try {
       const response = await apiPost('/api/auth/extend-session');
       if (!response.ok) {
-        // API call failed - force logout
-        console.error('Failed to extend session - forcing logout');
-        onTimeoutRef.current();
+        if (response.status === 401 || response.status === 403) {
+          console.error('Session no longer valid on the server - logging out');
+          onTimeoutRef.current();
+        } else {
+          console.warn(
+            `extend-session returned ${response.status}; keeping session, activity tracking continues`
+          );
+        }
       }
     } catch {
-      // Network error - force logout
-      console.error('Network error extending session - forcing logout');
-      onTimeoutRef.current();
+      // Network error — the session may well still be alive on the server.
+      // Stay logged in; the next activity event or warning cycle retries.
+      console.warn('Network error extending session; staying logged in');
     } finally {
       extendingSessionRef.current = false;
     }

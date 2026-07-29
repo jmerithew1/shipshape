@@ -177,6 +177,70 @@ describe('useSessionTimeout', () => {
     });
   });
 
+  describe('extend-session failure handling', () => {
+    // Regression tests for the Cat-6 fix: only a 401/403 (session truly gone)
+    // may force a logout. A transient 5xx or network blip during "Stay logged
+    // in" used to log the user out and lose their place.
+    const respond = (extendResponse: () => Promise<unknown> | unknown) => {
+      mockFetch.mockImplementation(async (url: unknown) => {
+        if (String(url).includes('/extend-session')) {
+          return extendResponse();
+        }
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => 'application/json' },
+          json: async () => ({ success: true, data: { token: 'csrf' } }),
+        };
+      });
+    };
+
+    const showWarningThenReset = async (onTimeout: () => void) => {
+      const { result } = renderHook(() => useSessionTimeout(onTimeout));
+      await act(async () => {
+        vi.advanceTimersByTime(TIME_UNTIL_WARNING);
+      });
+      expect(result.current.showWarning).toBe(true);
+      await act(async () => {
+        await result.current.resetTimer();
+      });
+      return result;
+    };
+
+    it('does NOT log out when extend-session fails with a 500', async () => {
+      const onTimeout = vi.fn();
+      respond(() => ({
+        ok: false,
+        status: 500,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: false }),
+      }));
+      const result = await showWarningThenReset(onTimeout);
+      expect(onTimeout).not.toHaveBeenCalled();
+      expect(result.current.showWarning).toBe(false);
+    });
+
+    it('does NOT log out on a network error during extend-session', async () => {
+      const onTimeout = vi.fn();
+      respond(() => Promise.reject(new Error('Network down')));
+      const result = await showWarningThenReset(onTimeout);
+      expect(onTimeout).not.toHaveBeenCalled();
+      expect(result.current.showWarning).toBe(false);
+    });
+
+    it('DOES log out when extend-session returns 401', async () => {
+      const onTimeout = vi.fn();
+      respond(() => ({
+        ok: false,
+        status: 401,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: false }),
+      }));
+      await showWarningThenReset(onTimeout);
+      expect(onTimeout).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Activity Reset', () => {
     it('resetTimer() hides warning modal', async () => {
       const onTimeout = vi.fn();
