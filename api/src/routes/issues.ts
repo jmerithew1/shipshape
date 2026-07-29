@@ -121,9 +121,14 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
     // Get visibility context for filtering
     const { isAdmin } = await getVisibilityContext(userId, workspaceId);
 
+    // The LIST response deliberately returns content: NULL. Shipping every
+    // issue's full TipTap document made this endpoint's payload 223 kB for
+    // 254 issues while no list consumer reads it (AUDIT_REPORT.md Cat 4:
+    // "unnecessary data fetching"). The single-issue GET below still returns
+    // full content — that is what the editor loads.
     let query = `
       SELECT d.id, d.title, d.properties, d.ticket_number,
-             d.content,
+             NULL as content,
              d.created_at, d.updated_at, d.created_by,
              d.started_at, d.completed_at, d.cancelled_at, d.reopened_at,
              d.converted_from_id,
