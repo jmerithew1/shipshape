@@ -50,6 +50,8 @@ const { csrfSynchronisedProtection, generateToken } = csrfSync({
 
 // Conditional CSRF middleware - skip for API token auth (Bearer tokens are not vulnerable to CSRF)
 import { Request, Response, NextFunction } from 'express';
+import path, { join } from 'node:path';
+import { existsSync } from 'node:fs';
 const conditionalCsrf = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers?.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -240,6 +242,40 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   initializeCAIA().catch((err) => {
     console.warn('CAIA initialization failed:', err);
   });
+
+  // Serve the built frontend from the API when SERVE_WEB is set.
+  //
+  // Locally, Vite dev serves the SPA on :5173 and proxies /api to :3000, so this
+  // stays off. In a single-service deployment there is no Vite, so the API serves
+  // web/dist itself. That works because web's build runs `VITE_API_URL=` (empty),
+  // which makes the client issue *relative* API calls — same origin, no CORS, and
+  // no need to know the deployed hostname at build time.
+  //
+  // Mounted last on purpose: every /api route above is already registered, so the
+  // SPA fallback below cannot shadow an API endpoint. Unmatched /api/* returns a
+  // JSON 404 rather than index.html, so a missing endpoint fails loudly instead of
+  // handing the client HTML it will try to parse as JSON.
+  if (process.env.SERVE_WEB === 'true') {
+    const webDist = process.env.WEB_DIST_PATH
+      ? path.resolve(process.env.WEB_DIST_PATH)
+      : path.resolve(process.cwd(), '../web/dist');
+
+    if (existsSync(join(webDist, 'index.html'))) {
+      app.use(express.static(webDist, { index: false, maxAge: '1h' }));
+
+      app.get(/^\/(?!api\/).*/, (_req: Request, res: Response) => {
+        res.sendFile(join(webDist, 'index.html'));
+      });
+
+      app.use('/api', (_req: Request, res: Response) => {
+        res.status(404).json({ error: 'Not found' });
+      });
+
+      console.log(`Serving frontend from ${webDist}`);
+    } else {
+      console.warn(`SERVE_WEB=true but no index.html at ${webDist} — API only`);
+    }
+  }
 
   return app;
 }
