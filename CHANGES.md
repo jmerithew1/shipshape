@@ -120,6 +120,8 @@ Rollback: `terraform destroy` in terraform/render (state is local to the owner's
 - 339 lint warnings (ratchet baseline): `no-explicit-any` ~230, `no-unused-vars` 114, react-hooks
   v6 compiler findings including the UnifiedEditor conditional-hook cluster — real latent issues.
 - 50 high transitive audit advisories (see CI deviation above).
-- Cat 3 second endpoint: parked with committed diagnosis (`NOTES-2026-07-29.md`).
+- Cat 3's three unsuccessful latency attempts are preserved (not deleted) in
+  `bench/cat3-latency/out/NOTES-2026-07-29.md` alongside the diagnosis that led to the successful
+  `/api/projects` fix — kept as the record of how the mechanism was found.
 - E2E full-suite run on Windows still blocked by the two Cat-5 host defects from the audit;
   measurement specs run against dev servers instead.
