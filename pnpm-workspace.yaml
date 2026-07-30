@@ -2,3 +2,9 @@ packages:
   - 'api'
   - 'web'
   - 'shared'
+
+# Security floors for transitive criticals (GHSA advisories, 2026-07-29):
+# audit gate in CI runs at --audit-level critical.
+overrides:
+  "fast-xml-parser@<5.3.5": ">=5.3.5"
+  "protobufjs@<7.5.5": ">=7.5.5"
