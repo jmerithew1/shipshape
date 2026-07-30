@@ -145,7 +145,7 @@ export function useSelection<T>({
     setFocusedId(prev => {
       const currentIdx = prev ? itemIds.indexOf(prev) : -1;
 
-      let newFocusedId: string | null = prev;
+      let newFocusedId: string | null;
       switch (direction) {
         case 'up':
           if (currentIdx <= 0) newFocusedId = firstId;

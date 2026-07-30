@@ -1204,7 +1204,7 @@ router.post('/bulk', authMiddleware, async (req: Request, res: Response) => {
         );
         break;
 
-      case 'update':
+      case 'update': {
         if (!updates || Object.keys(updates).length === 0) {
           await client.query('ROLLBACK');
           res.status(400).json({ error: 'Updates required for update action' });
@@ -1302,6 +1302,7 @@ router.post('/bulk', authMiddleware, async (req: Request, res: Response) => {
           }
         }
         break;
+      }
 
       default:
         await client.query('ROLLBACK');

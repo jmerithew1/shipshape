@@ -197,7 +197,7 @@ test.describe('3G throttled-network behaviour', () => {
 
       // After the editor is up, every loading indicator must resolve within 60s
       // — this is the "hanging spinner" probe from the audit's silent-failure set.
-      let spinners = -1
+      let spinners: number
       const spinnerDeadline = Date.now() + 60000
       do {
         spinners = await visibleSpinners(page)
