@@ -8,8 +8,10 @@ claim about what the AI did or got wrong is checkable there.
 
 | Item | Value |
 | --- | --- |
-| Tooling | Claude Code (desktop app + CLI), single developer |
-| Subscription / usage spend for the week | **TODO: owner fills from the billing/usage page** |
+| Tooling | Claude Code (desktop app + CLI), single developer, Claude **Max** subscription (flat monthly fee) |
+| Subscription share for the week | Monthly plan fee ÷ ~4.3 weeks — $23–46 depending on Max tier ($100/$200 per month) |
+| Measured utilization | The entire week — audit, all 8 implementation categories, measurement re-runs, deploy — finished at **19% of the plan's weekly usage limit** (usage page, 2026-07-30) |
+| Marginal / overage spend | **$0** — flat plan, no usage credits consumed, well under limits |
 | Marginal infra spend | $0 — Render free tier (web service + postgres), GitHub free, local Docker |
 
 ## Where AI was strongly effective
