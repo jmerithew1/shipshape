@@ -1,0 +1,84 @@
+[0m[1mrender_project.ship: Refreshing state... [id=prj-d9keaotg1s2s73futqeg][0m
+[0m[1mrender_postgres.ship: Refreshing state... [id=dpg-d9keaortqb8s73bbtjag-a][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+
+Terraform will perform the following actions:
+
+[1m  # render_web_service.api[0m will be created
+[0m  [32m+[0m[0m resource "render_web_service" "api" {
+      [32m+[0m[0m active_custom_domains         = (known after apply)
+      [32m+[0m[0m env_vars                      = {
+          [32m+[0m[0m "CORS_ORIGIN" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [32m+[0m[0m "DATABASE_URL" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [32m+[0m[0m "NODE_ENV" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [32m+[0m[0m "NODE_VERSION" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [32m+[0m[0m "PORT" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [32m+[0m[0m "SESSION_SECRET" = {
+              [32m+[0m[0m generate_value = true
+              [32m+[0m[0m value          = (sensitive value)
+            },
+        }
+      [32m+[0m[0m environment_id                = "evm-d9keaotg1s2s73futqf0"
+      [32m+[0m[0m health_check_path             = "/health"
+      [32m+[0m[0m id                            = (known after apply)
+      [32m+[0m[0m log_stream_override           = (known after apply)
+      [32m+[0m[0m maintenance_mode              = {
+          [32m+[0m[0m enabled = false
+          [32m+[0m[0m uri     = ""
+        }
+      [32m+[0m[0m max_shutdown_delay_seconds    = (known after apply)
+      [32m+[0m[0m name                          = "ship-api"
+      [32m+[0m[0m notification_override         = (known after apply)
+      [32m+[0m[0m num_instances                 = (known after apply)
+      [32m+[0m[0m plan                          = "free"
+      [32m+[0m[0m previews                      = (known after apply)
+      [32m+[0m[0m pull_request_previews_enabled = (known after apply)
+      [32m+[0m[0m region                        = "oregon"
+      [32m+[0m[0m root_directory                = (known after apply)
+      [32m+[0m[0m runtime_source                = {
+          [32m+[0m[0m native_runtime = {
+              [32m+[0m[0m auto_deploy         = true
+              [32m+[0m[0m auto_deploy_trigger = (known after apply)
+              [32m+[0m[0m branch              = "main"
+              [32m+[0m[0m build_command       = "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build:api"
+              [32m+[0m[0m repo_url            = "https://github.com/jmerithew1/shipshape"
+              [32m+[0m[0m runtime             = "node"
+            }
+        }
+      [32m+[0m[0m slug                          = (known after apply)
+      [32m+[0m[0m start_command                 = "node api/dist/db/migrate.js && node api/dist/index.js"
+      [32m+[0m[0m url                           = (known after apply)
+    }
+
+[1mPlan:[0m [0m1 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  [32m+[0m[0m api_docs_url     = (known after apply)
+  [32m+[0m[0m api_url          = (known after apply)
+  [32m+[0m[0m health_check_url = (known after apply)
+  [32m+[0m[0m web_service_id   = (known after apply)
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "tfplan"

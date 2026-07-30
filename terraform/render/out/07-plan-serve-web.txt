@@ -1,0 +1,61 @@
+[0m[1mrender_project.ship: Refreshing state... [id=prj-d9keaotg1s2s73futqeg][0m
+[0m[1mrender_postgres.ship: Refreshing state... [id=dpg-d9keaortqb8s73bbtjag-a][0m
+[0m[1mrender_web_service.api: Refreshing state... [id=srv-d9lqb7rm8hqs73994hvg][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+
+Terraform will perform the following actions:
+
+[1m  # render_web_service.api[0m will be updated in-place
+[0m  [33m~[0m[0m resource "render_web_service" "api" {
+      [32m+[0m[0m active_custom_domains         = (known after apply)
+      [33m~[0m[0m env_vars                      = {
+          [32m+[0m[0m "SERVE_WEB" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+          [33m~[0m[0m "SESSION_SECRET" = {
+              [33m~[0m[0m value          = (sensitive value)
+                [90m# (1 unchanged attribute hidden)[0m[0m
+            },
+          [32m+[0m[0m "WEB_DIST_PATH" = {
+              [32m+[0m[0m generate_value = false
+              [32m+[0m[0m value          = (sensitive value)
+            },
+            [90m# (5 unchanged elements hidden)[0m[0m
+        }
+        id                            = "srv-d9lqb7rm8hqs73994hvg"
+      [32m+[0m[0m log_stream_override           = (known after apply)
+      [32m+[0m[0m max_shutdown_delay_seconds    = (known after apply)
+        name                          = "ship-api"
+      [33m~[0m[0m notification_override         = {
+          [33m~[0m[0m notifications_to_send         = "default" -> (known after apply)
+          [33m~[0m[0m preview_notifications_enabled = "default" -> (known after apply)
+        } -> (known after apply)
+      [32m+[0m[0m num_instances                 = (known after apply)
+      [33m~[0m[0m previews                      = {
+          [33m~[0m[0m generation = "off" -> (known after apply)
+        } -> (known after apply)
+      [33m~[0m[0m pull_request_previews_enabled = false -> (known after apply)
+      [33m~[0m[0m root_directory                = [90mnull[0m[0m -> (known after apply)
+      [33m~[0m[0m runtime_source                = {
+          [33m~[0m[0m native_runtime = {
+              [33m~[0m[0m auto_deploy_trigger = "commit" -> (known after apply)
+              [33m~[0m[0m build_command       = "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build:api" [33m->[0m[0m "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build"
+                [90m# (4 unchanged attributes hidden)[0m[0m
+            }
+        }
+      [33m~[0m[0m slug                          = "ship-api-zwhr" -> (known after apply)
+        [90m# (7 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 1 to change, 0 to destroy.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "tfplan"

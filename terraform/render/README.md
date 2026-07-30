@@ -29,13 +29,20 @@ terraform init
 terraform apply -var repo_url=https://github.com/<namespace>/shipshape
 ```
 
-## ⚠️ Blocker
+## Blocker — RESOLVED 2026-07-30
 
-Render only builds from `github.com` or `gitlab.com`. This fork's origin is a
-self-hosted GitLab, so the web service cannot be created from it. The project
-and the database applied cleanly; the web service was rejected by the API.
-Mirror the fork to one of the two supported hosts and pass `-var repo_url=...`
-— that is the only change needed.
+Render only builds from `github.com` or `gitlab.com`; this fork's origin is a
+self-hosted GitLab, so the initial web-service create was rejected (evidence:
+`out/02-apply.txt`). Resolved by mirroring to
+`https://github.com/jmerithew1/shipshape` and applying with `-var repo_url=…`.
+The full app (API + SPA via `SERVE_WEB`) is live at
+**https://ship-api-llja.onrender.com** — deployed exclusively by
+`terraform apply`; post-apply plan reports no drift (`out/06`, `out/09-10`).
+
+One provider quirk worth knowing (evidence `out/08`): in-place updates of
+**free-tier** services fail with "maintenance mode can only be configured for
+non-free tier services". Workaround: `terraform apply -replace=render_web_service.api`
+— recreation succeeds but mints a new `onrender.com` slug.
 
 ## Evidence (`out/`)
 

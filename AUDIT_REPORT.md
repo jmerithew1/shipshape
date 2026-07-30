@@ -1439,7 +1439,8 @@ debt: [`CHANGES.md`](CHANGES.md).
 | 5 Tests | 3 meaningful tests on untested paths | real-time sync, keyboard access, slow-network behaviour: zero coverage | 3 assertive specs (risk comments in-file) + 13 failing tests fixed with RCAs + 8 new regression tests | — | `e2e/{keyboard-traversal,collab-convergence,network-3g}.spec.ts`; suites api 453/453, web 160/160 | ✅ met |
 | 6 Errors | 3 gaps, ≥1 user-facing data loss | silent migration exit-0; process-killing rejections; blip-forced logout | all fixed + the test-suite TRUNCATE guard (4th, found live) | — | `docs/pr-evidence/week4-cat6/` before/after transcripts | ✅ met (4 gaps) |
 | 7 A11y | 0 Critical/Serious on 3 key pages | 1 critical + 13 serious nodes; focus ring 2.89:1 | 0/0 on /login, /docs, /my-week; ring 3.78:1 | — | `bench/cat7-a11y/out/axe-rebaseline-d6e9fee.json` → `axe-after2-d6e9fee.json`; keyboard 4/4 re-run | ✅ met |
-| 8 Terraform | local ≥2 resources + Render deploy | — | local: complete, pinned 2.5.2, drift demo captured (`terraform/local/out/01..14`); Render: project+postgres applied, pinned 1.9.1 | — | `terraform/{local,render}/out/` | ◐ web service awaits GitHub mirror + owner's Render authorization (registry rejects labs.gauntletai.com; rejection captured) |
+| 8 Terraform | local ≥2 resources + Render deploy | — | local: complete, pinned 2.5.2, drift demo captured (`terraform/local/out/01..14`); Render: pinned 1.9.1, project + postgres + web service applied from the GitHub mirror; **full app (API + SPA) publicly live at https://ship-api-llja.onrender.com**, post-apply plan = "No changes" | — | `terraform/render/out/01..10` (incl. the original host-rejection and the free-tier update quirk, disclosed rather than trimmed) | ✅ met (2026-07-30) |
 
-Outstanding, human-gated: NVDA session results (protocol delivered; recorded only as executed) and
-the Cat-8 Render authorization. Neither is claimed above.
+Both formerly human-gated items closed on 2026-07-30: the NVDA session was executed by the
+repository owner (13 pass / 2 partial / 0 fail — see the addendum above), and the Render deployment
+completed via `terraform apply` against the GitHub mirror.

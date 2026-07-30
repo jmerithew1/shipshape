@@ -80,10 +80,15 @@ NVDA manual protocol: `docs/nvda-session-script.md` (results recorded only as ex
 Rollback: revert `4177a00` (visual-only changes).
 
 ### Cat 8 — Terraform (target: local provider + Render deploy of the fork)
-`terraform/local/` complete with 14-step captured evidence (init → apply → drift → reconcile),
-provider pinned 2.5.2. `terraform/render/` pinned 1.9.1; project + postgres applied; the web
-service awaits the GitHub mirror + owner's Render authorization (Render rejects
-labs.gauntletai.com URLs — rejection captured in `terraform/render/out/02-apply.txt`).
+**Result: complete.** `terraform/local/` with 14-step captured evidence (init → apply → drift →
+reconcile), provider pinned 2.5.2. `terraform/render/` pinned 1.9.1: project, postgres and web
+service applied from the GitHub mirror (`github.com/jmerithew1/shipshape`); the **full app (API +
+SPA, single service) is publicly live at https://ship-api-llja.onrender.com** — the API serves
+`web/dist` (`SERVE_WEB`), the SPA calls it same-origin. Post-apply plan: "No changes. Your
+infrastructure matches the configuration." Evidence trail `terraform/render/out/01..10` keeps the
+history honest: the original labs.gauntletai.com rejection (02), the free-tier maintenance-mode
+update quirk (08), and the `-replace` that resolved it (09–10; recreation changes the service URL).
+Rollback: `terraform destroy` in terraform/render (state is local to the owner's machine).
 
 ## Infrastructure rules delivered this commit-set
 

@@ -42,7 +42,11 @@ locals {
   build_command = join(" && ", [
     "npm install -g ${local.pnpm_spec}",
     "pnpm install --frozen-lockfile --prod=false --ignore-scripts",
-    "pnpm run build:api",
+    # Full build (shared + api + web), not build:api: the API serves web/dist
+    # itself (SERVE_WEB below), making this single service the whole app.
+    # web's build bakes VITE_API_URL= (empty) so the SPA calls the API
+    # same-origin — no CORS, no hostname baked at build time.
+    "pnpm run build",
   ])
 
   # Mirrors the repo Dockerfile's CMD: migrate, then serve. migrate.js applies
@@ -146,6 +150,13 @@ resource "render_web_service" "api" {
     # api/src/index.ts reads PORT (defaults to 3000); 10000 is Render's
     # convention.
     "PORT" = { value = "10000" }
+
+    # Serve the built SPA from the API (api/src/app.ts, mounted after all
+    # /api routes). WEB_DIST_PATH is relative to the start command's cwd —
+    # the repo root — because app.ts's default ("../web/dist") assumes a
+    # cwd of api/, which is not how the start command runs here.
+    "SERVE_WEB"     = { value = "true" }
+    "WEB_DIST_PATH" = { value = "web/dist" }
 
     # Pins the runtime Node major to package.json's engines (>=20) and the
     # Dockerfile's node:20-slim, instead of drifting with Render's default.

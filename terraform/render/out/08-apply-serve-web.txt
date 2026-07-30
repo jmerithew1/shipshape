@@ -1,0 +1,11 @@
+[0m[1mrender_web_service.api: Modifying... [id=srv-d9lqb7rm8hqs73994hvg][0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError updating service[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with render_web_service.api,
+[31m│[0m [0m  on main.tf line 115, in resource "render_web_service" "api":
+[31m│[0m [0m 115: resource "render_web_service" "api" [4m{[0m[0m
+[31m│[0m [0m
+[31m│[0m [0mCould not update service, unexpected error: could not update service:
+[31m│[0m [0mmaintenance mode can only be configured for non-free tier services
+[31m╵[0m[0m
