@@ -340,63 +340,65 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
       orderByClause = `d.${sortField} ${sortDir}`;
     }
 
-    // Subquery to compute inferred status based on sprint allocations
-    // Priority: archived > completed (retro done) > active (current sprint allocation) > planned (future allocation) > backlog
-    // Sprint timing is computed from sprint_number + workspace.sprint_start_date:
-    //   - current: today is within the sprint's 7-day window
-    //   - future: sprint hasn't started yet
-    //   - past: sprint window has passed
-    // Allocations are tracked via sprint documents with properties.project_id
-    const inferredStatusSubquery = `
-      CASE
-        WHEN d.archived_at IS NOT NULL THEN 'archived'
-        WHEN d.properties->>'plan_validated' IS NOT NULL THEN 'completed'
-        ELSE COALESCE(
-          (
-            SELECT
-              CASE MAX(
-                CASE
-                  -- Compute sprint timing: current=3, future=2, past=1
-                  WHEN CURRENT_DATE BETWEEN
-                    (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7)
-                    AND (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7 + 6)
-                  THEN 3  -- current sprint
-                  WHEN CURRENT_DATE < (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7)
-                  THEN 2  -- future sprint
-                  ELSE 1  -- past sprint
-                END
-              )
-              WHEN 3 THEN 'active'
-              WHEN 2 THEN 'planned'
-              ELSE NULL  -- past allocations don't count
-              END
-            FROM documents sprint
-            JOIN workspaces w ON w.id = sprint.workspace_id
-            WHERE sprint.document_type = 'sprint'
-              AND sprint.workspace_id = d.workspace_id
-              AND (sprint.properties->>'project_id')::uuid = d.id
-              AND jsonb_array_length(COALESCE(sprint.properties->'assignee_ids', '[]'::jsonb)) > 0
-          ),
-          'backlog'
-        )
-      END
-    `;
-
+    // Inferred status priority: archived > completed (plan validated) >
+    // active (current-sprint allocation) > planned (future allocation) >
+    // backlog. Sprint timing derives from sprint_number + the workspace's
+    // sprint_start_date (7-day windows); allocations are sprint documents
+    // carrying properties.project_id with a non-empty assignee_ids.
+    //
+    // The list used to run THREE correlated subqueries PER PROJECT ROW
+    // (sprint count, issue count, inferred status) — 135+ executions per
+    // request at seed scale, and the audit's slowest main-page query
+    // (AUDIT_REPORT.md Cat 3/4, /api/projects 6.43 ms). Both aggregates are
+    // now computed once per request as grouped joins; the CASE semantics of
+    // inferred status are unchanged (timing 3 → active, 2 → planned,
+    // 1/no-allocations → backlog, with archived/completed short-circuits).
     let query = `
       SELECT d.id, d.title, d.properties, prog_da.related_id as program_id, d.archived_at, d.created_at, d.updated_at,
              d.converted_from_id,
              (d.properties->>'owner_id')::uuid as owner_id,
              u.name as owner_name, u.email as owner_email,
-             (SELECT COUNT(*) FROM documents s
-              JOIN document_associations da ON da.document_id = s.id AND da.related_id = d.id AND da.relationship_type = 'project'
-              WHERE s.document_type = 'sprint') as sprint_count,
-             (SELECT COUNT(*) FROM documents i
-              JOIN document_associations da ON da.document_id = i.id AND da.related_id = d.id AND da.relationship_type = 'project'
-              WHERE i.document_type = 'issue') as issue_count,
-             (${inferredStatusSubquery}) as inferred_status
+             COALESCE(assoc_counts.sprint_count, 0) as sprint_count,
+             COALESCE(assoc_counts.issue_count, 0) as issue_count,
+             CASE
+               WHEN d.archived_at IS NOT NULL THEN 'archived'
+               WHEN d.properties->>'plan_validated' IS NOT NULL THEN 'completed'
+               WHEN alloc.timing = 3 THEN 'active'
+               WHEN alloc.timing = 2 THEN 'planned'
+               ELSE 'backlog'
+             END as inferred_status
       FROM documents d
       LEFT JOIN users u ON u.id = (d.properties->>'owner_id')::uuid
       LEFT JOIN document_associations prog_da ON prog_da.document_id = d.id AND prog_da.relationship_type = 'program'
+      LEFT JOIN (
+        SELECT da.related_id,
+               COUNT(*) FILTER (WHERE m.document_type = 'sprint') as sprint_count,
+               COUNT(*) FILTER (WHERE m.document_type = 'issue') as issue_count
+        FROM document_associations da
+        JOIN documents m ON m.id = da.document_id
+        WHERE da.relationship_type = 'project'
+          AND m.document_type IN ('sprint', 'issue')
+        GROUP BY da.related_id
+      ) assoc_counts ON assoc_counts.related_id = d.id
+      LEFT JOIN (
+        SELECT (sprint.properties->>'project_id')::uuid as project_id,
+               MAX(CASE
+                 WHEN CURRENT_DATE BETWEEN
+                   (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7)
+                   AND (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7 + 6)
+                 THEN 3
+                 WHEN CURRENT_DATE < (w.sprint_start_date + ((sprint.properties->>'sprint_number')::int - 1) * 7)
+                 THEN 2
+                 ELSE 1
+               END) as timing
+        FROM documents sprint
+        JOIN workspaces w ON w.id = sprint.workspace_id
+        WHERE sprint.document_type = 'sprint'
+          AND sprint.workspace_id = $1
+          AND sprint.properties->>'project_id' IS NOT NULL
+          AND jsonb_array_length(COALESCE(sprint.properties->'assignee_ids', '[]'::jsonb)) > 0
+        GROUP BY 1
+      ) alloc ON alloc.project_id = d.id
       WHERE d.workspace_id = $1 AND d.document_type = 'project'
         AND ${VISIBILITY_FILTER_SQL('d', '$2', '$3')}
     `;
