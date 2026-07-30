@@ -34,14 +34,15 @@ picker). Evidence: `bench/cat2-bundle/out/rebaseline-8e69a59-*` → `after-c22fe
 Rollback: revert `c22fea4` (static imports return; no data shape changes).
 
 ### Cat 3 — API P95 (target: −20% on ≥2 endpoints)
-**Result: met on `/api/auth/me` (−47%/−63% c=10, −27%/−45% c=25, consistent across two committed
-runs); second endpoint honestly parked** — three attempts committed with a full diagnosis
-(EXPLAIN shows 1.1 ms DB execution; the endpoint is Node-side bound in dev mode and ±20% run noise
-swallows legitimate wins). Commits `9c00675` (throttle per-request session write), `5d55ac8`
-(accountability N+1 batched — real query-count win, flat latency at seed scale), `b349a63` (list
-endpoint stops shipping full issue content).
-Evidence + variance disclosure: `bench/cat3-latency/out/` incl. `NOTES-2026-07-29.md` (both
-after-runs committed, not re-rolled).
+**Result: met on two endpoints.** `/api/auth/me`: −47%/−63% (c=10), −27%/−45% (c=25) from the
+session-write throttle (`9c00675`). `/api/projects`: −31%/−38% (c=10), −24%/−27% (c=25) from
+rewriting three correlated per-row subqueries (sprint/issue counts + inferred status — the audit's
+slowest main-page query) as two grouped joins computed once per request; each result verified in
+two consecutive runs. The route to the second endpoint matters: three earlier attempts
+(`5d55ac8` N+1 batch, `b349a63` content drop) produced no provable latency win and are preserved
+in `NOTES-2026-07-29.md` with the EXPLAIN-based diagnosis that ultimately pointed at the one
+DB-bound endpoint.
+Evidence: `bench/cat3-latency/out/` — `rebaseline-16a351b_*` → `after-*` pairs + notes.
 Rollback: revert each commit independently.
 
 ### Cat 4 — Query efficiency (target: −20% query count on one flow)

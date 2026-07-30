@@ -19,7 +19,7 @@
 | Requirement | Status | Evidence |
 | --- | --- | --- |
 | Audit report, baselines for all categories (pass/fail gate) | ✅ | `AUDIT_REPORT.md` — plus the post-draft change log and dated corrections responding to reviewer feedback |
-| Measurable improvement per category | ✅ ×6, ◐ ×1 honestly partial | Phase-2 results table in `AUDIT_REPORT.md`; every number is a committed `rebaseline-<sha>` → `after-<sha>` artifact pair. Cat 3: one endpoint −47…−63% P95; second endpoint parked with a committed diagnosis rather than a noise-mined number |
+| Measurable improvement per category | ✅ all 8 | Phase-2 results table in `AUDIT_REPORT.md`; every number is a committed `rebaseline-<sha>` → `after-<sha>` artifact pair. Cat 3 closed on both endpoints (auth/me −47…−63%, projects −24…−38%), with the three unsuccessful attempts and the diagnosis that found the real mechanism preserved in the notes |
 | Before/after proof, identical conditions | ✅ | `bench/*/out/` pairs; conditions pinned in `bench/README.md`; variance disclosed, both runs committed when they disagreed |
 | Tests still pass / regression tests | ✅ | api 453/453, web 160/160, ×3 consecutive runs; regression tests per fix (throttle, extend-session, axe, keyboard, convergence) |
 | CI pipeline (build, lint, types, test, coverage, audit, security scan, inventory) | ✅ | `.github/workflows/ci.yml`, green on the mirror; documented deviation: audit gates at critical (justification in `CHANGES.md`) |
