@@ -1408,3 +1408,25 @@ nobody mistakes it for the production number.
 
 *Planned:* manual NVDA session per `docs/nvda-session-script.md`; Speech Viewer transcript and
 per-step pass/fail findings to `bench/cat7-a11y/out/nvda-session-2026-07-29.md`.
+
+---
+
+# Phase-2 results summary (as of 2026-07-29)
+
+Every number below is a committed artifact pair — never a comparison against this report's
+audit-window prose (see Post-draft change log for why). Full narrative, rollback steps and known
+debt: [`CHANGES.md`](CHANGES.md).
+
+| Cat | Target | Re-baseline | After | Delta | Evidence pair | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 Type safety | −25% violations | 1,208 | 882 | **−27.0%** | `bench/cat1-types/out/rebaseline-8e69a59.txt` → `after-9cc5aeb.txt` | ✅ met |
+| 2 Bundle | −20% initial load | entry+css ≈2,088 kB; 3G cold-login transfer 605 kB, usable 7.2 s/14.3 s | 872 kB; 243 kB, 3.7 s/7.1 s | **−58% / −59.9%** | `bench/cat2-bundle/out/rebaseline-8e69a59-*` → `after-c22fea4-*`, `3g-*` pair | ✅ met (~3× target) |
+| 3 API P95 | −20% on ≥2 endpoints | `/api/auth/me` 93.7/127.4 ms | 34.9–49.7 / 70.5–92.8 ms | **−47..−63% / −27..−45%** (both runs) | `bench/cat3-latency/out/` + `NOTES-2026-07-29.md` | ◐ met on 1 of 2; second endpoint parked with committed diagnosis (dev-mode Node-bound, ±20% run noise; three fix attempts recorded) |
+| 4 Queries | −20% on one flow | main page 41 queries | 32 | **−22.0%** | `bench/cat4-queries/out/rebaseline-16a351b_mainpage.txt` → `after-9c00675_mainpage.txt` | ✅ met |
+| 5 Tests | 3 meaningful tests on untested paths | real-time sync, keyboard access, slow-network behaviour: zero coverage | 3 assertive specs (risk comments in-file) + 13 failing tests fixed with RCAs + 8 new regression tests | — | `e2e/{keyboard-traversal,collab-convergence,network-3g}.spec.ts`; suites api 453/453, web 160/160 | ✅ met |
+| 6 Errors | 3 gaps, ≥1 user-facing data loss | silent migration exit-0; process-killing rejections; blip-forced logout | all fixed + the test-suite TRUNCATE guard (4th, found live) | — | `docs/pr-evidence/week4-cat6/` before/after transcripts | ✅ met (4 gaps) |
+| 7 A11y | 0 Critical/Serious on 3 key pages | 1 critical + 13 serious nodes; focus ring 2.89:1 | 0/0 on /login, /docs, /my-week; ring 3.78:1 | — | `bench/cat7-a11y/out/axe-rebaseline-d6e9fee.json` → `axe-after2-d6e9fee.json`; keyboard 4/4 re-run | ✅ met |
+| 8 Terraform | local ≥2 resources + Render deploy | — | local: complete, pinned 2.5.2, drift demo captured (`terraform/local/out/01..14`); Render: project+postgres applied, pinned 1.9.1 | — | `terraform/{local,render}/out/` | ◐ web service awaits GitHub mirror + owner's Render authorization (registry rejects labs.gauntletai.com; rejection captured) |
+
+Outstanding, human-gated: NVDA session results (protocol delivered; recorded only as executed) and
+the Cat-8 Render authorization. Neither is claimed above.
