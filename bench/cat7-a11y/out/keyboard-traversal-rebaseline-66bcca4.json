@@ -1,0 +1,953 @@
+{
+  "sha": "66bcca4",
+  "label": "rebaseline",
+  "date": "2026-07-30T02:29:18.488Z",
+  "method": "real page.keyboard.press Tab/Shift+Tab/Enter via Playwright + CDP against live dev servers",
+  "loginTraversal": [
+    {
+      "step": 1,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Password",
+      "id": "password",
+      "focusVisible": true
+    },
+    {
+      "step": 2,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Sign in",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 3,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Open Tanstack query devtools",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 4,
+      "tag": "BODY",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 5,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Email address",
+      "id": "email",
+      "focusVisible": true
+    },
+    {
+      "step": 6,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Password",
+      "id": "password",
+      "focusVisible": true
+    },
+    {
+      "step": 7,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Sign in",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 8,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Open Tanstack query devtools",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 9,
+      "tag": "BODY",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 10,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Email address",
+      "id": "email",
+      "focusVisible": true
+    },
+    {
+      "step": 11,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Password",
+      "id": "password",
+      "focusVisible": true
+    },
+    {
+      "step": 12,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Sign in",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 13,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Open Tanstack query devtools",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 14,
+      "tag": "BODY",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": false
+    },
+    {
+      "step": 15,
+      "tag": "INPUT",
+      "role": null,
+      "name": "Email address",
+      "id": "email",
+      "focusVisible": true
+    }
+  ],
+  "enterActivatesLogin": true,
+  "docsTraversal": [
+    {
+      "step": 1,
+      "tag": "INPUT",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 2,
+      "tag": "BUTTON",
+      "role": "combobox",
+      "name": "Sort by",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 3,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "List view",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 4,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Tree view",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 5,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "New Document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 6,
+      "tag": "BUTTON",
+      "role": "tab",
+      "name": "All",
+      "id": "filter-all",
+      "focusVisible": true
+    },
+    {
+      "step": 7,
+      "tag": "BUTTON",
+      "role": "tab",
+      "name": "Workspace",
+      "id": "filter-workspace",
+      "focusVisible": true
+    },
+    {
+      "step": 8,
+      "tag": "BUTTON",
+      "role": "tab",
+      "name": "Private",
+      "id": "filter-private",
+      "focusVisible": true
+    },
+    {
+      "step": 9,
+      "tag": "A",
+      "role": null,
+      "name": "Untitled",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 10,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 11,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 12,
+      "tag": "A",
+      "role": null,
+      "name": "Untitled",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 13,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 14,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 15,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 16,
+      "tag": "A",
+      "role": null,
+      "name": "Welcome to Ship",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 17,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 18,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 19,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 20,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 61",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 21,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 22,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 23,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 24,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 62",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 25,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 26,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 27,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 28,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 63",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 29,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 30,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 31,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 32,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 64",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 33,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 34,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 35,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 36,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 65",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 37,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 38,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 39,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 40,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 66",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 41,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 42,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 43,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 44,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 67",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 45,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 46,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 47,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 48,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 68",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 49,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 50,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 51,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 52,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 69",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 53,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 54,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 55,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 56,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 70",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 57,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 58,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 59,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 60,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 71",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 61,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 62,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 63,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 64,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 72",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 65,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 66,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 67,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 68,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 73",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 69,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 70,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 71,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 72,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 74",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 73,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 74,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 75,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 76,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 75",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 77,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 78,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 79,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 80,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 76",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 81,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 82,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 83,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 84,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 77",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 85,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 86,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 87,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 88,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 78",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 89,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 90,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 91,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 92,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 79",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 93,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 94,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 95,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 96,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 80",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 97,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Delete document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 98,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Add sub-document",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 99,
+      "tag": "BUTTON",
+      "role": null,
+      "name": "Expand",
+      "id": null,
+      "focusVisible": true
+    },
+    {
+      "step": 100,
+      "tag": "A",
+      "role": null,
+      "name": "Load test wiki page 81",
+      "id": null,
+      "focusVisible": true
+    }
+  ],
+  "docsFocusVisibleRatio": 1,
+  "docsUnnamedStops": [
+    {
+      "step": 1,
+      "tag": "INPUT",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": true
+    }
+  ],
+  "editorTraversal": [
+    {
+      "step": 1,
+      "tag": "DIV",
+      "role": null,
+      "name": "",
+      "id": null,
+      "focusVisible": true
+    }
+  ],
+  "editorReachableByTab": true
+}

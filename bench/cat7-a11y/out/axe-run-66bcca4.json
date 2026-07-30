@@ -1,0 +1,31 @@
+{
+  "sha": "66bcca4",
+  "label": "run",
+  "date": "2026-07-30T02:29:03.806Z",
+  "results": [
+    {
+      "page": "/login",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/docs",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    },
+    {
+      "page": "/my-week",
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0,
+      "violations": []
+    }
+  ]
+}

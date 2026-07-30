@@ -1,0 +1,15 @@
+{
+  "sha": "66bcca4",
+  "label": "rebaseline",
+  "date": "2026-07-30T02:29:03.895Z",
+  "method": "two Playwright contexts, two distinct users, same /documents/:id (same Yjs room) over live dev servers",
+  "docUrl": "http://localhost:5173/documents/412530d2-9a96-4c64-b820-eabd914ec190",
+  "differentPositions": {
+    "convergenceMsUpperBound": 743,
+    "finalText": "alpha-1785378549619base-1785378549619 the quick brown fbravo-1785378549619ox "
+  },
+  "samePosition": {
+    "converged": true,
+    "finalText": "AAAAAAAAAABBBBBBBBBB"
+  }
+}
