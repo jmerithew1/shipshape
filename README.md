@@ -85,31 +85,25 @@ The goal isn't to check boxes. It's to capture what your team learned so you can
 - [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
 - [Docker](https://www.docker.com/) (for the database)
 
-### Setup
+### Setup — one command from a clean checkout
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/US-Department-of-the-Treasury/ship.git
-cd ship
+git clone https://labs.gauntletai.com/jamesmerithew/shipshape.git
+cd shipshape
+./start.sh
+```
 
-# 2. Install dependencies
-pnpm install
+`./start.sh` brings up the full composed system with Docker — PostgreSQL
+(host port **5433**, to avoid a locally-installed PostgreSQL), the API on
+:3000 (migrations and seed run automatically on startup), and the web app on
+:5173 — and waits until the API health check passes. No manual environment
+setup is required.
 
-# 3. Configure environment
-cp api/.env.example api/.env.local
-cp web/.env.example web/.env
+Variants:
 
-# 4. Start the database
-docker-compose up -d
-
-# 5. Create sample data
-pnpm db:seed
-
-# 6. Run database migrations
-pnpm db:migrate
-
-# 7. Start the application
-pnpm dev
+```bash
+./start.sh native   # postgres in Docker; api+web natively with hot reload (runs pnpm install for you)
+./start.sh down     # stop everything
 ```
 
 ### Open the App
