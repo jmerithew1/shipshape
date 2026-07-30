@@ -1404,10 +1404,23 @@ loads and settles. A first attempt against the dev server exceeded 120 s DOMCont
 Regular-3G, which is a dev-mode artifact (hundreds of unbundled ESM modules), recorded here so
 nobody mistakes it for the production number.
 
-## Screen reader (NVDA) — pending execution
+## Screen reader (NVDA) — executed 2026-07-30
 
-*Planned:* manual NVDA session per `docs/nvda-session-script.md`; Speech Viewer transcript and
-per-step pass/fail findings to `bench/cat7-a11y/out/nvda-session-2026-07-29.md`.
+**Method:** manual NVDA session by the repository owner per `docs/nvda-session-script.md`; Speech
+Viewer transcripts dictated live and transcribed verbatim. **Evidence:**
+`bench/cat7-a11y/out/nvda-session-2026-07-29.md` (17-probe protocol).
+
+**Result: 13 pass / 2 partial / 0 fail / 1 not exercised.** Landmarks (including `main`), heading
+outline, skip link, per-character typing echo, heading-role announcement in the editor, live-region
+login errors ("alert — Invalid email or password"), and full names on every rail/sidebar control
+all verified under real assistive technology.
+
+**Verdict vs Phase-1 reasoning: one claim revised, others confirmed.** The static-analysis claim
+that dialogs declare `aria-modal` but never trap focus **did not reproduce** on the Action Items
+modal: 3+ full Tab cycles stayed inside the dialog and Escape returned focus to the opener,
+re-announced (other flagged dialogs not exercised). New findings only AT could reveal: opening a
+document never speaks the document's name (generic `document.title`), and the editor region has no
+accessible name.
 
 ---
 
