@@ -228,7 +228,14 @@ export const test = base.extend<
 
       // Use vite preview instead of vite dev - much lighter weight
       // We pass the API port via env var so vite.config.ts can set up the proxy
-      const proc = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], {
+      // Spawn vite's JS entry with node directly: a bare 'npx' is npx.cmd on Windows,
+      // which CreateProcess cannot run (spawn npx ENOENT), and shell:true would orphan
+      // the preview server when the worker kills the shell wrapper.
+      const viteBin = path.join(PROJECT_ROOT, 'web', 'node_modules', 'vite', 'bin', 'vite.js');
+      if (!existsSync(viteBin)) {
+        throw new Error(`${workerTag} vite binary not found at ${viteBin}. Run: pnpm install`);
+      }
+      const proc = spawn(process.execPath, [viteBin, 'preview', '--port', String(port), '--strictPort'], {
         cwd: path.join(PROJECT_ROOT, 'web'),
         env: {
           ...process.env,
