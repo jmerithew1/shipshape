@@ -1,0 +1,24 @@
+=== 2026-07-31T19:15:26.940Z — capture-extend-session PHASE=after ===
+=== web/src/hooks/useSessionTimeout.ts @ 99e7ffa60b2fe51b9f213b207a3aa8231fa4175f (git hash-object; web/dist built from it) ===
+
+[step] goto http://localhost:4273/login and sign in as dev@ship.local
+[browser console.error] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[step] signed in; user's place in the app: http://localhost:4273/docs
+[step] fast-forwarding the clock 14 minutes to trigger the inactivity warning
+[browser console.error] `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[browser console.warning] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[step] inactivity warning visible ("Your session is about to expire")
+[step] dropping the network for all /api/** requests (route.abort = wifi blip)
+[step] pressing Enter on the focused "Stay Logged In" button
+[browser console.error] Failed to load resource: net::ERR_CONNECTION_FAILED
+[browser console.warning] Network error extending session; staying logged in
+
+[result] URL before "Stay Logged In": http://localhost:4273/docs
+[result] URL after:                   http://localhost:4273/docs
+[result] warning modal still visible: false
+[result] VERDICT: user kept their session and their place (post-fix behavior)
+[artifact] recording: docs\pr-evidence\week4-cat6\extend-session-after.webm

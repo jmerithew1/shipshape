@@ -48,6 +48,8 @@ Thumbs.db
 # Evidence/verification screenshots
 evidence/
 *.png
+# ...except committed PR/audit evidence screenshots
+!docs/pr-evidence/**/*.png
 
 # Playwright test artifacts
 playwright-report/

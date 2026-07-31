@@ -1,0 +1,45 @@
+=== 2026-07-31T19:14:19.831Z — capture-extend-session PHASE=before ===
+=== web/src/hooks/useSessionTimeout.ts @ 2acb3ac7f681c75c49b4ae5ec61f07b86c9e3efb (git hash-object; web/dist built from it) ===
+
+[step] goto http://localhost:4273/login and sign in as dev@ship.local
+[browser console.error] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[step] signed in; user's place in the app: http://localhost:4273/docs
+[step] fast-forwarding the clock 14 minutes to trigger the inactivity warning
+[browser console.error] `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[browser console.warning] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[step] inactivity warning visible ("Your session is about to expire")
+[step] dropping the network for all /api/** requests (route.abort = wifi blip)
+[step] pressing Enter on the focused "Stay Logged In" button
+[browser console.error] Failed to load resource: net::ERR_CONNECTION_FAILED
+[browser console.error] Network error extending session - forcing logout
+[browser console.error] Failed to load resource: net::ERR_CONNECTION_FAILED
+[browser console.error] [Auth] Session check failed: TypeError: Failed to fetch
+    at Ke (http://localhost:4273/assets/index-C6_5YZyy.js:52:73242)
+    at Object.me (http://localhost:4273/assets/index-C6_5YZyy.js:52:74012)
+    at http://localhost:4273/assets/index-C6_5YZyy.js:52:78396
+    at http://localhost:4273/assets/index-C6_5YZyy.js:52:78958
+    at jc (http://localhost:4273/assets/index-C6_5YZyy.js:41:24546)
+    at vi (http://localhost:4273/assets/index-C6_5YZyy.js:41:43061)
+    at http://localhost:4273/assets/index-C6_5YZyy.js:41:41282
+    at P (http://localhost:4273/assets/index-C6_5YZyy.js:26:1617)
+    at MessagePort.Y (http://localhost:4273/assets/index-C6_5YZyy.js:26:1986)
+[browser console.error] Failed to load resource: net::ERR_CONNECTION_FAILED
+[browser console.error] Failed to check setup status: TypeError: Failed to fetch
+    at X (http://localhost:4273/assets/index-C6_5YZyy.js:52:153743)
+    at http://localhost:4273/assets/index-C6_5YZyy.js:52:154147
+    at jc (http://localhost:4273/assets/index-C6_5YZyy.js:41:24546)
+    at vi (http://localhost:4273/assets/index-C6_5YZyy.js:41:43061)
+    at http://localhost:4273/assets/index-C6_5YZyy.js:41:41282
+    at P (http://localhost:4273/assets/index-C6_5YZyy.js:26:1617)
+    at MessagePort.Y (http://localhost:4273/assets/index-C6_5YZyy.js:26:1986)
+[browser console.error] Failed to load resource: net::ERR_CONNECTION_FAILED
+
+[result] URL before "Stay Logged In": http://localhost:4273/docs
+[result] URL after:                   http://localhost:4273/login?expired=true&returnTo=%2Fdocs
+[result] warning modal still visible: false
+[result] VERDICT: user was force-logged-out to /login — their place is gone (pre-fix behavior)
+[artifact] recording: docs\pr-evidence\week4-cat6\extend-session-before.webm

@@ -63,12 +63,18 @@ web 160/160.
 Rollback: the specs are additive; revert individual commits.
 
 ### Cat 6 — Error handling (target: 3 gaps, ≥1 user-facing data loss)
-**Result: 4 gaps fixed, all with before/after repro transcripts** in
+**Result: 4 gaps fixed, each with its own before/after evidence pair** in
 [docs/pr-evidence/week4-cat6/](docs/pr-evidence/week4-cat6/README.md): silent migration failure +
 fresh-install death at 010 (`f3c89c5`), process-killing unhandled rejections (`dd98511`),
 transient-network forced logout — the user-facing data-loss case (`22acc2f`), and the test suite's
 unguarded TRUNCATE of whatever DATABASE_URL names (`d6e9fee` — found the hard way; incident
 disclosed in `bench/cat3-latency/out/NOTES-2026-07-29.md`).
+*Amended 2026-07-31 (reviewer feedback):* the original submission had executed transcripts only
+for the migration fix — the claim above overstated it. Now committed per fix: executed crash/
+survive transcripts for the unhandled-rejection fix (`*-unhandled-rejection.txt` + the repro
+scripts that produced them), and screenshots + screen recordings + step transcripts for the
+forced-logout data-loss fix (`extend-session-*`), captured by the committed
+`capture-extend-session.mjs` on pre-fix and post-fix builds under identical conditions.
 Rollback: each commit reverts independently; rollback steps in the evidence README.
 
 ### Cat 7 — Accessibility (target: all Critical/Serious axe violations on 3 key pages)
@@ -123,5 +129,10 @@ Rollback: `terraform destroy` in terraform/render (state is local to the owner's
 - Cat 3's three unsuccessful latency attempts are preserved (not deleted) in
   `bench/cat3-latency/out/NOTES-2026-07-29.md` alongside the diagnosis that led to the successful
   `/api/projects` fix — kept as the record of how the mechanism was found.
-- E2E full-suite run on Windows still blocked by the two Cat-5 host defects from the audit;
-  measurement specs run against dev servers instead.
+- ~~E2E full-suite run on Windows still blocked by the two Cat-5 host defects from the audit;
+  measurement specs run against dev servers instead.~~ **Closed 2026-07-31:** the second host
+  defect (`spawn('npx')` in `e2e/fixtures/isolated-env.ts`) is fixed — the preview server is
+  spawned as `node .../vite/bin/vite.js` — and the testcontainers suite now runs on this host.
+  The inherited `test-failures.md` list of 15 failing E2E tests was reconciled the same day:
+  10 of the 15 no longer exist in the suite, the 5 survivors all pass (103/103 across their
+  four spec files; see `test-failures.md` for per-test dispositions and commands).

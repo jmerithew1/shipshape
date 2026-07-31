@@ -35,6 +35,15 @@
 | Demo video | 🎬 owner records | Outline below |
 | Social post | ✍️ owner posts | Draft below |
 
+## Response to reviewer feedback (2026-07-31)
+
+The review passed the submission with two staff-call rows; both are closed:
+
+| Flagged item | Closure |
+| --- | --- |
+| "Fifteen pre-existing end-to-end tests are still failing as mentioned in test-failure doc" | The doc (`test-failures.md`, inherited, written 2026-01-07 — six months before the audit) was reconciled against the current suite: **10 of the 15 tests no longer exist** (features/specs removed in repo history), and the **5 survivors all pass** — 103/103 across their four spec files, re-run 2026-07-31 on this host. The re-run itself required fixing the audit's second Cat-5 host defect (`spawn('npx')` in `e2e/fixtures/isolated-env.ts`). Per-test dispositions, commands, and a disclosed flake note: [`test-failures.md`](../test-failures.md) |
+| "Error-handling category only has before/after transcripts for one of the three fixes; the user-facing data-loss case has a regression test but no screenshot or recording" | Every Cat-6 fix now has its own committed evidence pair: executed crash/survive transcripts for the unhandled-rejection fix, and **screenshots + screen recordings + step transcripts** for the forced-logout data-loss fix (pre-fix build vs. current build, same script, same conditions; artifacts stamp the `git hash-object` of the code they ran against). [`docs/pr-evidence/week4-cat6/`](pr-evidence/week4-cat6/README.md) |
+
 ## Demo video outline (3–5 min)
 
 1. **The hook (30 s)** — "I inherited a Treasury project-management monorepo, audited it in 36

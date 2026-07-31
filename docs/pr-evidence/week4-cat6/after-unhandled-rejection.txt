@@ -1,0 +1,22 @@
+=== 2026-07-31T19:04:46Z — repro-unhandled-rejection ===
+=== api/src/index.ts @ 3cce4a2ab860c750efe8f82324ce33b80d7a0861 (git hash-object) ===
+
+--- server output ---
+Yjs collaboration server attached
+Events WebSocket server attached
+CAIA not configured, skipping initialization
+API server running on http://localhost:3790
+CORS origin: http://localhost:5173
+[repro] /health is answering — server is up
+[repro] firing an un-awaited Promise.reject now (t=ready+3s)
+UNHANDLED PROMISE REJECTION (continuing to serve): Error: repro: stray rejection from a request handler
+    at Timeout._onTimeout (C:\Users\merit\OneDrive\Desktop\shipshape\docs\pr-evidence\week4-cat6\repro-unhandled-rejection.ts:40:20)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[repro] still alive at t=ready+15s — shutting down cleanly (repro over)
+
+--- health probes (from outside the process) ---
+[driver] ready+0s (before rejection; rejection fires at ready+3s) /health -> 200
+[driver] ready+5s (2s after rejection) /health -> 200
+[driver] ready+9s (6s after rejection) /health -> 200
+[driver] server process ended with exit code 0
