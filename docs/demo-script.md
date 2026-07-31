@@ -9,8 +9,11 @@ before/after measurements, explain your reasoning. This script does that and not
 2. **Window 1 — VS Code:** `AUDIT_REPORT.md` open. Find two spots so you can jump between them:
    the **Category 3** section ("The single largest cost: authentication") and the
    **"Phase-2 results summary"** table near the bottom.
-3. **Window 2 — Browser, two tabs:** the live app https://ship-api-llja.onrender.com (logged in,
-   `dev@ship.local` / `admin123`) · the green CI run at https://github.com/jmerithew1/shipshape/actions
+3. **Window 2 — Browser, two tabs:** the live app https://ship-api-llja.onrender.com — the deployed
+   database is fresh, so the seeded local accounts don't exist here: on first visit complete
+   `/setup` to create an admin (throwaway credentials — staging-grade deployment), then create a
+   document titled "Demo" with a line of text · the green CI run at
+   https://github.com/jmerithew1/shipshape/actions (click the top run, then the checks job)
 4. **Window 3 — Git Bash** in the repo, pre-typed (don't run yet):
    `node bench/cat1-types/count-types.mjs "$(pwd -W)" 2>/dev/null | head -2`
 
