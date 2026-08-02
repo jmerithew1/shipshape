@@ -1,19 +1,23 @@
 # NVDA Session Results — 2026-07-30
 
+> Filename note: the file keeps its scheduled-date name (`-2026-07-29`) because other documents
+> link it; the session itself ran 2026-07-30, as dated below.
+
 **Executed by:** James Merithew (manual session per [`docs/nvda-session-script.md`](../../../docs/nvda-session-script.md));
 Speech Viewer transcripts dictated live and transcribed verbatim.
 **Status:** EXECUTED 2026-07-30 — 13 pass / 2 partial / 0 fail / 1 not exercised. Environment
 note: initial Chrome session produced no landmark/heading announcements until the page window was
 properly focused ("Chrome Legacy Window" announcements in raw transcripts are the assistant window
 on a second monitor, not the app).
-**NVDA version:** ___
-**Browser + version:** ___
-**App:** local dev (`pnpm dev`), commit `___`
+**NVDA version:** 2026.1.1 (not noted during the session; read from the session machine's
+registry 2026-07-31, one day after — no NVDA update in between)
+**Browser + version:** Chrome 150.0.7871.187 (same machine-inspected caveat as above)
+**App:** local dev (`pnpm dev`); exact checked-out commit not recorded at session time — the
+session results were committed the same day in `00f2e0c`
 **Login:** dev@ship.local (super-admin)
 
-Fill *Observed* with what NVDA actually announced (paste from Speech Viewer). Verdicts:
-**Pass** (announced as expected) / **Partial** (announced but degraded) / **Fail** (silent, unnamed,
-or wrong).
+Verdict vocabulary: **Pass** (announced as expected) / **Partial** (announced but degraded) /
+**Fail** (silent, unnamed, or wrong). *Observed* cells are pasted from NVDA's Speech Viewer.
 
 ## Part A — Login page
 
@@ -77,10 +81,5 @@ or wrong).
 
 Transcripts were dictated live in-session and transcribed verbatim into the Observed column above;
 the environment note in the header explains the "Chrome Legacy Window" lines (assistant window on a
-second monitor). NVDA + Chrome on Windows 11, app served by `pnpm dev`.
-
-## Raw transcript appendix
-
-```
-(paste Speech Viewer contents here, or reference nvda-transcript-2026-07-29.txt)
-```
+second monitor). NVDA + Chrome on Windows 11, app served by `pnpm dev`. No separate transcript
+file was kept — the Observed column above is the record.

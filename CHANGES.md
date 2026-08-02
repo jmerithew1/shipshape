@@ -63,7 +63,8 @@ web 160/160.
 Rollback: the specs are additive; revert individual commits.
 
 ### Cat 6 — Error handling (target: 3 gaps, ≥1 user-facing data loss)
-**Result: 4 gaps fixed, each with its own before/after evidence pair** in
+**Result: 4 gaps fixed — the three rubric gaps each with a committed before/after evidence
+pair; the bonus TRUNCATE guard evidenced by its disclosed incident and guard code** in
 [docs/pr-evidence/week4-cat6/](docs/pr-evidence/week4-cat6/README.md): silent migration failure +
 fresh-install death at 010 (`f3c89c5`), process-killing unhandled rejections (`dd98511`),
 transient-network forced logout — the user-facing data-loss case (`22acc2f`), and the test suite's
@@ -112,8 +113,10 @@ Rollback: `terraform destroy` in terraform/render (state is local to the owner's
   COPY'd laptop-built artifacts, breaking clean checkouts); `GIT_SHA` build-arg stamps provenance
   (OCI revision label + env). CI uploads a SHA-tagged tarball with a sha256 provenance file.
   Rollback: revert to the single-stage file.
-- **Version pinning**: all 131 ranged dependency specs pinned to installed exacts across the four
-  package.jsons; lockfile committed.
+- **Version pinning**: all ranged dependency specs pinned to installed exacts across the four
+  package.jsons (131 in the original pass; a 132nd survivor — `@asteasolutions/zod-to-openapi`
+  `"7"` → `7.3.4` — was caught by the 2026-08-01 pre-submission gate and pinned); lockfile
+  committed.
 - **Resilience assessment** (`docs/resilience-assessment.md`): inventory of every outbound
   dependency; what was added this week (session-keepalive failure-awareness, process-level nets)
   and what was deliberately not built (DB circuit breaker — single datastore, no fallback surface),

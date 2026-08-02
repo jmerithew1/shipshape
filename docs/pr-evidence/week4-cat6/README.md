@@ -43,8 +43,9 @@ boots the real API entrypoint, fires one un-awaited `Promise.reject` 3 s after `
 answers, and probes `/health` from outside ([repro-unhandled-rejection.sh](repro-unhandled-rejection.sh)).
 - **Before** ([before-unhandled-rejection.txt](before-unhandled-rejection.txt)), pre-fix
   `index.ts` restored via `git show dd98511~1`: `/health` 200 → rejection → crash trace →
-  **process exits code 1**, `/health` no-response. (The trailing `ERR_PNPM_RECURSIVE_EXEC` lines
-  are the pnpm wrapper reporting its dead child — noise, not part of the failure.)
+  **process exits code 1**, `/health` no-response. (The trailing `undefined` +
+  `ERR_PNPM_RECURSIVE_EXEC` lines are the pnpm wrapper reporting its dead child — noise, not
+  part of the failure.)
 - **After** ([after-unhandled-rejection.txt](after-unhandled-rejection.txt)): `UNHANDLED PROMISE
   REJECTION (continuing to serve)` logged, `/health` 200 at +2 s and +6 s, clean exit 0.
 
@@ -89,4 +90,9 @@ Live incident 2026-07-29: running the api suite with `.env.local`'s DATABASE_URL
 **Fix:** `api/vitest.config.ts` redirects non-test database URLs to `ship_test`; `api/src/test/setup.ts`
 hard-refuses any database whose name is not test-patterned. Verified: plain `pnpm test` runs green
 against ship_test with `ship_dev` untouched (557 documents before and after).
+**Evidence status:** unlike Gaps 1–3, this fix intentionally has **no** executed before/after
+pair — reproducing the "before" means truncating a live database. Its evidence is the disclosed
+incident (`bench/cat3-latency/out/NOTES-2026-07-29.md`), the guard code itself
+(`api/vitest.config.ts`, `api/src/test/setup.ts`, commit `d6e9fee`), and the verification note
+above. The rubric's three-gap ask is covered by Gaps 1–3, each with committed pairs.
 **Rollback:** revert the guard commit (and never run the suite pointed at a real database again).

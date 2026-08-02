@@ -55,10 +55,11 @@ The review passed the submission with two staff-call rows; both are closed:
 3. **The visible wins (90 s)** — DevTools network tab on the live Render URL: initial load with
    the split bundle; then open a doc in two browser windows and type simultaneously — convergence
    live. Flash the axe spec passing (0 Critical/Serious).
-4. **The honest parts (45 s)** — the parked Cat-3 endpoint with its diagnosis; the TRUNCATE
-   incident and the guard it produced. "The report says what I didn't achieve, with evidence."
-5. **Close (15 s)** — `terraform apply` output → "No changes" → the live health check. Tag on
-   screen: `week4-implementation`.
+4. **The honest parts (45 s)** — Cat 3's three preserved failed attempts and the diagnosis that
+   led to the fix that closed both endpoints; the TRUNCATE incident and the guard it produced.
+   "The report keeps the dead ends, with evidence."
+5. **Close (15 s)** — `terraform apply` output → "No changes" → the live health check. Tags on
+   screen: `week4-implementation` (reviewed) / `week4-final` (feedback closed).
 
 ## Social post draft (X / LinkedIn — edit voice to taste, tag @GauntletAI)
 
@@ -72,8 +73,9 @@ The review passed the submission with two staff-call rows; both are closed:
 >
 > Results, each with a committed before/after artifact: type violations −27%, initial bundle −58%
 > (3G cold load 605→243 kB), main-page DB queries −22%, 0 critical/serious a11y violations on the
-> core pages, 4 error-handling bugs fixed with repro transcripts — and the whole app deployed to
-> Render purely via `terraform apply`.
+> core pages, 4 error-handling bugs fixed (each of the three rubric gaps with committed
+> before/after repro evidence — transcripts, screenshots, screen recordings) — and the whole app
+> deployed to Render purely via `terraform apply`.
 >
 > Biggest lesson: measurement discipline beats speed. When two benchmark runs disagreed, the
 > honest move was committing both and writing down why. @GauntletAI
@@ -83,6 +85,8 @@ The review passed the submission with two staff-call rows; both are closed:
 Reviewer-oriented pointers: start with `AUDIT_REPORT.md` § Post-draft change log (the response to
 last week's feedback), then § Post-audit measurement execution (the four formerly-unexecuted
 measurements, now run — NVDA revised one finding), then the Phase-2 results table (every claim →
-artifact pair). `CHANGES.md` maps commits to evidence with rollback steps. The one intentionally
-partial result (Cat 3, second endpoint) is documented with three committed fix attempts and a
-diagnosis, per the "depth over breadth, proof over promises" instruction.
+artifact pair). `CHANGES.md` maps commits to evidence with rollback steps. Cat 3 closed on both
+endpoints, and the road there is preserved: three committed unsuccessful fix attempts and the
+diagnosis that found the real mechanism, per the "depth over breadth, proof over promises"
+instruction. The "Response to reviewer feedback" section above maps both staff-call rows from
+the review to their closures.

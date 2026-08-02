@@ -21,7 +21,7 @@
     "mcp": "tsx src/mcp/server.ts"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "7",
+    "@asteasolutions/zod-to-openapi": "7.3.4",
     "@aws-sdk/client-bedrock-runtime": "3.987.0",
     "@aws-sdk/client-s3": "3.985.0",
     "@aws-sdk/client-secrets-manager": "3.985.0",

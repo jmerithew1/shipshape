@@ -772,7 +772,8 @@ automated gate, so it is routinely bypassed with `--no-verify`. That is precisel
 
 **Offline/PWA was deleted, not fixed.** `git log --diff-filter=D` shows **36 offline spec files**
 removed across two commits (`3f5ec31`, `f1d727f`) — **143 tests, 5,658 lines**. `test-failures.md`
-still lists offline failures as open work against specs that no longer exist, while the offline
+still lists offline failures as open work against specs that no longer exist *(reconciled
+2026-07-31 — that document is now a dated per-test disposition table)*, while the offline
 machinery (`idb-keyval`, `y-indexeddb`) still ships in production.
 
 | Flow | Coverage |
@@ -1318,6 +1319,14 @@ improvement with real before/after proof.
 A Linux environment (WSL2 Ubuntu) has been installed to measure the suite **without editing the
 repo**, so the finding stays intact and the number becomes real. Until then the honest entry is
 "not measured", with the reason — not an estimate.
+
+> **Correction (2026-07-31):** the second host defect (`spawn('npx')` in
+> `e2e/fixtures/isolated-env.ts`) was fixed in the implementation phase (`0f30543`), so the suite
+> now starts on this Windows host — the paragraphs above are preserved as the audit-time record.
+> Executed since: the four spec files implicated by the inherited `test-failures.md` pass
+> **103/103** (per-test reconciliation in that file). The full-suite pass/fail/flaky/runtime cell
+> remains **not measured** — 103 of 869 tests is not a suite number, and this report will not
+> pretend otherwise.
 
 ---
 
