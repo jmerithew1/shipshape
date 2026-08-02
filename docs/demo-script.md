@@ -61,7 +61,8 @@ before/after measurements, explain your reasoning. This script does that and not
 > for every before-and-after. And when two benchmark runs disagreed, I committed both and wrote
 > down why, instead of re-running until a number looked good — the failed attempts are in the repo
 > next to the fix that worked, because that diagnosis is what found the real bottleneck. Everything
-> I've claimed is under the tag week-four-implementation, and all of it can be re-run. Thanks."
+> I've claimed is in the repo — the reviewed snapshot under the tag week-four-implementation, the
+> post-feedback closure under week-four-final — and all of it can be re-run. Thanks."
 
 ## If something breaks
 - Page hangs → server asleep: hit `/health`, wait for `ok`, restart the take.
