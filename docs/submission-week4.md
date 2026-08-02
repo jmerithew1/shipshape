@@ -61,24 +61,11 @@ The review passed the submission with two staff-call rows; both are closed:
 5. **Close (15 s)** — `terraform apply` output → "No changes" → the live health check. Tags on
    screen: `week4-implementation` (reviewed) / `week4-final` (feedback closed).
 
-## Social post draft (X / LinkedIn — edit voice to taste, tag @GauntletAI)
+## Social post draft (X — 276 chars, fits one post)
 
-> This week I audited and improved a real U.S. Treasury project-management codebase (TypeScript
-> monorepo: React, Express, Postgres, Yjs live collaboration).
->
-> The part that changed how I work: my reviewers caught my audit claiming "nothing was fixed"
-> while commits said otherwise. The fix wasn't spin — it was a change-log table reconciling every
-> commit against every claim, and re-executing four measurements I had only reasoned about
-> (including a real NVDA screen-reader session that *overturned* one of my own findings).
->
-> Results, each with a committed before/after artifact: type violations −27%, initial bundle −58%
-> (3G cold load 605→243 kB), main-page DB queries −22%, 0 critical/serious a11y violations on the
-> core pages, 4 error-handling bugs fixed (each of the three rubric gaps with committed
-> before/after repro evidence — transcripts, screenshots, screen recordings) — and the whole app
-> deployed to Render purely via `terraform apply`.
->
-> Biggest lesson: measurement discipline beats speed. When two benchmark runs disagreed, the
-> honest move was committing both and writing down why. @GauntletAI
+> Audited a real U.S. Treasury monorepo, then fixed what I found. Every claim has a committed
+> before/after artifact: bundle −58% on 3G, P95 −24…−63%, 0 critical a11y violations, deployed
+> via one terraform apply. Lesson: when two benchmark runs disagree, commit both. @GauntletAI
 
 ## Submission notes (paste into the submission form)
 
