@@ -62,7 +62,11 @@ before/after measurements, explain your reasoning. This script does that and not
 > bottlenecks, and the remediation plan ordered the work by measured impact. Identical conditions
 > for every before-and-after. And when two benchmark runs disagreed, I committed both and wrote
 > down why, instead of re-running until a number looked good — the failed attempts are in the repo
-> next to the fix that worked, because that diagnosis is what found the real bottleneck. Everything
+> next to the fix that worked, because that diagnosis is what found the real bottleneck. Review
+> flagged two rows: the inherited failing-test doc and per-fix error-handling evidence. Both are
+> closed the same way — that doc is now a per-test reconciliation, one-oh-three of one-oh-three
+> passing, and every error-handling fix has committed before-and-after evidence: transcripts,
+> screenshots, screen recordings. Everything
 > I've claimed is in the repo — the reviewed snapshot under the tag week-four-implementation, the
 > post-feedback closure under week-four-final — and all of it can be re-run. Thanks."
 
