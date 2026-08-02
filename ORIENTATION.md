@@ -53,6 +53,12 @@ Every question in the assignment's *Codebase Orientation Checklist*, and where i
 shipped — two defects documented in §6. A Linux environment is being provisioned to measure it without
 editing the repo, so the "unrunnable as shipped" finding stays intact as a genuine before-state.
 
+> **Update (2026-07-31, implementation phase):** both host defects were later fixed (`ebd8f95`,
+> `0f30543`), so the suite now starts on this host; the inherited failing-tests doc is reconciled
+> per-test in `test-failures.md` (103/103 across the four implicated spec files). The full-suite
+> runtime cell remains honestly "not measured". The paragraph above is preserved as the
+> orientation-time record.
+
 An interactive version of this document is published separately for presentation.
 
 ## 0. Method
@@ -349,8 +355,8 @@ anywhere. **No coverage number exists today** — that must be stated plainly ra
 **✅ Root `test` is `pnpm --filter @ship/api test`** — API only. `web`'s ~151 vitest cases are orphaned
 from every aggregate command.
 
-**Uncovered flows:** offline/PWA (specs *deleted* rather than fixed — `test-failures.md:28-36` still
-analyses them), org chart, person editor, converted documents, public feedback form, invite acceptance,
+**Uncovered flows:** offline/PWA (specs *deleted* rather than fixed — `test-failures.md` still
+analysed them at orientation time; reconciled 2026-07-31), org chart, person editor, converted documents, public feedback form, invite acceptance,
 and — notably — **concurrent multi-user Yjs convergence**, the app's most complex subsystem.
 
 ---
