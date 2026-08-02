@@ -44,7 +44,9 @@ before/after measurements, explain your reasoning. This script does that and not
 
 **Do:** press Enter → GRAND TOTAL prints.
 
-> "Eight-eighty-two violations, down twenty-seven percent from the re-baseline."
+> "Eight-eighty-two at the committed after-artifact — down twenty-seven percent from the
+> re-baseline. Today's live line is one higher: a single comment-justified cast landed since,
+> and committed pairs are exactly what makes that kind of drift visible."
 
 ### Beat 3 — It runs (2:00–2:50) · Browser
 
