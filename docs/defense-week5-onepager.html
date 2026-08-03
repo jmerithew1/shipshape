@@ -1,0 +1,297 @@
+<title>FleetGraph — Week 5 Architecture Defense</title>
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --card: #FFFFFF;
+    --ink: #1B2129;
+    --muted: #5C6672;
+    --line: #DDD8CC;
+    --beacon: #C97F1F;
+    --beacon-soft: #F3E2C6;
+    --quiet: #4C8A6A;
+    --quiet-soft: #DDEAE2;
+    --chat: #3E7C8F;
+    --chat-soft: #DCE9ED;
+    --never: #A5514A;
+    --never-soft: #EFDCDA;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #14181F; --card: #1C222B; --ink: #E9E6DE; --muted: #98A0AB;
+      --line: #2B323D; --beacon: #E8A13D; --beacon-soft: #3A2F1B;
+      --quiet: #6FB08D; --quiet-soft: #1E2E26; --chat: #6AA7B8;
+      --chat-soft: #1B2B31; --never: #C97B73; --never-soft: #33211F;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F5F0; --card: #FFFFFF; --ink: #1B2129; --muted: #5C6672;
+    --line: #DDD8CC; --beacon: #C97F1F; --beacon-soft: #F3E2C6;
+    --quiet: #4C8A6A; --quiet-soft: #DDEAE2; --chat: #3E7C8F;
+    --chat-soft: #DCE9ED; --never: #A5514A; --never-soft: #EFDCDA;
+  }
+  :root[data-theme="dark"] {
+    --paper: #14181F; --card: #1C222B; --ink: #E9E6DE; --muted: #98A0AB;
+    --line: #2B323D; --beacon: #E8A13D; --beacon-soft: #3A2F1B;
+    --quiet: #6FB08D; --quiet-soft: #1E2E26; --chat: #6AA7B8;
+    --chat-soft: #1B2B31; --never: #C97B73; --never-soft: #33211F;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 28px 72px; }
+  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  /* ---------- header ---------- */
+  header { margin-bottom: 44px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 44px); font-weight: 650; letter-spacing: -0.01em;
+    margin: 6px 0 10px; text-wrap: balance;
+  }
+  h1 .beam { color: var(--beacon); }
+  .thesis {
+    font-size: clamp(17px, 2.4vw, 21px); max-width: 34em; margin: 0 0 18px;
+    color: var(--ink); text-wrap: balance;
+  }
+  .thesis em { font-style: normal; border-bottom: 3px solid var(--beacon); }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-size: 13px; color: var(--muted);
+  }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--beacon); }
+
+  /* ---------- beats ---------- */
+  section { display: grid; grid-template-columns: 56px 1fr; gap: 18px; margin: 0 0 40px; }
+  .num {
+    font-family: ui-monospace, Consolas, monospace; font-size: 26px; font-weight: 700;
+    color: var(--beacon); line-height: 1; padding-top: 4px;
+  }
+  h2 { font-size: 21px; font-weight: 650; margin: 0 0 4px; text-wrap: balance; }
+  .idea { color: var(--muted); margin: 0 0 16px; max-width: 42em; }
+  .idea strong { color: var(--ink); }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; overflow-x: auto;
+  }
+
+  /* beat 1: ladder */
+  .tier { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: center; padding: 10px 0; }
+  .tier + .tier { border-top: 1px solid var(--line); }
+  .chip {
+    justify-self: start; font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+  }
+  .chip.go   { background: var(--quiet-soft);  color: var(--quiet); }
+  .chip.ask  { background: var(--beacon-soft); color: var(--beacon); }
+  .chip.stop { background: var(--never-soft);  color: var(--never); }
+  .tier p { margin: 0; font-size: 15px; }
+  .tier p span { color: var(--muted); }
+
+  /* beat 2: flow */
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 560px; }
+  .doors { display: flex; gap: 16px; width: 100%; justify-content: center; }
+  .node {
+    border: 1.5px solid var(--line); border-radius: 8px; background: var(--card);
+    padding: 10px 16px; text-align: center; font-size: 14px;
+  }
+  .node b { display: block; font-size: 14px; }
+  .node span { color: var(--muted); font-size: 12.5px; }
+  .node.door-a { border-color: var(--beacon); }
+  .node.door-b { border-color: var(--chat); }
+  .node.brain  { border-color: var(--ink); font-weight: 600; }
+  .node.quiet  { border-color: var(--quiet); background: var(--quiet-soft); }
+  .node.hot    { border-color: var(--beacon); background: var(--beacon-soft); }
+  .arrow { color: var(--muted); font-size: 17px; line-height: 1.5; text-align: center; }
+  .branch { display: flex; gap: 16px; align-items: stretch; justify-content: center; width: 100%; }
+  .branch-col { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 300px; }
+  .edge-label { font-size: 12px; color: var(--muted); font-style: italic; }
+
+  /* beat 3: timeline */
+  .tl { min-width: 560px; }
+  .tl-bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .seg { display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  .seg.grace    { width: 30%; background: var(--chat-soft);   color: var(--chat); }
+  .seg.debounce { width: 10%; background: var(--beacon-soft); color: var(--beacon); }
+  .seg.run      { width: 6%;  background: var(--beacon);      color: var(--paper); }
+  .seg.buffer   { flex: 1;    background: transparent;        color: var(--muted); font-weight: 500; font-style: italic; }
+  .tl-marks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .tl-note { margin: 12px 0 0; font-size: 14px; color: var(--muted); max-width: 44em; }
+  .tl-note b { color: var(--ink); }
+  .cardmark { color: var(--beacon); font-weight: 700; }
+
+  /* beat 4: approval card mockup */
+  .approval { max-width: 560px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); padding: 14px 16px; }
+  .ag { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ag-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--beacon); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .ag-name { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; }
+  .ag-time { font-size: 12px; color: var(--muted); }
+  .approval h3 { font-size: 15px; margin: 0 0 6px; font-weight: 650; }
+  .approval .why { font-size: 13.5px; color: var(--muted); margin: 0 0 4px; }
+  .approval .warn { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0 0 12px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); }
+  .btn.primary { background: var(--beacon); border-color: var(--beacon); color: var(--paper); }
+  .btn.calm { border-color: var(--quiet); color: var(--quiet); }
+  .anatomy { list-style: none; padding: 0; margin: 14px 0 0; font-size: 13.5px; color: var(--muted); display: grid; gap: 4px; }
+  .anatomy b { color: var(--ink); font-weight: 600; }
+
+  /* beat 5: de-risk */
+  .found { display: grid; gap: 10px; margin: 0 0 14px; }
+  .find { display: grid; grid-template-columns: 20px 1fr; gap: 10px; font-size: 14.5px; align-items: baseline; }
+  .find .x { color: var(--never); font-weight: 800; }
+  .find b { font-weight: 650; }
+  .find span { color: var(--muted); }
+  .closer { border-top: 1px solid var(--line); padding-top: 12px; margin: 0; font-size: 15px; }
+  .closer b { color: var(--beacon); }
+
+  footer { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; color: var(--muted); }
+  footer .mono { font-size: 12.5px; }
+
+  @media (max-width: 640px) {
+    section { grid-template-columns: 1fr; gap: 4px; }
+    .num { padding: 0; }
+    .tier { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">GFA Week 5 · Architecture Defense · Ship</div>
+    <h1>Fleet<span class="beam">Graph</span></h1>
+    <p class="thesis">Ship shows you what's happening. FleetGraph tells you what's wrong — <em>especially when the signal is silence</em>.</p>
+    <div class="status">Design checkpoint — no agent code yet, by design. Every claim below is labeled in FLEETGRAPH.md.</div>
+  </header>
+
+  <section>
+    <div class="num">1</div>
+    <div>
+      <h2>A coordinator, not a dashboard</h2>
+      <p class="idea">The worst problems emit no events — an issue nobody touches never pings anyone. FleetGraph notices, drafts the fix, and <strong>never rewrites your plan without asking</strong>.</p>
+      <div class="panel">
+        <div class="tier">
+          <span class="chip go">Acts on its own</span>
+          <p>Surface findings, post attributed comments, answer chat <span>— additive, visible, reversible by ignoring</span></p>
+        </div>
+        <div class="tier">
+          <span class="chip ask">Asks first</span>
+          <p>Anything that rewrites a person's plan <span>— reassign, move, change state or dates</span></p>
+        </div>
+        <div class="tier">
+          <span class="chip stop">Never</span>
+          <p>Delete, auth changes, outside communication <span>— the executor has no such verbs. Not a prompt rule: the code physically can't.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">2</div>
+    <div>
+      <h2>One brain, two doors</h2>
+      <p class="idea">Proactive mode and chat are <strong>the same graph</strong> — same reasoning, same safety gates. Cheap checks run first; the AI only wakes when they fire. <strong>A healthy project costs $0.</strong></p>
+      <div class="panel">
+        <div class="flow">
+          <div class="doors">
+            <div class="node door-a"><b>Proactive door</b><span>created/changed events · 2-min sweep</span></div>
+            <div class="node door-b"><b>On-demand door</b><span>chat opened on an issue, week, project</span></div>
+          </div>
+          <div class="arrow">↓ &nbsp; ↓</div>
+          <div class="node brain"><b>Deterministic detectors</b><span>plain SQL rules — no AI, fractions of a cent</span></div>
+          <div class="arrow">↓</div>
+          <div class="branch">
+            <div class="branch-col">
+              <div class="edge-label">nothing wrong</div>
+              <div class="arrow">↓</div>
+              <div class="node quiet"><b>Stays quiet</b><span>zero tokens — a traced, deliberate outcome</span></div>
+            </div>
+            <div class="branch-col">
+              <div class="edge-label">something's off</div>
+              <div class="arrow">↓</div>
+              <div class="node hot"><b>AI triage</b><span>ranks it, drafts the message &amp; the fix</span></div>
+              <div class="arrow">↓</div>
+              <div class="node"><b>Human gate</b><span>approval card · chat reply</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">3</div>
+    <div>
+      <h2>Events for what happens. A clock for what doesn't.</h2>
+      <p class="idea">Graded test: create an unassigned issue, start the stopwatch. <strong>Card visible in ≈ 2–3 minutes</strong> against a 5-minute goal.</p>
+      <div class="panel">
+        <div class="tl">
+          <div class="tl-bar">
+            <div class="seg grace">90s grace</div>
+            <div class="seg debounce">30s settle</div>
+            <div class="seg run">~15s</div>
+            <div class="seg buffer">buffer to the 5:00 goal</div>
+          </div>
+          <div class="tl-marks mono"><span>0:00 issue created</span><span class="cardmark">≈2:30 card visible ▲</span><span>5:00 goal</span></div>
+          <p class="tl-note"><b>Why wait 90 seconds?</b> Every new issue is born "Untitled" and empty for a few seconds while someone types. Firing instantly would nag people mid-keystroke — the grace window is printed on the card, so the demo explains itself.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">4</div>
+    <div>
+      <h2>Built so people don't hate it</h2>
+      <p class="idea">The hard part of a watchful agent isn't detection — it's <strong>not becoming noise</strong>. Every trust rule is visible on the card itself.</p>
+      <div class="panel">
+        <div class="approval">
+          <div class="ag"><div class="ag-dot">F</div><div class="ag-name">FleetGraph</div><div class="ag-time">· just now</div></div>
+          <h3>"Fix login flow" has no assignee and no week — proposed: assign to Dana</h3>
+          <p class="why">Created 4 min ago · Dana has the lightest load and closed the last 3 auth issues</p>
+          <p class="warn">Findings talk about the work, never the person. If nothing changes in 2 business days, the project owner is looped in — you're told that here, first.</p>
+          <div class="btns">
+            <span class="btn primary">Approve</span>
+            <span class="btn">Change…</span>
+            <span class="btn calm">Still on it</span>
+            <span class="btn">Snooze</span>
+            <span class="btn">Dismiss</span>
+          </div>
+        </div>
+        <ul class="anatomy">
+          <li><b>Still on it</b> — one tap, resets the clock, notifies nobody. Clearing a false alarm is cheaper than ignoring the agent.</li>
+          <li><b>Notifies once</b> per problem — and the card removes itself when the problem gets fixed.</li>
+          <li><b>Multi-issue proposals</b> get per-item checkboxes — approve the two you agree with, not all-or-nothing.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">5</div>
+    <div>
+      <h2>We attacked this design before writing code</h2>
+      <p class="idea">Three scoping lenses, then a blind red-team pass given only the spec. It found <strong>three real problems in our own infrastructure</strong> — verified, then folded into the plan.</p>
+      <div class="panel">
+        <div class="found">
+          <div class="find"><span class="x">✕</span><p style="margin:0"><b>A Week-4 deploy defect</b> <span>would have silently eaten the agent's database tables on Render — fix is scheduled Day 1, before any agent code.</span></p></div>
+          <div class="find"><span class="x">✕</span><p style="margin:0"><b>Deploy-on-push</b> <span>contradicted our own "CI-gated deploys" claim — now: no green CI, no deploy.</span></p></div>
+          <div class="find"><span class="x">✕</span><p style="margin:0"><b>The rebuild-from-scratch test</b> <span>would have destroyed the demo data with it — repopulation is now a scripted part of the proof.</span></p></div>
+        </div>
+        <p class="closer"><b>11 decisions logged</b> — every one with the alternative we rejected written next to it.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Full detail: <span class="mono">FLEETGRAPH.md</span> · <span class="mono">DECISIONS.md</span> · <span class="mono">PRESEARCH.md</span> — every capability claim carries a file reference or a "designed, not yet wired" label.
+  </footer>
+</div>
