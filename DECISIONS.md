@@ -5,6 +5,41 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-03 — Enhancement gate: E1 credibility alerting adopted; game-theory kernels K1–K3; behavioral econ B1–B2 (James approved)
+
+Differentiator research (market scan + methods scan) produced five candidate
+enhancements; James adopted **E1 credibility-weighted alerting** — a
+repeated-game mechanism no shipped competitor has (verified: Swarmia,
+LinearB, Asana AI, Linear, Height all use static thresholds): per
+(user × finding_type) discounted Beta posterior on usefulness
+(α←λα+y, β←λβ+(1−y), λ=0.9), Thompson-sampled notify threshold, guards
+against death spirals (decay, θ cap, critical-severity bypass, forced probe).
+Schema lands in migration 038; logic lands Thu–Fri after the compliant
+baseline. Seeded RNG in tests.
+
+Ten outside game-theory proposals were adversarially reviewed against the
+schema and logged decisions; three kernels survived: **K1 safe disclosure**
+(self-reported slips suppress escalation and are framed as recalibration —
+incentive compatibility), **K2 claim-vs-state grounding** in triage/chat
+prompts (cheap talk), **K3 due-soon-idle** SQL rule inside the stale detector
+family (present bias / student syndrome — uses due_date, not nonexistent git
+data). Behavioral econ adds: **B1** loss-framed card copy ("3 issues won't
+make Friday"), **B2** a named choice-architecture passage in FLEETGRAPH.md.
+
+**Rejected:** E2 attention budget, E3 bootstrap slip forecast, E4 adaptive
+staleness (declined at the gate — constants v1 documented as such);
+dependency risk map + MPL surfacing (no issue-to-issue links —
+relationship_type enum is parent/project/sprint/program, schema.sql:203 — and
+no git/PR data in Ship); Free-Rider contribution scoring (individual
+performance monitoring is on the deliberately-not-monitored list;
+psychology-lens surveillance risk); EVI formula (unmeasurable inputs — E1 is
+the implementable attention-economics gate); congestion-pricing token market
+(no resource model, YAGNI, out of clock); Redis degradation cache
+(contradicts Postgres-only and in-process decisions); streaks/points/social
+comparison (behavioral econ shapes the agent's behavior toward people, never
+scores people); Winner's Curse estimator (third documented deferral — no slip
+history to calibrate on yet).
+
 ## 2026-08-03 — Cold-critic pass: five folds, all verified against the repo (Gate 2, James approved)
 
 (1) Fix the Week-4 migration-runner defect (`migrate.ts` catch scope,

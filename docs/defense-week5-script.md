@@ -1,109 +1,122 @@
-# Week 5 Defense — light script
+# Week 5 Defense — room script (persuasive cut)
 
-One big idea per beat. Say it in your own words — the "say something like"
-lines are a starting point, not a script to memorize. Deep answers live in
-the [Q&A brief](defense-week5-fleetgraph.md); don't front-load them.
+One page on screen: `docs/defense-week5-onepager.html` — scroll top to bottom
+as you talk. Each beat: **the idea**, a few lines to say your way, and the
+**"how we decided"** thread that runs through the whole talk. Deep answers
+live in the [Q&A brief](defense-week5-fleetgraph.md).
 
-## Prep (10 min before)
+**The spine of the talk (say it if you say nothing else):** *we didn't just
+design an agent — we ran a decision process: three lenses to scope it, game
+theory to make it trustworthy, behavioral economics to make it humane, and a
+blind red team to break it before it shipped.*
 
-1. Open VS Code in `shipshape`. Open two tabs: `FLEETGRAPH.md`, `DECISIONS.md`.
-2. With FLEETGRAPH.md focused, press **Ctrl+Shift+V** to preview. If the
-   diagram is a code block instead of boxes: Extensions icon → search
-   `Markdown Preview Mermaid Support` → Install → reopen preview.
-3. Keep the Q&A brief on your phone or printed. That's your answer sheet.
+## Prep (5 min before)
+1. Open `docs/defense-week5-onepager.html` in a browser (double-click it).
+2. Q&A brief on your phone or printed.
+3. That's it — the one page carries the whole talk.
 
 ---
 
-## Beat 1 — What it is (about 1 min)
-`[SCREEN]` FLEETGRAPH.md top, then scroll to the Autonomy boundary table.
+## Open — the cost of silence (20s)
+`[SCREEN]` top of the page — the Tuesday/Friday story is right there; you can
+literally read it.
 
-**The idea: Ship shows you what's happening. FleetGraph tells you what's
-wrong — especially when the signal is silence.**
+- "Tuesday: an issue goes quiet. No event fires, nothing turns red. Friday:
+  it's why the week slips — and everyone finds out at the retro."
+- "Every tool in this market shows you activity. Nothing watches the
+  silence. That's the gap FleetGraph fills."
 
-Say something like:
-- "Dashboards only show activity. The worst problems are *no* activity — an
-  issue nobody's touched in four days doesn't ping anyone. FleetGraph watches
-  for that."
-- "It works like a good project coordinator: it notices, it drafts the fix,
-  but it never rewrites your plan without asking."
-- "And the safety isn't a prompt saying 'please be careful' — the code that
-  executes actions literally has no delete button. The AI suggests;
-  plain TypeScript decides."
+*(Why this works on a room: loss framing — people move to prevent a loss
+they can picture. One vivid story beats ten statistics.)*
 
-## Beat 2 — One brain, two doors (about 1 min)
-`[SCREEN]` the graph diagram in preview.
+## Beat 1 — A coordinator, not a dashboard (1 min)
+`[SCREEN]` the three-tier ladder.
 
-**The idea: the same graph runs whether the agent wakes itself up or a user
-opens chat. The only difference is which door it came in through.**
+- "It notices, it drafts the fix, and it never rewrites your plan without
+  asking. Three hard tiers — and the bottom one isn't a guideline, the
+  executor literally has no delete verb in it."
+- **Decision thread:** "Every scope choice went through three lenses — worth
+  building? will a human want it? does the data exist? We found seven use
+  cases and built five, because the graded table demands a real trace per
+  row. We define exactly what we can prove."
 
-Say something like:
-- "Proactive mode and chat mode are the same graph — same reasoning, same
-  safety gates. Just different triggers."
-- "Cheap checks run first: plain SQL rules decide if anything even looks
-  wrong. The expensive AI brain only wakes up when they fire. A healthy
-  project costs zero tokens." *(point at the quiet path)* "This branch —
-  where it finds nothing and says nothing — is a real outcome we trace.
-  Knowing when to shut up is a feature."
+## Beat 2 — One brain, two doors (1 min)
+`[SCREEN]` the flow diagram.
 
-## Beat 3 — How it knows, and how fast (about 1 min)
-`[SCREEN]` Trigger Model section.
+- "Proactive mode and chat are the same graph — same reasoning, same gates,
+  different trigger."
+- "Cheap SQL checks run first; the expensive model only wakes when they
+  fire." *(point at the green box)* "A healthy project ends here — zero
+  tokens. Knowing when to shut up is a feature, and it's traced."
+- **Decision thread:** "That ordering is an economics-lens decision: our cost
+  scales with problems found, not projects watched. Watching one more
+  healthy project costs nothing."
 
-**The idea: events for things that happen, a clock for things that don't.**
+## Beat 3 — Events and the clock (45s)
+`[SCREEN]` the timeline bar.
 
-Say something like:
-- "When someone creates or changes an issue, the agent hears it instantly —
-  it lives inside the app, so there's no webhook plumbing."
-- "But staleness is the *absence* of events, so a lightweight sweep runs
-  every two minutes. It's just SQL — basically free."
-- "For the graded stopwatch test: create an unassigned issue, and the card
-  shows up in about two to three minutes. We wait 90 seconds on purpose —
-  every new issue is born empty for a few seconds while you type, and we
-  don't want to nag people mid-keystroke."
+- "Things that happen, we hear instantly — we live in the app. Things that
+  *don't* happen need a clock — a two-minute sweep."
+- "Graded test: create an unassigned issue, card visible in two to three
+  minutes against the five-minute goal."
+- **Decision thread:** "The 90-second pause is the psychology lens colliding
+  with a data-model fact: every issue is born empty while someone types.
+  We spend 90 of our 300 seconds on manners — and the card prints its own
+  grace window, so the demo explains itself."
 
-## Beat 4 — Built so people don't hate it (about 45s)
-`[SCREEN]` Use Cases table.
+## Beat 4 — It earns the right to interrupt (1.5 min — the centerpiece)
+`[SCREEN]` the approval card + crying-wolf score panel.
 
-**The idea: the hard part of a nagging agent isn't detection — it's not
-becoming noise.**
+- "Here's the part nobody else ships. Alerting is a repeated game — every
+  false alarm spends trust you don't get back. Every competitor handles this
+  with static thresholds an admin sets once. FleetGraph keeps score of its
+  own usefulness, per person, per finding type."
+- *(point at the meters)* "Sam dismissed seven of the last nine stale-issue
+  nudges — so for Sam, stale nudges now need to be big to interrupt. Dana
+  acts on them — Dana keeps the normal threshold. It forgets old evidence on
+  purpose, critical severity always gets through, and the math has guards so
+  it can never talk itself into permanent silence."
+- "And the card itself is applied behavioral economics:" *(walk the four
+  labels)* "proposals arrive pre-checked so agreeing is one click; 'Still on
+  it' is the cheapest button because clearing a false alarm must cost less
+  than ignoring the agent; cards say '3 issues won't make Friday,' not
+  'completion rate 20%'; and if you report a slip before the agent finds it,
+  it's a recalibration, not a failure — hiding bad news stops paying."
+- **Decision thread:** "We treated notifications as a mechanism-design
+  problem, not a settings page."
 
-Say something like:
-- "Every finding talks about the work, never the person. 'This issue has been
-  quiet for four days,' not 'you haven't done your job.'"
-- "One tap says 'still on it' and the agent goes away — nobody gets told.
-  If it ever escalates, the card warned you first."
-- "Each problem notifies once, and the card disappears on its own when the
-  problem gets fixed. The surface only ever shows live issues."
+## Beat 5 — We attacked it ourselves (45s — the close)
+`[SCREEN]` the three ✕ findings.
 
-## Beat 5 — Why you can trust the plan (about 45s)
-`[SCREEN]` switch to DECISIONS.md, top entries.
+- "Before writing code, we gave the spec to a critic with zero context and
+  orders to break it. It found three real problems in our own
+  infrastructure — a deploy defect that would have silently eaten the
+  agent's tables, a deploy-on-push contradiction, and a rebuild test that
+  destroys its own demo data. All verified, all fixed in the plan."
+- "Same discipline on ideas coming in: ten game-theory features were
+  pitched at us; three survived the feasibility check against our own
+  schema. Every yes and every no is logged with the alternative next to it."
+- "That's the submission: not just an agent — a decision process you can
+  audit. Questions?"
 
-**The idea: we attacked our own design before writing any code.**
-
-Say something like:
-- "Honest status: zero FleetGraph code exists yet, and the doc says so in
-  writing. What we do have is a design that's already been beaten up twice."
-- "We ran three scoping reviews, then handed the spec to a fresh 'red team'
-  pass with no context. It found three real problems in our own
-  infrastructure — including a deploy defect from last week that would have
-  silently broken the agent's database tables. All fixed in the plan before
-  they could bite."
-- "Every decision in this log has the alternative we rejected written next
-  to it. Happy to take questions."
+*(Why this closes: peak-end rule — the last thing they remember is you
+red-teaming yourself. Nobody else in the room will have that.)*
 
 ---
 
 ## If you only get 3 minutes
-Beats 1, 2, 3 — then jump to Beat 5's last line. Beats 4's material makes a
-great *answer* when someone asks about notification spam.
+Open + Beat 2 + Beat 4 + Beat 5's last two lines. Beat 4 is the
+differentiator — never cut it.
 
 ## Fallbacks
-- **Diagram won't render:** skip it — Beat 2's words carry the idea without
-  the picture.
-- **Question you don't know:** "That part is designed but not built yet — the
-  doc is explicit about which is which. The design intent is…" (then it's
-  fine to reason out loud).
-- **"Show me code":** "There isn't any yet, on purpose — this checkpoint is
-  four hours in. What I can show you is the decision log." *(DECISIONS.md)*
-- **Numbers:** never claim a measurement. Everything today is a budget or an
-  estimate, and say so — the plan includes an accounting table that turns
-  them into measurements.
+- **Question you don't know:** "Designed but not built yet — the doc labels
+  which is which. The design intent is…" (then reason out loud, it's fine).
+- **"Show me code":** "None yet, on purpose — this checkpoint is hours in.
+  What I can show is the decision log." *(open DECISIONS.md)*
+- **"Is the crying-wolf score built?"** "It's designed and scheduled for
+  Thursday, after the compliant baseline deploys Tuesday — and it's schema'd
+  from day one. The baseline always wins the clock; the doc says exactly
+  that."
+- **Numbers:** everything today is a budget or estimate — say so, every
+  time. The plan includes the accounting table that turns them into
+  measurements.

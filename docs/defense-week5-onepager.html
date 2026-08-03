@@ -47,7 +47,7 @@
   .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
 
   /* ---------- header ---------- */
-  header { margin-bottom: 44px; }
+  header { margin-bottom: 40px; }
   .eyebrow {
     font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--muted); font-weight: 600;
@@ -58,10 +58,15 @@
   }
   h1 .beam { color: var(--beacon); }
   .thesis {
-    font-size: clamp(17px, 2.4vw, 21px); max-width: 34em; margin: 0 0 18px;
+    font-size: clamp(17px, 2.4vw, 21px); max-width: 34em; margin: 0 0 14px;
     color: var(--ink); text-wrap: balance;
   }
   .thesis em { font-style: normal; border-bottom: 3px solid var(--beacon); }
+  .story {
+    max-width: 40em; margin: 0 0 18px; font-size: 15px; color: var(--muted);
+    border-left: 3px solid var(--line); padding-left: 14px;
+  }
+  .story b { color: var(--ink); }
   .status {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--card); border: 1px solid var(--line); border-radius: 999px;
@@ -75,6 +80,12 @@
     font-family: ui-monospace, Consolas, monospace; font-size: 26px; font-weight: 700;
     color: var(--beacon); line-height: 1; padding-top: 4px;
   }
+  .how {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--chat); border: 1px solid var(--chat); border-radius: 4px;
+    padding: 2px 8px; margin-bottom: 6px;
+  }
   h2 { font-size: 21px; font-weight: 650; margin: 0 0 4px; text-wrap: balance; }
   .idea { color: var(--muted); margin: 0 0 16px; max-width: 42em; }
   .idea strong { color: var(--ink); }
@@ -83,6 +94,11 @@
     background: var(--card); border: 1px solid var(--line); border-radius: 10px;
     padding: 18px 20px; overflow-x: auto;
   }
+  .decided {
+    margin: 12px 0 0; font-size: 13px; color: var(--muted); max-width: 46em;
+    padding-top: 10px; border-top: 1px dashed var(--line);
+  }
+  .decided b { color: var(--chat); font-weight: 650; }
 
   /* beat 1: ladder */
   .tier { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: center; padding: 10px 0; }
@@ -129,8 +145,14 @@
   .tl-note b { color: var(--ink); }
   .cardmark { color: var(--beacon); font-weight: 700; }
 
-  /* beat 4: approval card mockup */
-  .approval { max-width: 560px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); padding: 14px 16px; }
+  /* beat 4: approval card mockup + credibility */
+  .duo { display: grid; grid-template-columns: minmax(300px, 560px); gap: 16px; }
+  .approval { border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); padding: 14px 16px; position: relative; }
+  .tag {
+    position: absolute; top: -9px; right: 12px; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; background: var(--chat);
+    color: var(--paper); border-radius: 4px; padding: 2px 7px;
+  }
   .ag { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .ag-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--beacon); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
   .ag-name { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; }
@@ -142,8 +164,19 @@
   .btn { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); }
   .btn.primary { background: var(--beacon); border-color: var(--beacon); color: var(--paper); }
   .btn.calm { border-color: var(--quiet); color: var(--quiet); }
-  .anatomy { list-style: none; padding: 0; margin: 14px 0 0; font-size: 13.5px; color: var(--muted); display: grid; gap: 4px; }
+  .cred {
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--paper);
+  }
+  .cred h3 { font-size: 14px; margin: 0 0 8px; font-weight: 650; }
+  .cred p { margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
+  .cred-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; margin-bottom: 6px; }
+  .cred-row .who { width: 130px; color: var(--ink); font-weight: 600; }
+  .meter { flex: 1; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--beacon); }
+  .cred-row .note { width: 175px; color: var(--muted); }
+  .anatomy { list-style: none; padding: 0; margin: 14px 0 0; font-size: 13.5px; color: var(--muted); display: grid; gap: 5px; }
   .anatomy b { color: var(--ink); font-weight: 600; }
+  .anatomy .econ { color: var(--chat); font-family: ui-monospace, Consolas, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
 
   /* beat 5: de-risk */
   .found { display: grid; gap: 10px; margin: 0 0 14px; }
@@ -161,6 +194,7 @@
     section { grid-template-columns: 1fr; gap: 4px; }
     .num { padding: 0; }
     .tier { grid-template-columns: 1fr; gap: 4px; }
+    .cred-row .note { display: none; }
   }
 </style>
 
@@ -169,14 +203,16 @@
     <div class="eyebrow">GFA Week 5 · Architecture Defense · Ship</div>
     <h1>Fleet<span class="beam">Graph</span></h1>
     <p class="thesis">Ship shows you what's happening. FleetGraph tells you what's wrong — <em>especially when the signal is silence</em>.</p>
+    <p class="story"><b>Tuesday:</b> an issue goes quiet. No event fires, no dashboard turns red. <b>Friday:</b> it's the reason the week slips — and everyone finds out at the retro. Every tool on the market shows you the activity. Nothing watches the silence.</p>
     <div class="status">Design checkpoint — no agent code yet, by design. Every claim below is labeled in FLEETGRAPH.md.</div>
   </header>
 
   <section>
     <div class="num">1</div>
     <div>
+      <div class="how">How we decided: three-lens scoping</div>
       <h2>A coordinator, not a dashboard</h2>
-      <p class="idea">The worst problems emit no events — an issue nobody touches never pings anyone. FleetGraph notices, drafts the fix, and <strong>never rewrites your plan without asking</strong>.</p>
+      <p class="idea">FleetGraph notices what's drifting, drafts the fix, and <strong>never rewrites your plan without asking</strong>.</p>
       <div class="panel">
         <div class="tier">
           <span class="chip go">Acts on its own</span>
@@ -190,6 +226,7 @@
           <span class="chip stop">Never</span>
           <p>Delete, auth changes, outside communication <span>— the executor has no such verbs. Not a prompt rule: the code physically can't.</span></p>
         </div>
+        <p class="decided"><b>The decision process:</b> every scope choice went through three lenses — economics (is it worth building?), psychology (will a human want it?), technology (does the data exist?). That's how 7 discovered use cases became 5 built ones: the graded table requires a real trace per row, so we defined exactly what we can prove.</p>
       </div>
     </div>
   </section>
@@ -197,8 +234,9 @@
   <section>
     <div class="num">2</div>
     <div>
+      <div class="how">How we decided: economics lens</div>
       <h2>One brain, two doors</h2>
-      <p class="idea">Proactive mode and chat are <strong>the same graph</strong> — same reasoning, same safety gates. Cheap checks run first; the AI only wakes when they fire. <strong>A healthy project costs $0.</strong></p>
+      <p class="idea">Proactive mode and chat are <strong>the same graph</strong> — same reasoning, same safety gates. <strong>A healthy project costs $0.</strong></p>
       <div class="panel">
         <div class="flow">
           <div class="doors">
@@ -223,6 +261,7 @@
             </div>
           </div>
         </div>
+        <p class="decided"><b>The decision process:</b> the economics lens set the architecture — cheap deterministic checks in front of the expensive model means cost scales with <em>problems found</em>, not with projects monitored. Marginal cost of watching one more healthy project: zero.</p>
       </div>
     </div>
   </section>
@@ -230,6 +269,7 @@
   <section>
     <div class="num">3</div>
     <div>
+      <div class="how">How we decided: psychology lens × the data model</div>
       <h2>Events for what happens. A clock for what doesn't.</h2>
       <p class="idea">Graded test: create an unassigned issue, start the stopwatch. <strong>Card visible in ≈ 2–3 minutes</strong> against a 5-minute goal.</p>
       <div class="panel">
@@ -241,7 +281,7 @@
             <div class="seg buffer">buffer to the 5:00 goal</div>
           </div>
           <div class="tl-marks mono"><span>0:00 issue created</span><span class="cardmark">≈2:30 card visible ▲</span><span>5:00 goal</span></div>
-          <p class="tl-note"><b>Why wait 90 seconds?</b> Every new issue is born "Untitled" and empty for a few seconds while someone types. Firing instantly would nag people mid-keystroke — the grace window is printed on the card, so the demo explains itself.</p>
+          <p class="tl-note"><b>Why wait 90 seconds?</b> The psychology lens collided with a data-model fact: every new issue is born "Untitled" and empty while someone types. An agent that fires instantly nags people mid-keystroke — so we spend 90 of our 300 seconds on manners, and print the grace window on the card so the demo explains itself.</p>
         </div>
       </div>
     </div>
@@ -250,27 +290,40 @@
   <section>
     <div class="num">4</div>
     <div>
-      <h2>Built so people don't hate it</h2>
-      <p class="idea">The hard part of a watchful agent isn't detection — it's <strong>not becoming noise</strong>. Every trust rule is visible on the card itself.</p>
+      <div class="how">How we decided: game theory + behavioral economics</div>
+      <h2>It earns the right to interrupt</h2>
+      <p class="idea">Alerting is a <strong>repeated game</strong>: every false alarm spends trust the agent never gets back. Competitors use static thresholds set by an admin. FleetGraph <strong>keeps score of its own usefulness — per person</strong> — and interrupts less when it's been wrong.</p>
       <div class="panel">
-        <div class="approval">
-          <div class="ag"><div class="ag-dot">F</div><div class="ag-name">FleetGraph</div><div class="ag-time">· just now</div></div>
-          <h3>"Fix login flow" has no assignee and no week — proposed: assign to Dana</h3>
-          <p class="why">Created 4 min ago · Dana has the lightest load and closed the last 3 auth issues</p>
-          <p class="warn">Findings talk about the work, never the person. If nothing changes in 2 business days, the project owner is looped in — you're told that here, first.</p>
-          <div class="btns">
-            <span class="btn primary">Approve</span>
-            <span class="btn">Change…</span>
-            <span class="btn calm">Still on it</span>
-            <span class="btn">Snooze</span>
-            <span class="btn">Dismiss</span>
+        <div class="duo">
+          <div class="approval">
+            <span class="tag">choice architecture</span>
+            <div class="ag"><div class="ag-dot">F</div><div class="ag-name">FleetGraph</div><div class="ag-time">· just now</div></div>
+            <h3>"Fix login flow" has no assignee and no week — proposed: assign to Dana</h3>
+            <p class="why">Created 4 min ago · Dana has the lightest load and closed the last 3 auth issues</p>
+            <p class="warn">If nothing changes in 2 business days, the project owner is looped in — you're told that here, first. Self-reported slips are framed as proactive updates, never late failures.</p>
+            <div class="btns">
+              <span class="btn primary">Approve</span>
+              <span class="btn">Change…</span>
+              <span class="btn calm">Still on it</span>
+              <span class="btn">Snooze</span>
+              <span class="btn">Dismiss</span>
+            </div>
+          </div>
+          <div class="cred">
+            <h3>The crying-wolf score (per person, per finding type)</h3>
+            <p>The agent tracks whether each person actually acts on its findings, forgets old evidence on purpose, and raises its own bar before interrupting someone it's been wasting:</p>
+            <div class="cred-row"><span class="who">Dana · stale nudges</span><div class="meter"><i style="width:78%"></i></div><span class="note">acts often → normal threshold</span></div>
+            <div class="cred-row"><span class="who">Sam · stale nudges</span><div class="meter"><i style="width:24%"></i></div><span class="note">dismissed 7 of 9 → big ones only</span></div>
+            <div class="cred-row"><span class="who">Sam · slip warnings</span><div class="meter"><i style="width:65%"></i></div><span class="note">scores are per-type, not per-person</span></div>
           </div>
         </div>
         <ul class="anatomy">
-          <li><b>Still on it</b> — one tap, resets the clock, notifies nobody. Clearing a false alarm is cheaper than ignoring the agent.</li>
-          <li><b>Notifies once</b> per problem — and the card removes itself when the problem gets fixed.</li>
-          <li><b>Multi-issue proposals</b> get per-item checkboxes — approve the two you agree with, not all-or-nothing.</li>
+          <li><span class="econ">defaults</span> — multi-issue proposals arrive pre-checked: agreeing is one click, editing is easy, all-or-nothing is never forced.</li>
+          <li><span class="econ">friction asymmetry</span> — <b>Still on it</b> is the cheapest button on the card: one tap, resets the clock, notifies nobody. Clearing a false alarm must cost less than learning to ignore the agent.</li>
+          <li><span class="econ">loss framing</span> — cards say <b>"3 issues won't make Friday,"</b> not "completion rate 20% at 70% elapsed."</li>
+          <li><span class="econ">incentive compatibility</span> — report a slip before the detector finds it, and it's a recalibration, not a failure. Hiding bad news stops paying.</li>
         </ul>
+        <p class="decided"><b>The decision process:</b> we treated notifications as a mechanism-design problem, not a settings page. Critical severity always gets through; the math has guards so the agent can never talk itself into permanent silence.</p>
       </div>
     </div>
   </section>
@@ -278,15 +331,16 @@
   <section>
     <div class="num">5</div>
     <div>
+      <div class="how">How we decided: blind red team</div>
       <h2>We attacked this design before writing code</h2>
-      <p class="idea">Three scoping lenses, then a blind red-team pass given only the spec. It found <strong>three real problems in our own infrastructure</strong> — verified, then folded into the plan.</p>
+      <p class="idea">A critic with zero context got the spec and orders to break it. It found <strong>three real problems in our own infrastructure</strong> — each one verified against the repo, then folded into the plan.</p>
       <div class="panel">
         <div class="found">
           <div class="find"><span class="x">✕</span><p style="margin:0"><b>A Week-4 deploy defect</b> <span>would have silently eaten the agent's database tables on Render — fix is scheduled Day 1, before any agent code.</span></p></div>
           <div class="find"><span class="x">✕</span><p style="margin:0"><b>Deploy-on-push</b> <span>contradicted our own "CI-gated deploys" claim — now: no green CI, no deploy.</span></p></div>
           <div class="find"><span class="x">✕</span><p style="margin:0"><b>The rebuild-from-scratch test</b> <span>would have destroyed the demo data with it — repopulation is now a scripted part of the proof.</span></p></div>
         </div>
-        <p class="closer"><b>11 decisions logged</b> — every one with the alternative we rejected written next to it.</p>
+        <p class="closer"><b>Every decision logged</b> — with the alternative we rejected written next to it. The same process reviewed outside proposals: ten game-theory features were pitched; three survived the feasibility check against our own schema. Saying no, with receipts, is the discipline this week graded.</p>
       </div>
     </div>
   </section>
