@@ -18,8 +18,10 @@ blind red team to break it before it shipped.*
 ---
 
 ## Open — the cost of silence (20s)
-`[SCREEN]` top of the page — the Tuesday/Friday story is right there; you can
-literally read it.
+`[SCREEN]` top of the page — the dark hero panel. The Tuesday/Friday story is
+printed right there; you can literally read it. The radar figure on the right
+is your visual: four drift signals converging on one watching dot — gesture
+at it on the second line.
 
 - "Tuesday: an issue goes quiet. No event fires, nothing turns red. Friday:
   it's why the week slips — and everyone finds out at the retro."
@@ -30,7 +32,8 @@ literally read it.
 they can picture. One vivid story beats ten statistics.)*
 
 ## Beat 1 — A coordinator, not a dashboard (1 min)
-`[SCREEN]` the three-tier ladder.
+`[SCREEN]` the cream panel — three tier cards: Acts alone / Asks first /
+Never.
 
 - "It notices, it drafts the fix, and it never rewrites your plan without
   asking. Three hard tiers — and the bottom one isn't a guideline, the
@@ -41,7 +44,9 @@ they can picture. One vivid story beats ten statistics.)*
   row. We define exactly what we can prove."
 
 ## Beat 2 — One brain, two doors (1 min)
-`[SCREEN]` the flow diagram.
+`[SCREEN]` the dark panel — the chip pipeline: two ghost door chips → sand
+chips (detectors → AI triage → human gate); the quiet path is the hairline
+aside underneath.
 
 - "Proactive mode and chat are the same graph — same reasoning, same gates,
   different trigger."
@@ -53,7 +58,8 @@ they can picture. One vivid story beats ten statistics.)*
   healthy project costs nothing."
 
 ## Beat 3 — Events and the clock (45s)
-`[SCREEN]` the timeline bar.
+`[SCREEN]` the cream panel — the hairline timeline: 0:00 created → ≈2:30
+card visible → 5:00 goal.
 
 - "Things that happen, we hear instantly — we live in the app. Things that
   *don't* happen need a clock — a two-minute sweep."
@@ -65,7 +71,9 @@ they can picture. One vivid story beats ten statistics.)*
   grace window, so the demo explains itself."
 
 ## Beat 4 — It earns the right to interrupt (1.5 min — the centerpiece)
-`[SCREEN]` the approval card + crying-wolf score panel.
+`[SCREEN]` the cream panel — approval card mockup on the left, crying-wolf
+score meters on the right; the four behavioral-econ labels sit below in the
+hairline grid.
 
 - "Here's the part nobody else ships. Alerting is a repeated game — every
   false alarm spends trust you don't get back. Every competitor handles this
@@ -86,7 +94,8 @@ they can picture. One vivid story beats ten statistics.)*
   problem, not a settings page."
 
 ## Beat 5 — We attacked it ourselves (45s — the close)
-`[SCREEN]` the three ✕ findings.
+`[SCREEN]` the final dark panel — the small radar ("spec in / 3 defects
+out") beside the three ✕ findings.
 
 - "Before writing code, we gave the spec to a critic with zero context and
   orders to break it. It found three real problems in our own
