@@ -1,147 +1,109 @@
-# Week 5 Defense — speakable script + screen walkthrough
+# Week 5 Defense — light script
 
-Read the **bold lines aloud** (or your own words — they're written to be
-spoken). `[SCREEN]` lines say exactly what to have visible. Timestamps assume
-a 5-minute slot; the 3-minute cut is at the bottom.
+One big idea per beat. Say it in your own words — the "say something like"
+lines are a starting point, not a script to memorize. Deep answers live in
+the [Q&A brief](defense-week5-fleetgraph.md); don't front-load them.
 
-## Prep — do this 10 minutes before (one-time, ~3 min)
+## Prep (10 min before)
 
-1. Open VS Code in the `shipshape` folder.
-2. Open these four files as tabs, in this order (Ctrl+P, type the name,
-   Enter): `FLEETGRAPH.md`, `DECISIONS.md`, `PRESEARCH.md`,
-   `docs/defense-week5-fleetgraph.md` (the Q&A brief — keep it on a second
-   monitor or printed if you can; it's your answer sheet).
-3. For the diagram: with `FLEETGRAPH.md` focused, press **Ctrl+Shift+V**
-   (markdown preview). Scroll to the flowchart under "Graph Diagram."
-   - If the diagram shows as a code block instead of boxes-and-arrows: click
-     the Extensions icon (left rail, 4 squares) → search
-     `Markdown Preview Mermaid Support` (publisher: Matt Bierner) → Install →
-     close and reopen the preview. Takes ~30 seconds.
-4. In the preview, scroll back to the top of FLEETGRAPH.md. That's your
-   opening screen.
-
-## The script
-
-### 0:00 – 0:20 — Open with the honesty frame
-`[SCREEN]` FLEETGRAPH.md preview, top — the status banner table is visible.
-
-**"This is an architecture defense, so I'll be precise about status: no
-FleetGraph code exists yet — the status banner says exactly that in writing.
-Everything I cite about Ship itself is shipped code with file-and-line
-references. And this design has already survived two adversarial passes
-before a single line gets written — I'll come back to that at the end."**
-
-### 0:20 – 1:15 — Beat 1: jurisdiction and the autonomy boundary
-`[SCREEN]` scroll to **Agent Responsibility** → stop at the **Autonomy
-boundary** table (three tiers).
-
-**"FleetGraph's jurisdiction is project-execution health. The key design
-insight: the most important signals are silence, not events — a stale issue
-emits nothing. It watches for stale work, stuck reviews, week slip, and
-orphaned intake."**
-
-**"The autonomy boundary is three hard tiers. Autonomous: anything additive
-and attributed — findings, cards, agent comments. Human approval: any
-mutation of a person's plan. And a 'never' tier — delete, auth, external
-comms — enforced by a deterministic TypeScript allowlist, not by prompt
-instructions. The model proposes; deterministic code disposes. A prompt
-injection lands on an executor that has no delete verb."**
-
-**"Five use cases, all built and traced by final. Two more we discovered and
-deliberately deferred, with written rationale — because the rubric requires a
-trace and regression tests per defined use case, the defined set equals the
-built set. No empty cells in a graded table."**
-
-### 1:15 – 2:15 — Beat 2: one graph, two triggers
-`[SCREEN]` scroll to the **Graph Diagram** flowchart.
-
-**"One LangGraph StateGraph. Proactive and on-demand are the same graph —
-the difference is the trigger payload, top-left. Parallel fetch, then a
-deterministic detector stage — no LLM — then conditional edges."**
-
-*(point at the quiet path)* **"This branch matters most: a healthy project's
-sweep ends at recordQuiet with zero LLM calls. That's what makes this a graph
-and not a pipeline — different Ship states drive visibly different execution
-paths, and our two MVP trace links are exactly this quiet path next to a
-finding path."**
-
-### 2:15 – 3:15 — Beat 3: trigger model and the graded clock
-`[SCREEN]` scroll to **Trigger Model** — the poll/event/hybrid comparison
-table.
-
-**"Hybrid trigger, and here's the defense: events alone are structurally
-blind to inactivity — no webhook fires when an issue sits untouched four
-days. A clock for silence, events for mutations. And because the agent lives
-inside the Ship API process, webhooks collapse into in-process event
-emission — we verified the change logger never fires on document creation,
-so we hook the create routes explicitly. The sweep is SQL-only every two
-minutes, which is effectively free."**
-
-**"For the graded timed test: create event, a 90-second grace window — Ship
-births every issue as 'Untitled' and momentarily unassigned, so firing
-instantly would be a noise firehose — then debounce, two seconds of SQL,
-about ten seconds of LLM. Two to three minutes against a five-minute goal,
-and the card prints its own grace window so the demo explains itself."**
-
-### 3:15 – 3:55 — Beat 4: cost is structural
-`[SCREEN]` stay on the Trigger Model table — point at the cost column.
-
-**"Cost control is structural, not aspirational. The LLM sits behind the
-deterministic detectors and behind dedup memory — a quiet project costs zero
-tokens at any scale. Spend scales with findings and chat use, not with the
-number of projects monitored. Haiku for triage because detectors
-pre-structure the input; Sonnet for chat because that's the user-facing
-surface. Every call goes through ChatAnthropic so every token lands in
-LangSmith — the final cost analysis will be measured, not estimated."**
-
-### 3:55 – 4:30 — Beat 5: trust surfaces
-`[SCREEN]` scroll up to the **Use Cases** table.
-
-**"Human-in-the-loop is a LangGraph interrupt — the gate is visible in the
-trace itself. Approval cards render in Ship's existing ActionItems surface;
-we deliberately did not invent a new inbox. The card anatomy is designed for
-trust: evidence inline, escalation forewarned on the card — never silent —
-per-item checkboxes on multi-issue proposals, and a one-tap 'Still on it'
-that resets the clock and notifies nobody, so clearing a false alarm is
-cheaper than ignoring the agent. Findings are phrased about the artifact,
-never the person. And findings auto-resolve when the condition clears, so
-the surface only ever shows live problems."**
-
-### 4:30 – 5:00 — Beat 6: the de-risk story (close strong)
-`[SCREEN]` switch to the `DECISIONS.md` tab — top two entries visible.
-
-**"Last thing, and it's the reason to believe this plan: before writing any
-code we ran a three-lens scoping pass and then a blind cold critic against
-the spec. The critic found three silent failure modes — verified against our
-own repo: a known migration-runner defect that would have silently eaten the
-agent's tables on Render, deploy-on-push contradicting our CI-gated-deploy
-claim, and a destroy-and-redeploy test that takes the database with it. All
-three are folded into the plan with fixes scheduled before they can bite.
-Eleven decisions in this log, every one with an explicit rejected
-alternative. Happy to take questions."**
+1. Open VS Code in `shipshape`. Open two tabs: `FLEETGRAPH.md`, `DECISIONS.md`.
+2. With FLEETGRAPH.md focused, press **Ctrl+Shift+V** to preview. If the
+   diagram is a code block instead of boxes: Extensions icon → search
+   `Markdown Preview Mermaid Support` → Install → reopen preview.
+3. Keep the Q&A brief on your phone or printed. That's your answer sheet.
 
 ---
 
-## 3-minute cut (if time is short)
+## Beat 1 — What it is (about 1 min)
+`[SCREEN]` FLEETGRAPH.md top, then scroll to the Autonomy boundary table.
 
-Keep Beats 1, 2, 3 (jurisdiction / graph / trigger) at ~50s each, then jump
-straight to the Beat 6 close at ~30s. Drop Beats 4 and 5 — their content is
-in the Q&A brief and both have strong prepared answers ("what does a run
-cost?", "how do you avoid notification fatigue?").
+**The idea: Ship shows you what's happening. FleetGraph tells you what's
+wrong — especially when the signal is silence.**
 
-## On-the-day fallbacks
+Say something like:
+- "Dashboards only show activity. The worst problems are *no* activity — an
+  issue nobody's touched in four days doesn't ping anyone. FleetGraph watches
+  for that."
+- "It works like a good project coordinator: it notices, it drafts the fix,
+  but it never rewrites your plan without asking."
+- "And the safety isn't a prompt saying 'please be careful' — the code that
+  executes actions literally has no delete button. The AI suggests;
+  plain TypeScript decides."
 
-- **Mermaid won't render:** narrate from the raw code block — the node names
-  read cleanly top to bottom (ingestTrigger → loadContext → fetch × 3 →
-  runDetectors → quiet OR triage → gate/notify/respond). The argument doesn't
-  need the picture.
-- **Asked something not in the Q&A brief:** the honest fallback that always
-  works: *"That's designed but not yet wired — the status banner is explicit
-  about that split. Here's the design intent…"* Never claim a measurement.
-- **Asked to show code:** *"There isn't any yet, by design — this checkpoint
-  is four hours in. What I can show is the decision log and the build order,
-  which starts with fixing a real defect in our own Week-4 migration runner
-  before it can eat the new tables."* (Then show DECISIONS.md.)
-- **Asked about LangSmith setup:** keys are being provisioned today; tracing
-  is wired from the first line of graph code, and the two MVP trace links are
-  named in the Test Cases table (quiet path + finding path).
+## Beat 2 — One brain, two doors (about 1 min)
+`[SCREEN]` the graph diagram in preview.
+
+**The idea: the same graph runs whether the agent wakes itself up or a user
+opens chat. The only difference is which door it came in through.**
+
+Say something like:
+- "Proactive mode and chat mode are the same graph — same reasoning, same
+  safety gates. Just different triggers."
+- "Cheap checks run first: plain SQL rules decide if anything even looks
+  wrong. The expensive AI brain only wakes up when they fire. A healthy
+  project costs zero tokens." *(point at the quiet path)* "This branch —
+  where it finds nothing and says nothing — is a real outcome we trace.
+  Knowing when to shut up is a feature."
+
+## Beat 3 — How it knows, and how fast (about 1 min)
+`[SCREEN]` Trigger Model section.
+
+**The idea: events for things that happen, a clock for things that don't.**
+
+Say something like:
+- "When someone creates or changes an issue, the agent hears it instantly —
+  it lives inside the app, so there's no webhook plumbing."
+- "But staleness is the *absence* of events, so a lightweight sweep runs
+  every two minutes. It's just SQL — basically free."
+- "For the graded stopwatch test: create an unassigned issue, and the card
+  shows up in about two to three minutes. We wait 90 seconds on purpose —
+  every new issue is born empty for a few seconds while you type, and we
+  don't want to nag people mid-keystroke."
+
+## Beat 4 — Built so people don't hate it (about 45s)
+`[SCREEN]` Use Cases table.
+
+**The idea: the hard part of a nagging agent isn't detection — it's not
+becoming noise.**
+
+Say something like:
+- "Every finding talks about the work, never the person. 'This issue has been
+  quiet for four days,' not 'you haven't done your job.'"
+- "One tap says 'still on it' and the agent goes away — nobody gets told.
+  If it ever escalates, the card warned you first."
+- "Each problem notifies once, and the card disappears on its own when the
+  problem gets fixed. The surface only ever shows live issues."
+
+## Beat 5 — Why you can trust the plan (about 45s)
+`[SCREEN]` switch to DECISIONS.md, top entries.
+
+**The idea: we attacked our own design before writing any code.**
+
+Say something like:
+- "Honest status: zero FleetGraph code exists yet, and the doc says so in
+  writing. What we do have is a design that's already been beaten up twice."
+- "We ran three scoping reviews, then handed the spec to a fresh 'red team'
+  pass with no context. It found three real problems in our own
+  infrastructure — including a deploy defect from last week that would have
+  silently broken the agent's database tables. All fixed in the plan before
+  they could bite."
+- "Every decision in this log has the alternative we rejected written next
+  to it. Happy to take questions."
+
+---
+
+## If you only get 3 minutes
+Beats 1, 2, 3 — then jump to Beat 5's last line. Beats 4's material makes a
+great *answer* when someone asks about notification spam.
+
+## Fallbacks
+- **Diagram won't render:** skip it — Beat 2's words carry the idea without
+  the picture.
+- **Question you don't know:** "That part is designed but not built yet — the
+  doc is explicit about which is which. The design intent is…" (then it's
+  fine to reason out loud).
+- **"Show me code":** "There isn't any yet, on purpose — this checkpoint is
+  four hours in. What I can show you is the decision log." *(DECISIONS.md)*
+- **Numbers:** never claim a measurement. Everything today is a budget or an
+  estimate, and say so — the plan includes an accounting table that turns
+  them into measurements.
