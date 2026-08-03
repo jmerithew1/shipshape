@@ -5,6 +5,19 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-03 — E1 naming: no branded score name in the UI (James's call)
+
+"Crying-wolf score" was presentation shorthand and is retired from all
+user-facing material — it can read as if the *user* is being accused of
+crying wolf, inverting the mechanism (the agent scores its own usefulness,
+never the person). Presentation/docs name: **credibility score**; formal
+name: credibility-weighted alerting. In the product UI the score has no
+label at all — cards carry only the plain explainability sentence ("You've
+dismissed most stale-issue nudges lately, so I only bring high-severity
+ones"). **Rejected:** any gamified or judgment-flavored label visible to
+users (trust score, reliability rating) — the psychology lens's
+surveillance line applies to naming, not just features.
+
 ## 2026-08-03 — Enhancement gate: E1 credibility alerting adopted; game-theory kernels K1–K3; behavioral econ B1–B2 (James approved)
 
 Differentiator research (market scan + methods scan) produced five candidate

@@ -71,7 +71,7 @@ card visible → 5:00 goal.
   grace window, so the demo explains itself."
 
 ## Beat 4 — It earns the right to interrupt (1.5 min — the centerpiece)
-`[SCREEN]` the cream panel — approval card mockup on the left, crying-wolf
+`[SCREEN]` the cream panel — approval card mockup on the left, credibility
 score meters on the right; the four behavioral-econ labels sit below in the
 hairline grid.
 
@@ -122,7 +122,7 @@ differentiator — never cut it.
   which is which. The design intent is…" (then reason out loud, it's fine).
 - **"Show me code":** "None yet, on purpose — this checkpoint is hours in.
   What I can show is the decision log." *(open DECISIONS.md)*
-- **"Is the crying-wolf score built?"** "It's designed and scheduled for
+- **"Is the credibility score built?"** "It's designed and scheduled for
   Thursday, after the compliant baseline deploys Tuesday — and it's schema'd
   from day one. The baseline always wins the clock; the doc says exactly
   that."
