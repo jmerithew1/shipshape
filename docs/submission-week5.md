@@ -26,10 +26,10 @@
 | LangSmith tracing, ≥2 links, different execution paths | Three public links above: finding vs quiet vs chat — same graph, visibly different paths (quiet ends at `recordQuiet`, zero tokens). |
 | FLEETGRAPH.md: Responsibility, Diagram, ≥5 Use Cases, Trigger Model | All complete; status banner separates ✅ shipped (file-cited) from 🔜 scheduled. |
 | ≥1 human-in-the-loop gate | Approval card → Approve executed live: issue assigned, `document_history.automated_by='fleetgraph'`. Executor is a deterministic allowlist (no delete/auth/external verbs). |
-| Agent chat + notifications accessible in UI | Dashboard FleetGraph card section; "Ask FleetGraph" panel on every document view — scoped ("Discussing: <title>"), grounded (cites real state/assignee/timestamps). No standalone chat page. |
+| Agent chat + notifications accessible in UI | Global bottom-right FleetGraph widget on every page (toast on new findings, severity-scaled re-pulse, nothing rendered when quiet); "Ask FleetGraph" panel on every document view — scoped ("Discussing: <title>"), grounded (cites real state/assignee/timestamps). No standalone chat page. |
 | Deployed via Terraform: agent service, env config w/o secrets, /health + /ready, annotated plan, destroy-and-redeploy | `terraform/render/`: Starter tier (idling would kill the proactive guarantee), FleetGraph env via sensitive TF_VARs, `auto_deploy=false` + CI-gated deploy job. Plan/apply outputs committed. Destroy-and-redeploy proof scheduled Friday with scripted repopulation (documented in the plan). |
 | Trigger model documented + defended | FLEETGRAPH.md §Trigger Model — hybrid, with the cost/latency table and the "silence needs a clock" argument. |
-| Detection latency < 5 min | Measured locally ≈ 2–3 min incl. deliberate 90 s grace window (printed on the card). Timed rehearsal on the deployed instance: ⏳ below. |
+| Detection latency < 5 min | **Measured on production: 4 m 55 s** (issue 19:15:07 UTC → card 19:20:02 UTC, incl. the deliberate 90 s grace window; full timeline + trace below). Cost per run and runs/day documented and defended in FLEETGRAPH.md §Cost Analysis. |
 
 ## Timed rehearsal on production (2026-08-04, live Render instance)
 

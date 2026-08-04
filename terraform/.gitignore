@@ -18,3 +18,4 @@ override.tf.json
 
 # Sensitive variable files
 *.auto.tfvars.secret
+*.tfplan

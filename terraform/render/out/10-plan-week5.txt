@@ -1,3 +1,36 @@
+################################################################################
+# ANNOTATED TERRAFORM PLAN — Week 5 MVP (2026-08-04)
+#
+# What this plan does, in English:
+#   Plan: 0 to add, 1 to change, 0 to destroy — a single in-place update to
+#   render_web_service.api. The database (render_postgres.ship) and project
+#   are untouched; no data is at risk in this plan.
+#
+# The one change, line by line:
+#   * plan: "free" -> "starter"    — LOAD-BEARING, not an optimization. The
+#     proactive agent runs on an in-process cron; on the free tier the
+#     service idles out and node-cron simply stops. Starter keeps the
+#     "runs without a user present" guarantee alive (DECISIONS.md
+#     2026-08-03 "Render Starter tier").
+#   * auto_deploy: true -> false   — closes the cold-critic finding: deploys
+#     were on-push, contradicting our "no green CI, no deploy" claim. With
+#     this flag off, the ONLY push-driven deploy path is the CI deploy job
+#     that runs after checks + secret-scan pass (.github/workflows/ci.yml).
+#   * env_vars += ANTHROPIC_API_KEY, LANGSMITH_TRACING/API_KEY/PROJECT,
+#     FLEETGRAPH_SWEEP_MINUTES — the agent's model + tracing config. Values
+#     arrive via sensitive TF_VAR_* at plan time; they appear below only as
+#     "(sensitive value)" and are never committed (same posture as
+#     DATABASE_URL).
+#
+# Outcome note: applying THIS plan in place failed with Render's
+# "maintenance mode can only be configured for non-free tier services"
+# quirk (free->paid in-place update, out/11-apply-week5.txt). The service
+# was therefore recreated from config alone via -replace
+# (out/11-apply-week5-replace.txt: create failed pre-payment-method, then
+# out/12-apply-week5-starter.txt: created live at Starter). The database
+# was deliberately not part of the replace.
+################################################################################
+
 render_project.ship: Refreshing state... [id=prj-d9keaotg1s2s73futqeg]
 render_postgres.ship: Refreshing state... [id=dpg-d9keaortqb8s73bbtjag-a]
 render_web_service.api: Refreshing state... [id=srv-d9lqdr15efls73bohab0]

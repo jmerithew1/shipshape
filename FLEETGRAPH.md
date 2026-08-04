@@ -11,7 +11,7 @@
 | FleetGraph graph — both modes, quiet path, breaker + degraded fallback | ✅ shipped — `api/src/fleetgraph/graph.ts` |
 | Detectors: orphan intake (90 s grace + deterministic assignee proposal), stale issue; auto-resolve on cleared conditions | ✅ shipped — `api/src/fleetgraph/detectors.ts` |
 | Triggers: create-route + change-chokepoint events (30 s debounce), 2-min SQL-only sweep | ✅ shipped — `api/src/routes/issues.ts`, `api/src/utils/document-crud.ts:63`, `api/src/fleetgraph/index.ts` |
-| HITL: approval cards + allowlisted executor, agent-attributed writes | ✅ shipped — `api/src/routes/agent.ts`, `web/src/components/AgentFindings.tsx`; verified live (approve → assign → `document_history.automated_by='fleetgraph'`) |
+| HITL: approval cards + allowlisted executor, agent-attributed writes | ✅ shipped — `api/src/routes/agent.ts`; global notification widget `web/src/components/FleetGraphNotifications.tsx` (toast + severity-scaled pulse) with cards from `AgentFindings.tsx`; verified live (approve → assign → `document_history.automated_by='fleetgraph'`) |
 | Context chat panel — embedded in the document view, scoped, 401-aware | ✅ shipped — `web/src/components/AgentChatPanel.tsx` |
 | LangSmith tracing with public links for distinct paths | ✅ shipped — Test Cases table |
 | `/health` + `/ready` (asserts agent tables exist) | ✅ shipped — `api/src/app.ts` |
@@ -80,13 +80,22 @@ Recipient resolution is deterministic, from data Ship already has:
 | *(deferred)* Daily digest | Program accountable (Director view) | program RACI |
 
 Anti-noise policy: every finding has a dedup key (detector + document +
-condition hash). A finding notifies **once**; it re-notifies only on severity
-escalation or snooze expiry. Dismissed findings stay dismissed for that
-condition instance. Findings **auto-resolve** when the condition clears (the
-issue gets an assignee, the review lands) — the card disappears instead of
-going stale, so the surface only ever shows live problems. The agent earning
-the right to be listened to is a design goal: **the quiet path is a
-first-class graph outcome.**
+condition hash). A finding is *created* once; it re-arms only on snooze
+expiry. Dismissed findings stay dismissed for that condition instance.
+Findings **auto-resolve** when the condition clears (the issue gets an
+assignee, the review lands) — the card disappears instead of going stale, so
+the surface only ever shows live problems.
+
+The notification surface (`web/src/components/FleetGraphNotifications.tsx`,
+mounted globally in `App.tsx`) enforces the same economics in the UI, shaped
+by three rounds of live field feedback (DECISIONS.md 2026-08-04): a new
+finding **toasts once** and the bottom-right button pulses until the panel
+is opened; a glance buys quiet **in proportion to severity** (critical 30 m /
+high 1 h / medium 2 h / low 4 h), after which an undecided finding re-pulses;
+only a disposition clears it for good; and zero findings renders **nothing**
+— the agent earns screen space, it does not reserve it. The agent earning the
+right to be listened to is a design goal: **the quiet path is a first-class
+graph outcome.**
 
 ### How it knows who is on a project and their role
 
@@ -115,51 +124,60 @@ trigger payload. The difference between modes is the trigger, not the graph.
 
 ```mermaid
 flowchart TD
-    EV[Trigger: Ship event\nin-process, debounced 30s] --> IN
+    EV[Trigger: Ship event\ncreate routes + change chokepoint,\ndebounced 30s] --> IN
     CRON[Trigger: sweep\nevery 2 min, env-tunable] --> IN
     CHAT[Trigger: user chat\nfrom current view] --> IN
 
-    IN[ingestTrigger\nnormalize trigger → mode] --> CTX[loadContext\nRACI, view seed, prior findings]
-    CTX --> F1[fetchIssues]
-    CTX --> F2[fetchWeeks]
-    CTX --> F3[fetchActivity]
+    IN[ingestTrigger\nnormalize trigger → mode] --> F1[fetchIssues]
+    IN --> F2[fetchWeeks]
+    IN --> F3[fetchActivity]
     F1 --> DET
     F2 --> DET
     F3 --> DET
 
-    DET[runDetectors\ndeterministic rules, no LLM] -->|no candidates AND proactive| QUIET[recordQuiet → END\nthe silent path is an outcome]
-    DET -->|candidates OR on-demand| TRIAGE[triage / reason — LLM\nrank, dedup vs memory,\ndraft messages, propose actions]
+    DET[runDetectors\ndeterministic rules, no LLM\nauto-resolve + dedup vs memory] -->|no candidates AND proactive| QUIET[recordQuiet → END\nthe silent path is an outcome]
+    DET -->|mode = on-demand| RESPOND[respond\ngrounded chat answer]
+    DET -->|candidates| TRIAGE[triage — LLM haiku\nrank, phrase cards,\nbreaker-wrapped, degrades rule-based]
 
-    TRIAGE -->|proposed action is mutation| GATE[requestApproval\nLangGraph interrupt → approval card in Ship UI]
-    TRIAGE -->|notify-only| NOTIFY[notify\nwrite findings + notifications]
-    TRIAGE -->|mode = on-demand| RESPOND[respond\ngrounded chat answer]
-
-    GATE -->|approved| ACT[applyAction\ndeterministic executor + allowlist]
-    GATE -->|dismissed / snoozed| MEMO[recordDisposition → END]
-    ACT --> NOTIFY
+    TRIAGE --> NOTIFY[notify\nwrite findings + proposals\nidempotent on dedup key]
     NOTIFY --> END1[END]
     RESPOND --> END2[END]
+    QUIET --> END3[END]
+
+    NOTIFY -.->|approval card in UI| HUMAN[Human gate — REST disposition\napprove / change / dismiss / snooze / still-on-it\nallowlisted executor, agent-attributed writes]
 ```
 
-**Conditional edges** (each produces a visibly different LangSmith trace):
-1. `runDetectors` → quiet path vs. triage (candidates found?)
-2. `triage` → approval gate vs. direct notify (is any proposed action a mutation?)
-3. `triage` → respond (on-demand mode)
-4. `requestApproval` → apply vs. record-disposition (human's decision)
+**Conditional edges** (each produces a visibly different LangSmith trace —
+`api/src/fleetgraph/graph.ts:246-251`):
+1. `runDetectors` → `recordQuiet` (proactive, zero candidates — zero tokens)
+2. `runDetectors` → `respond` (on-demand mode)
+3. `runDetectors` → `triage` → `notify` (candidates found)
 
-**State:** `{ mode, trigger, workspace_id, project_scope, view_seed, fetched
-snapshot, candidate_findings, triaged_findings, proposed_actions, approvals,
-messages }`. Session state checkpoints to Postgres (LangGraph checkpointer) so
-approval interrupts survive restarts. Between proactive runs, only
-`agent_findings` rows persist (dedup memory) — the graph itself is stateless
-between runs.
+**The human gate sits at the edge of the graph, not inside it**: `notify`
+writes the finding + allowlisted proposal; the human decides on the card
+(`POST /api/agent/findings/:id/disposition`, `api/src/routes/agent.ts`), and
+the deterministic executor applies approved mutations with agent-attributed
+audit rows. An in-graph `interrupt()` + Postgres-checkpointer variant (gate
+visible inside the trace, resumable across restarts) is designed and
+scheduled with Thursday's work — the current gate is fully functional and
+verified live; the checkpointer version is trace-cosmetic, not
+safety-functional.
+
+**State:** distinct keys per parallel fetch node (`issues`, `weeks`,
+`recentActivity`) plus `{ trigger, mode, workspaceId, projectScope,
+candidates, triaged, path, chatResponse, degraded }`
+(`api/src/fleetgraph/state.ts`). Between runs, only `agent_findings` rows
+persist (dedup + disposition memory) — the graph itself is stateless between
+runs.
 
 ---
 
 ## Use Cases
 
-All five defined use cases are built, regression-tested, and traced (one
-LangSmith trace link each in the Test Cases table — no empty cells).
+Five use cases defined. As of the MVP checkpoint: #1 (orphan) and #5 (chat)
+are built and traced on production, plus the quiet path; #2 (stale) is built
+and awaiting its seeded test-case trace; #3–#4 detectors land Thursday with
+their traces and regression tests (per-row status in the Test Cases table).
 
 | # | Role | Trigger | Agent detects / produces | Human decides |
 | --- | --- | --- | --- | --- |
@@ -191,8 +209,8 @@ post-submission.
 
 ## Trigger Model
 
-**Decision: hybrid — in-process event triggers + a 5-minute deterministic sweep.**
-🔜 designed, not yet wired.
+**Decision: hybrid — in-process event triggers + a 2-minute deterministic
+sweep.** ✅ shipped (`api/src/fleetgraph/events.ts`, `index.ts`).
 
 Because FleetGraph lives inside the Ship API process (see Architecture
 Decisions), "webhooks" collapse into something better: **in-process event
@@ -209,11 +227,14 @@ nothing — silence is the trigger. No event system can detect inactivity; only
 a clock can. The tight default is deliberate belt-and-braces for the graded
 latency window: the sweep is SQL-only, so running it often is effectively free.
 
-Event hooks cover the actual write paths explicitly: the create routes
-(`POST /api/issues`, generic `POST /api/documents`, and wiki→issue type
-conversion) plus the shared change chokepoint `logDocumentChange`
-(`api/src/utils/document-crud.ts:47`) — verified against call sites, because
-the change logger alone never fires on creation, and creation is the MVP
+Event hooks shipped at MVP: the issue create route (`POST /api/issues`,
+`api/src/routes/issues.ts:646`) plus the shared change chokepoint
+`logDocumentChange` (`api/src/utils/document-crud.ts:63`) — chosen against
+call-site evidence, because the change logger alone never fires on creation.
+Hooks on the generic `POST /api/documents` create path and wiki→issue type
+conversion land Thursday; until then those paths are covered by the 2-minute
+sweep backstop (worst-case latency still inside the 5-minute window).
+Creation is the MVP
 anchor's trigger.
 
 | Model | Detection latency | Cost at 100 / 1,000 projects | Failure modes |
@@ -245,8 +266,9 @@ orders of magnitude tighter than needed — chosen anyway because it is free
 
 ## Test Cases
 
-*Due at Early Submission (Thursday). Table stubbed now so the mapping from use
-cases is fixed early; trace links filled in from real runs.* 🔜 designed.
+*Full table due at Early Submission (Thursday). Rows 1, 5 and Q already carry
+real production/local trace links from the MVP timed rehearsal; rows 2–4 fill
+in as their seeded runs and detectors land Thursday.*
 
 | # | Ship state (seeded, real data — no mocks) | Expected output | Trace link |
 | --- | --- | --- | --- |
@@ -294,21 +316,25 @@ disposition + notification feed); `agent_runs` for cost/latency accounting.
 Boring technology; the DB already exists and is already backed up.
 *Rejected:* Redis/in-memory (loses HITL interrupts on restart, new infra).
 
-**HITL — LangGraph `interrupt()` + approval cards in the ActionItems
-surface.** Approval is a first-class graph node, so the trace shows the gate.
-There is no notification inbox in Ship today (verified: no notifications table
-in `schema.sql`, no notifications route); the reuse path is the ActionItems
-dashboard surface (`api/src/services/accountability.ts` →
-`web/src/hooks/useActionItemsQuery.ts` → `web/src/components/ActionItems.tsx`),
-where agent findings render as a new item type with Approve / Dismiss /
-Snooze / **Still on it** (resets the staleness clock, notifies nobody).
-Implementation constraint: on resume, an interrupted node re-executes from its
-top — so the gate node is side-effect-free before `interrupt()`; the card is
-written by the prior node, idempotent on the finding's dedup key. Snooze
-re-arms the dedup key with an expiry. *Rejected:* new bell/inbox UI (multi-day
-build for zero graded benefit); free-text confirmation in chat (unauditable);
-auto-apply with undo (mutating someone's plan and apologizing is the wrong
-default).
+**HITL — REST disposition gate + a global notification widget.** As shipped:
+`notify` writes the finding with its allowlisted proposal (idempotent on the
+dedup key), the card renders in a global bottom-right widget
+(`web/src/components/FleetGraphNotifications.tsx`, cards from
+`AgentFindings.tsx`), and the human decides via
+`POST /api/agent/findings/:id/disposition` — Approve / Change (inline
+assignee picker) / Dismiss / Snooze / **Still on it** (resets the clock,
+notifies nobody). Mutations execute only through the deterministic allowlist
+executor with agent-attributed audit rows. *Evolution, honestly told:* the
+defense-day plan was ActionItems-surface cards plus a LangGraph `interrupt()`
+gate; live field feedback moved the surface to a global widget (findings must
+live where people are, DECISIONS.md 2026-08-04), and the interrupt-based
+in-graph gate — which makes the human decision visible inside the trace and
+resumable via the Postgres checkpointer — is scheduled with Thursday's work.
+The shipped gate is equally safe (same executor, same allowlist); the
+interrupt variant is trace-visibility polish. Snooze re-arms the dedup key
+with an expiry. *Rejected:* new bell/inbox page (the widget is lighter and
+follows the user); free-text confirmation in chat (unauditable); auto-apply
+with undo (mutating someone's plan and apologizing is the wrong default).
 
 **Model routing and the injectable client seam.** Triage/detection ranking:
 cheapest capable model (claude-haiku-4-5), because inputs are pre-structured
@@ -366,8 +392,32 @@ deploys instead.
 
 ## Cost Analysis
 
-*Due at Final Submission. Structure fixed now; numbers filled from
-`agent_runs` accounting table (real measured spend, not vibes).* 🔜 designed.
+*Full measured analysis due at Final Submission, from the `agent_runs`
+accounting table + Anthropic console. The MVP-due performance metrics —
+cost per graph run and estimated runs per day — are documented and defended
+here now, as estimates built on one observed production run.*
+
+### Cost per graph run (MVP estimate, defended)
+
+| Run type | Model | Tokens (est.) | Cost |
+| --- | --- | --- | --- |
+| Quiet sweep (no candidates) | none — SQL only | 0 | **$0.000** |
+| Triage (finding path) | claude-haiku-4-5 ($1/M in, $5/M out) | ~4k in / ~0.75k out | **≈ $0.008** |
+| Chat turn | claude-sonnet-5 ($3/M in, $15/M out) | ~6k in / ~0.75k out | **≈ $0.029** |
+
+Grounding: the observed production finding run (2026-08-04 19:20 UTC)
+consumed 670 total tokens on Haiku ≈ **$0.002** — under the estimate, which
+deliberately budgets for fuller project neighborhoods than a demo workspace.
+
+### Estimated runs per day (MVP estimate, defended)
+
+Per active project: 720 sweeps/day (2-min interval, $0 — the LLM sits behind
+the detectors and dedup, so a quiet or already-notified project never spends
+a token) + an estimated 5–15 triage runs/day (bounded by *new* rule hits, not
+by project count) + 1–3 chat turns per active user per day. Worst-case daily
+LLM spend per active project ≈ 15 × $0.008 + 3 users × 3 × $0.029 ≈
+**$0.38/day** — the cost structure scales with problems found and questions
+asked, not with monitoring coverage (see §Trigger Model).
 
 **Development and testing costs** — tracked via `agent_runs` (tokens in/out,
 model, latency per run) + Anthropic console cross-check.

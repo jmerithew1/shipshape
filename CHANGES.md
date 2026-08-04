@@ -5,8 +5,11 @@
 **What was built:** LangGraph.js agent inside the API — `api/src/fleetgraph/`
 (state, graph, detectors, events, models, resilience), migration
 `038_fleetgraph_agent.sql` (+ mirrored in `schema.sql` per the snapshot
-convention), `/api/agent` routes (findings, dispositions, chat), dashboard
-approval cards (`web/src/components/AgentFindings.tsx`), context chat panel
+convention), `/api/agent` routes (findings, dispositions, chat), a global
+bottom-right notification widget on every page
+(`web/src/components/FleetGraphNotifications.tsx` — toast on new findings,
+severity-scaled re-pulse, renders nothing when quiet; cards from
+`AgentFindings.tsx`), context chat panel
 (`web/src/components/AgentChatPanel.tsx`), `/ready` endpoint.
 
 **Run locally:** `docker compose -f docker-compose.local.yml up -d postgres`
@@ -19,8 +22,9 @@ is a designed behavior). Sweep interval: `FLEETGRAPH_SWEEP_MINUTES` (default
 2). Kill switch: `FLEETGRAPH_ENABLED=false`.
 
 **Test it:** create an issue with no assignee/week, wait ~2–3 min (90 s grace
-+ sweep) → FleetGraph card on the Dashboard; Approve assigns the issue and
-writes `document_history.automated_by='fleetgraph'`. Open any issue → "Ask
++ sweep) → toast fires and the bottom-right FleetGraph button pulses on any
+page; open the panel, Approve assigns the issue and writes
+`document_history.automated_by='fleetgraph'`. Open any issue → "Ask
 FleetGraph" → grounded answer. `/ready` 503s if agent tables are missing.
 
 **Deploy:** `terraform/render/` — `auto_deploy=false`; deploys happen via
