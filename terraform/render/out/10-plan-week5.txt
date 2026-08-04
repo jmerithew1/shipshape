@@ -1,0 +1,74 @@
+render_project.ship: Refreshing state... [id=prj-d9keaotg1s2s73futqeg]
+render_postgres.ship: Refreshing state... [id=dpg-d9keaortqb8s73bbtjag-a]
+render_web_service.api: Refreshing state... [id=srv-d9lqdr15efls73bohab0]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # render_web_service.api will be updated in-place
+  ~ resource "render_web_service" "api" {
+      + active_custom_domains         = (known after apply)
+      ~ env_vars                      = {
+          + "ANTHROPIC_API_KEY" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "FLEETGRAPH_SWEEP_MINUTES" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_API_KEY" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_PROJECT" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_TRACING" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          ~ "SESSION_SECRET" = {
+              ~ value          = (sensitive value)
+                # (1 unchanged attribute hidden)
+            },
+            # (7 unchanged elements hidden)
+        }
+        id                            = "srv-d9lqdr15efls73bohab0"
+      + log_stream_override           = (known after apply)
+      + max_shutdown_delay_seconds    = (known after apply)
+        name                          = "ship-api"
+      ~ notification_override         = {
+          ~ notifications_to_send         = "default" -> (known after apply)
+          ~ preview_notifications_enabled = "default" -> (known after apply)
+        } -> (known after apply)
+      + num_instances                 = (known after apply)
+      ~ plan                          = "free" -> "starter"
+      ~ previews                      = {
+          ~ generation = "off" -> (known after apply)
+        } -> (known after apply)
+      ~ pull_request_previews_enabled = false -> (known after apply)
+      ~ root_directory                = null -> (known after apply)
+      ~ runtime_source                = {
+          ~ native_runtime = {
+              ~ auto_deploy         = true -> false
+              ~ auto_deploy_trigger = "commit" -> (known after apply)
+                # (4 unchanged attributes hidden)
+            }
+        }
+      ~ slug                          = "ship-api-llja" -> (known after apply)
+        # (6 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: week5.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "week5.tfplan"

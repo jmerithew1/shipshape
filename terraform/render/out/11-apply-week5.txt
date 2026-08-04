@@ -1,0 +1,10 @@
+render_web_service.api: Modifying... [id=srv-d9lqdr15efls73bohab0]
+
+Error: Error updating service
+
+  with render_web_service.api,
+  on main.tf line 115, in resource "render_web_service" "api":
+ 115: resource "render_web_service" "api" {
+
+Could not update service, unexpected error: could not update service:
+maintenance mode can only be configured for non-free tier services
