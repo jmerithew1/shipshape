@@ -5,6 +5,21 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-03 — Correction: cold-critic issue #1 was stale documentation, not a live defect
+
+The critic's migration-runner finding traced to a KNOWN-DEFECT comment in
+`terraform/render/main.tf` written 2026-07-28 — one day BEFORE the Week-4
+Gap-1 fix landed (`f3c89c5`, 2026-07-29). Current `migrate.ts` verified
+clean: "already exists" tolerance scoped to schema.sql only, per-migration
+transactions with rollback and non-zero exit, fresh-install baseline
+stamping. Week-5 Day-1 scope adjusted: fix the stale terraform comment (the
+actual remaining defect — false documentation that misled our own red team),
+keep the `/ready` agent-tables assertion. The critic's process worked as
+designed — it read our docs and believed them; the lesson is the one this
+skill already teaches: never let a claim (including a defect claim) outlive
+the code. **Rejected:** silently editing the earlier cold-critic log entry —
+corrections get their own entry; the log is append-only.
+
 ## 2026-08-03 — E1 naming: no branded score name in the UI (James's call)
 
 "Crying-wolf score" was presentation shorthand and is retired from all

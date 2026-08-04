@@ -61,11 +61,25 @@ The review passed the submission with two staff-call rows; both are closed:
 5. **Close (15 s)** — `terraform apply` output → "No changes" → the live health check. Tags on
    screen: `week4-implementation` (reviewed) / `week4-final` (feedback closed).
 
-## Social post draft (X — 276 chars, fits one post)
+## Social post draft (X — organized per reviewer feedback: hook → receipts → lesson)
 
-> Audited a real U.S. Treasury monorepo, then fixed what I found. Every claim has a committed
-> before/after artifact: bundle −58% on 3G, P95 −24…−63%, 0 critical a11y violations, deployed
-> via one terraform apply. Lesson: when two benchmark runs disagree, commit both. @GauntletAI
+Main post (~270 chars, fits one post — line breaks are intentional):
+
+> Audited a real U.S. Treasury monorepo, then fixed what I found.
+>
+> Receipts, all committed:
+> • Bundle −58% on 3G
+> • P95 latency −24…−63%
+> • 0 critical a11y violations
+> • Deployed via one terraform apply
+>
+> Rule that kept me honest: when two runs disagree, commit both. @GauntletAI
+
+Optional follow-up reply (posts as a thread; adds the discovery story):
+
+> The part I'm proudest of isn't a number: three failed fix attempts are
+> committed next to the one that worked, plus the diagnosis that found the
+> real mechanism. Audits should keep their dead ends.
 
 ## Submission notes (paste into the submission form)
 

@@ -50,17 +50,17 @@ locals {
   ])
 
   # Mirrors the repo Dockerfile's CMD: migrate, then serve. migrate.js applies
-  # api/src/db/schema.sql (the complete current DDL) before the numbered
-  # migrations, so a fresh database lands on the right schema.
+  # api/src/db/schema.sql (the complete current DDL) on fresh databases and
+  # baseline-stamps the numbered migrations; on existing databases it applies
+  # pending migrations each in its own transaction.
   #
-  # KNOWN DEFECT, do not read the migration count as success: the catch block
-  # in api/src/db/migrate.ts (~lines 103-111) wraps the *entire* migration
-  # loop and swallows any error whose message contains "already exists",
-  # printing "Database schema already exists, continuing..." and exiting 0.
-  # In practice it applies 10 of the 47 files in api/src/db/migrations/ and
-  # still reports success. Fresh databases are correct because schema.sql is
-  # complete; incremental migrations are not to be trusted. See
-  # docs/deployment-render.md.
+  # HISTORY (stale note corrected 2026-08-03): a KNOWN-DEFECT warning lived
+  # here describing an outer catch that swallowed migration failures and
+  # exited 0. That defect was fixed in Week 4 by f3c89c5 (2026-07-29, one day
+  # after this comment was first written): the "already exists" tolerance is
+  # now scoped to schema.sql only, and a failing migration names the file,
+  # rolls back, and exits non-zero so the deploy stops. Evidence:
+  # docs/pr-evidence/week4-cat6/ (before/after transcripts + recordings).
   start_command = "node api/dist/db/migrate.js && node api/dist/index.js"
 }
 

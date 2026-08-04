@@ -330,12 +330,13 @@ the CI `checks` job (`.github/workflows/ci.yml`); (2) Render **Starter** tier
 (always-on, ~$7/mo) is load-bearing, not an optimization — on free tier,
 node-cron does not run while the service is idled, so proactive mode would not
 exist during the graded window. Two more corrections from the cold-critic
-pass: (3) the deployed migration runner has a Week-4 KNOWN DEFECT
-(`terraform/render/main.tf:56-63` — the catch block in `api/src/db/migrate.ts`
-swallows errors for the whole loop, so incremental migrations silently skip);
-fixing that catch scope is a Day-1 prerequisite, or the new agent tables never
-exist on Render and HITL checkpointing dies at runtime — `/ready` asserts the
-agent tables exist so this defect class can never hide again; (4) `terraform
+pass: (3) the critic flagged a migration-runner defect cited by a KNOWN-DEFECT
+note in `terraform/render/main.tf` — on verification (2026-08-03) that note is
+**stale**: the defect was fixed in Week 4 (`f3c89c5`, 2026-07-29 — catch
+scoped to schema.sql, per-migration transactions, rollback + exit 1; evidence
+in `docs/pr-evidence/week4-cat6/`). The Day-1 step is therefore correcting the
+stale terraform note, and `/ready` still asserts the agent tables exist so any
+future defect of this class can never hide; (4) `terraform
 destroy` takes `render_postgres` (and all data) with it, and the start command
 migrates but never seeds — so the destroy-and-redeploy proof includes a
 scripted repopulation step (`pnpm db:seed` + demo-scenario script) as a
