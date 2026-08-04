@@ -18,9 +18,16 @@ import { useToast } from '@/components/ui/Toast';
 const SEEN_KEY = 'fleetgraph.seenFindings';
 const TOASTED_KEY = 'fleetgraph.toastedFindingIds';
 
-/** A glance buys quiet for 4 hours, not forever — undecided findings
- *  re-pulse so they can't be forgotten. Only a disposition clears them. */
-const SEEN_TTL_MS = 4 * 60 * 60 * 1000;
+/** A glance buys quiet in proportion to the stakes, not forever — undecided
+ *  findings re-pulse so they can't be forgotten, sooner when they matter
+ *  more. Only a disposition clears them for good. */
+const SEEN_TTL_BY_SEVERITY: Record<string, number> = {
+  critical: 30 * 60 * 1000,
+  high: 60 * 60 * 1000,
+  medium: 2 * 60 * 60 * 1000,
+  low: 4 * 60 * 60 * 1000,
+};
+const DEFAULT_SEEN_TTL_MS = 2 * 60 * 60 * 1000;
 
 function readIds(key: string): Set<string> {
   try {
@@ -52,9 +59,14 @@ function writeSeenMap(map: Record<string, number>): void {
   localStorage.setItem(SEEN_KEY, JSON.stringify(Object.fromEntries(entries)));
 }
 
-function isSeenFresh(map: Record<string, number>, id: string): boolean {
+function isSeenFresh(
+  map: Record<string, number>,
+  id: string,
+  severity: string,
+): boolean {
   const at = map[id];
-  return typeof at === 'number' && Date.now() - at < SEEN_TTL_MS;
+  const ttl = SEEN_TTL_BY_SEVERITY[severity] ?? DEFAULT_SEEN_TTL_MS;
+  return typeof at === 'number' && Date.now() - at < ttl;
 }
 
 export function FleetGraphNotifications() {
@@ -100,7 +112,7 @@ export function FleetGraphNotifications() {
   if (findings.length === 0) return null;
 
   const seen = readSeenMap();
-  const unseenCount = findings.filter((f) => !isSeenFresh(seen, f.id)).length;
+  const unseenCount = findings.filter((f) => !isSeenFresh(seen, f.id, f.severity)).length;
 
   const toggle = () => {
     setOpen((o) => {
