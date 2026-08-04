@@ -32,6 +32,12 @@ vi.mock('@/hooks/useDashboardActionItems', () => ({
   }),
 }));
 
+// AgentFindings (Week 5) uses TanStack Query; mock the hook so DashboardPage
+// renders without a QueryClientProvider, matching this file's pattern.
+vi.mock('@/components/AgentFindings', () => ({
+  AgentFindings: () => null,
+}));
+
 // Import the component after mocking
 import { DashboardPage } from './Dashboard';
 
