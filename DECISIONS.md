@@ -5,6 +5,34 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-04 — Notification model: three iterations of live field feedback (James)
+
+The notification surface was redesigned three times in one evening by the
+product's first real user hitting real friction, minutes after each deploy:
+
+1. **"I wouldn't find this"** — findings lived on a Dashboard page nobody
+   visits. → Global bottom-right widget on every page, stacking above the
+   chat button on document views.
+2. **"I wouldn't notice it's alerting me"** — a passive badge is wallpaper.
+   → New findings toast once (with a View action) and the button fills +
+   pulses until the panel is opened.
+3. **"If I glance and close it, I'll forget"** — one look shouldn't buy
+   permanent silence, and a flat re-reminder ignores stakes. → Seen-state
+   expires by severity (critical 30 m / high 1 h / medium 2 h / low 4 h);
+   only a disposition clears a finding for good. No constant pulsing while
+   minimized: habituation would destroy the pulse's signal value for NEW
+   alerts — the static count is the memory, the pulse stays scarce so it
+   stays loud.
+
+Zero-finding state renders nothing: the agent earns screen space, it does
+not reserve it. This is the anti-noise philosophy (dedup-once, auto-resolve,
+E1 credibility) expressed in the UI layer, tuned by observed behavior rather
+than predicted behavior.
+**Rejected:** constant pulse while findings exist (trains users to ignore
+it); flat re-pulse interval (urgent and trivial shouldn't cost the same
+attention); notification-only Dashboard section (right surface for a grader
+demo, wrong surface for a user's Tuesday).
+
 ## 2026-08-03 — Correction: cold-critic issue #1 was stale documentation, not a live defect
 
 The critic's migration-runner finding traced to a KNOWN-DEFECT comment in
