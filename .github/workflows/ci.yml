@@ -120,3 +120,20 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # CI-gated deploy (Week 5): auto_deploy is OFF in terraform/render/main.tf,
+  # so this job is the only push-driven path to production. No green checks,
+  # no deploy — the rollback story is "bad builds never ship" plus a
+  # documented `git revert` (CHANGES.md).
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [checks, secret-scan]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            "https://api.render.com/v1/services/srv-d9lqdr15efls73bohab0/deploys" \
+            -d '{}'

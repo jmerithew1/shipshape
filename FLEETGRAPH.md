@@ -1,18 +1,23 @@
 # FLEETGRAPH — Project Intelligence Agent for Ship
 
-> **Status banner — Architecture Defense (Week 5, Day 0).**
-> Everything below the shipped-vs-planned table is the *designed* architecture,
-> produced for the 4-hour Architecture Defense checkpoint. No FleetGraph code has
-> been written yet; claims about Ship internals cite existing code, claims about
-> FleetGraph are labeled 🔜 designed. This banner is updated at each checkpoint.
+> **Status banner — MVP checkpoint (2026-08-04).**
+> Updated at each checkpoint. Shipped capabilities cite files/commits;
+> anything not yet wired stays labeled 🔜.
 
 | Capability | Status |
 | --- | --- |
 | Ship platform (documents, issues, weeks, RACI, activity, comments, auth) | ✅ shipped — Weeks 1–4 (`api/src/`, `web/src/`) |
-| RACI ownership on projects/programs | ✅ shipped — `shared/src/types/document.ts:91-114` |
-| Accountability engine (auto-generated action items) | ✅ shipped — `api/src/services/accountability.ts` |
-| Terraform-managed Render deployment | ✅ shipped — `terraform/render/` (Week 4) |
-| FleetGraph graph, detectors, triggers, HITL, chat, notifications | 🔜 designed, not yet wired (this document) |
+| Terraform-managed Render deployment | ✅ shipped — `terraform/render/` (Week 4; Week 5 changes: FleetGraph env vars, `auto_deploy=false` + CI-gated deploy, Starter tier) |
+| FleetGraph graph — both modes, quiet path, breaker + degraded fallback | ✅ shipped — `api/src/fleetgraph/graph.ts` |
+| Detectors: orphan intake (90 s grace + deterministic assignee proposal), stale issue; auto-resolve on cleared conditions | ✅ shipped — `api/src/fleetgraph/detectors.ts` |
+| Triggers: create-route + change-chokepoint events (30 s debounce), 2-min SQL-only sweep | ✅ shipped — `api/src/routes/issues.ts`, `api/src/utils/document-crud.ts:63`, `api/src/fleetgraph/index.ts` |
+| HITL: approval cards + allowlisted executor, agent-attributed writes | ✅ shipped — `api/src/routes/agent.ts`, `web/src/components/AgentFindings.tsx`; verified live (approve → assign → `document_history.automated_by='fleetgraph'`) |
+| Context chat panel — embedded in the document view, scoped, 401-aware | ✅ shipped — `web/src/components/AgentChatPanel.tsx` |
+| LangSmith tracing with public links for distinct paths | ✅ shipped — Test Cases table |
+| `/health` + `/ready` (asserts agent tables exist) | ✅ shipped — `api/src/app.ts` |
+| Detectors: stuck-review / urgent-idle / week-slip / due-soon-idle | 🔜 designed — Thursday (plan step 8) |
+| E1 credibility thresholding (dispositions already feeding `agent_credibility`) | 🔜 designed — Thu–Fri |
+| CI E2E on recorded fixtures + regression per use case | 🔜 designed — Wednesday |
 
 > 2026-08-03, post-defense: a three-lens scoping pass (economics / psychology
 > / technology) amended this design before build start. Build scope is the 5
@@ -245,12 +250,12 @@ cases is fixed early; trace links filled in from real runs.* 🔜 designed.
 
 | # | Ship state (seeded, real data — no mocks) | Expected output | Trace link |
 | --- | --- | --- | --- |
-| 1 | Issue created live with no assignee, no week, left untouched through the 90 s grace window (grader-provokable; this is the timed-latency test) | Orphan finding + proposed assignee + approval card, visible < 5 min (target ≈ 2–3 min incl. grace window) | *(pending)* |
-| 2 | Issue `in_progress`, `updated_at` back-dated 4 business days, active week | Stale finding; nudge drafted to assignee; Still-on-it available; dedup key recorded | *(pending)* |
-| 3 | Issue in `in_review` for 3 business days | Stuck-review finding naming reviewer path; attributed ask drafted | *(pending)* |
-| 4 | Active week, 70% elapsed, 20% issues done | Slip-risk finding, evidence inline, per-item checkbox card | *(pending)* |
-| 5 | Chat opened on issue X: "what's blocking this?" | Grounded answer citing X's history/associations; different trace shape from proactive runs | *(pending)* |
-| Q | Healthy project, sweep fires | **Quiet path** — trace ends at `recordQuiet`, zero LLM calls | *(pending)* |
+| 1 | Issue created live with no assignee, no week, left untouched through the 90 s grace window (grader-provokable; this is the timed-latency test) | Orphan finding + proposed assignee + approval card, visible < 5 min (measured ≈ 2–3 min incl. grace; run logged `path=finding`, 2 055 ms) | [finding-path trace](https://smith.langchain.com/public/9e688edf-1545-4de8-8915-0b0d198e40e1/r) |
+| 2 | Issue `in_progress`, `updated_at` back-dated 4 business days, active week | Stale finding; nudge drafted to assignee; Still-on-it available; dedup key recorded | *(pending — Thu run)* |
+| 3 | Issue in `in_review` for 3 business days | Stuck-review finding naming reviewer path; attributed ask drafted | *(pending — detector lands Thu)* |
+| 4 | Active week, 70% elapsed, 20% issues done | Slip-risk finding, evidence inline, per-item checkbox card | *(pending — detector lands Thu)* |
+| 5 | Chat opened on issue "Payment webhook retries fail silently": "What's the current state of this issue?" | Grounded answer citing the issue's real state/priority/assignee/timestamps; different trace shape from proactive runs | [chat trace](https://smith.langchain.com/public/810f4f6b-648b-4e47-9a77-8145a0b3ecc6/r) |
+| Q | Healthy project, sweep fires | **Quiet path** — trace ends at `recordQuiet`, zero LLM calls (run logged `path=quiet`, 67 ms) | [quiet-path trace](https://smith.langchain.com/public/08dd7d9f-dcd6-486a-9c43-d0ec8fc17639/r) |
 
 Test case Q is deliberate: the quiet path and the finding path are the two
 shared trace links for MVP — proof the graph branches ("a graph that looks

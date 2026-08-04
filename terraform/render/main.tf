@@ -126,7 +126,13 @@ resource "render_web_service" "api" {
       repo_url      = var.repo_url
       branch        = var.branch
       build_command = local.build_command
-      auto_deploy   = true
+      # CI-gated deploys (Week 5, cold-critic finding #2 in DECISIONS.md):
+      # deploy-on-push contradicted the "no green CI, no deploy" claim. With
+      # auto_deploy off, deploys happen exactly two ways: `terraform apply`
+      # (infra changes; provider deploys and waits), and the CI deploy job in
+      # .github/workflows/ci.yml, which triggers the Render API only after
+      # the checks job passes on main.
+      auto_deploy = false
     }
   }
 
@@ -161,5 +167,15 @@ resource "render_web_service" "api" {
     # Pins the runtime Node major to package.json's engines (>=20) and the
     # Dockerfile's node:20-slim, instead of drifting with Render's default.
     "NODE_VERSION" = { value = var.node_version }
+
+    # --- FleetGraph (Week 5) -------------------------------------------------
+    # Reasoning model + tracing. Values arrive via TF_VAR_* at apply time and
+    # live only in local gitignored state (same posture as DATABASE_URL).
+    "ANTHROPIC_API_KEY" = { value = var.anthropic_api_key }
+    "LANGSMITH_TRACING" = { value = "true" }
+    "LANGSMITH_API_KEY" = { value = var.langsmith_api_key }
+    "LANGSMITH_PROJECT" = { value = var.langsmith_project }
+    # SQL-only sweep interval; the backstop for the graded <5-min window.
+    "FLEETGRAPH_SWEEP_MINUTES" = { value = var.fleetgraph_sweep_minutes }
   }
 }

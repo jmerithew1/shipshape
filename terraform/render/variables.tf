@@ -43,9 +43,16 @@ variable "web_service_plan" {
     down after ~15 minutes of inactivity (first request after that takes
     ~50s). Paid plans documented by the provider: starter, standard, pro,
     pro_plus, pro_max, pro_ultra.
+
+    Week 5: default is "starter" (~$7/mo) and this is LOAD-BEARING, not an
+    optimization — FleetGraph's proactive mode runs on an in-process cron,
+    and on the free tier node-cron does not run at all while the service is
+    idled, so the agent's "runs without a user present" guarantee (and the
+    graded <5-minute detection window) silently dies. Decision + sign-off:
+    DECISIONS.md 2026-08-03 "Render Starter tier".
   EOT
   type        = string
-  default     = "free"
+  default     = "starter"
 }
 
 variable "postgres_plan" {
@@ -135,6 +142,42 @@ variable "node_env" {
   EOT
   type        = string
   default     = "staging"
+}
+
+variable "anthropic_api_key" {
+  description = <<-EOT
+    Anthropic API key for FleetGraph's reasoning model (Week 5). Supplied via
+    TF_VAR_anthropic_api_key at plan/apply time — never committed. Lands in
+    local gitignored state, same posture as DATABASE_URL. Without it the
+    agent runs rule-based-only (degraded mode is a designed behavior, not a
+    crash) — but MVP tracing requires the real model.
+  EOT
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "langsmith_api_key" {
+  description = "LangSmith API key for tracing (Week 5). Same handling as anthropic_api_key."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "langsmith_project" {
+  description = "LangSmith project name traces are written to."
+  type        = string
+  default     = "fleetgraph"
+}
+
+variable "fleetgraph_sweep_minutes" {
+  description = <<-EOT
+    FleetGraph sweep interval in minutes. SQL-only when quiet, so a tight
+    default is effectively free; it is the backstop for the graded
+    <5-minute detection window (FLEETGRAPH.md §Trigger Model).
+  EOT
+  type        = string
+  default     = "2"
 }
 
 variable "cors_origin" {

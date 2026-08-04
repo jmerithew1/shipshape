@@ -1,4 +1,42 @@
-# CHANGES — Week-4 implementation dev docs
+# CHANGES — implementation dev docs
+
+## Week 5 — FleetGraph (project-intelligence agent) · MVP 2026-08-04
+
+**What was built:** LangGraph.js agent inside the API — `api/src/fleetgraph/`
+(state, graph, detectors, events, models, resilience), migration
+`038_fleetgraph_agent.sql` (+ mirrored in `schema.sql` per the snapshot
+convention), `/api/agent` routes (findings, dispositions, chat), dashboard
+approval cards (`web/src/components/AgentFindings.tsx`), context chat panel
+(`web/src/components/AgentChatPanel.tsx`), `/ready` endpoint.
+
+**Run locally:** `docker compose -f docker-compose.local.yml up -d postgres`
+(stop the compose `api`/`web` containers if running — they hold ports
+3000/5173), then `pnpm db:migrate && pnpm db:seed` in `api/`, then `pnpm dev`
+in `api/` and `web/`. FleetGraph needs `ANTHROPIC_API_KEY`,
+`LANGSMITH_TRACING=true`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` in
+`api/.env.local`; without a key it runs detectors rule-based (degraded mode
+is a designed behavior). Sweep interval: `FLEETGRAPH_SWEEP_MINUTES` (default
+2). Kill switch: `FLEETGRAPH_ENABLED=false`.
+
+**Test it:** create an issue with no assignee/week, wait ~2–3 min (90 s grace
++ sweep) → FleetGraph card on the Dashboard; Approve assigns the issue and
+writes `document_history.automated_by='fleetgraph'`. Open any issue → "Ask
+FleetGraph" → grounded answer. `/ready` 503s if agent tables are missing.
+
+**Deploy:** `terraform/render/` — `auto_deploy=false`; deploys happen via
+`terraform apply` (needs `RENDER_API_KEY` env + `TF_VAR_anthropic_api_key` +
+`TF_VAR_langsmith_api_key`) or the CI `deploy` job on green `main`
+(`.github/workflows/ci.yml`, needs the `RENDER_API_KEY` repo secret).
+
+**Roll back:** CI-green is the only deploy path, so a bad build never ships;
+a bad shipped behavior: `git revert <sha>` + push (deploy job redeploys).
+The agent is additive — `FLEETGRAPH_ENABLED=false` turns it off without a
+deploy. Migration 038 is additive-only; rollback is dropping the three
+`agent_*` tables, no existing table touched.
+
+---
+
+# Week-4 implementation dev docs
 
 For the next engineer who inherits this codebase (implementation rule 8): what was added, how to
 run it, how to test it, how to roll it back. Every measurable claim links to a committed artifact —
