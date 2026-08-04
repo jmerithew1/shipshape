@@ -31,10 +31,19 @@
 | Trigger model documented + defended | FLEETGRAPH.md §Trigger Model — hybrid, with the cost/latency table and the "silence needs a clock" argument. |
 | Detection latency < 5 min | Measured locally ≈ 2–3 min incl. deliberate 90 s grace window (printed on the card). Timed rehearsal on the deployed instance: ⏳ below. |
 
-## Timed rehearsal on production (fill in after run)
+## Timed rehearsal on production (2026-08-04, live Render instance)
 
-- Created issue at: ⏳
-- Card visible at: ⏳ (target < 5:00)
+- Issue "demo issue" created (no assignee, no week): **19:15:07 UTC**
+- Detected + card written (`notify` node, Haiku triage 670 tokens): **19:20:02 UTC**
+- **Measured detection latency: 4 m 55 s** against the 5:00 goal — includes
+  the deliberate 90 s no-edit grace window, which reset while the reporter
+  finished typing (by design; the window is printed on the card)
+- Production trace (public): https://smith.langchain.com/public/06df5809-5e0a-431c-a00b-a6c2a2d26de6/r
+- Notification surface (upgraded from field feedback during this rehearsal):
+  global bottom-right widget on every page — new findings announce once via
+  toast, the button pulses until the panel is opened, and the widget renders
+  nothing when there are no findings. The full HITL loop (Approve →
+  agent-attributed assignment) runs from the same widget.
 
 ## Notes for graders
 

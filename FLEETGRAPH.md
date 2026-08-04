@@ -250,7 +250,7 @@ cases is fixed early; trace links filled in from real runs.* 🔜 designed.
 
 | # | Ship state (seeded, real data — no mocks) | Expected output | Trace link |
 | --- | --- | --- | --- |
-| 1 | Issue created live with no assignee, no week, left untouched through the 90 s grace window (grader-provokable; this is the timed-latency test) | Orphan finding + proposed assignee + approval card, visible < 5 min (measured ≈ 2–3 min incl. grace; run logged `path=finding`, 2 055 ms) | [finding-path trace](https://smith.langchain.com/public/9e688edf-1545-4de8-8915-0b0d198e40e1/r) |
+| 1 | Issue created live with no assignee, no week, left untouched through the 90 s grace window (grader-provokable; this is the timed-latency test) | Orphan finding + proposed assignee + approval card, visible < 5 min. **Measured on production 2026-08-04: created 19:15:07 → card 19:20:02 = 4 m 55 s** (grace window reset while the title was typed, by design) | [prod trace](https://smith.langchain.com/public/06df5809-5e0a-431c-a00b-a6c2a2d26de6/r) · [local trace](https://smith.langchain.com/public/9e688edf-1545-4de8-8915-0b0d198e40e1/r) |
 | 2 | Issue `in_progress`, `updated_at` back-dated 4 business days, active week | Stale finding; nudge drafted to assignee; Still-on-it available; dedup key recorded | *(pending — Thu run)* |
 | 3 | Issue in `in_review` for 3 business days | Stuck-review finding naming reviewer path; attributed ask drafted | *(pending — detector lands Thu)* |
 | 4 | Active week, 70% elapsed, 20% issues done | Slip-risk finding, evidence inline, per-item checkbox card | *(pending — detector lands Thu)* |
