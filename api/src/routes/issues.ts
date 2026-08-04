@@ -12,6 +12,7 @@ import {
   type BelongsToEntry,
 } from '../utils/document-crud.js';
 import { broadcastToUser } from '../collaboration/index.js';
+import { notifyShipEvent } from '../fleetgraph/events.js';
 
 type RouterType = ReturnType<typeof Router>;
 const router: RouterType = Router();
@@ -639,6 +640,15 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
     }
 
     await client.query('COMMIT');
+
+    // FleetGraph: issue creation is the MVP-anchor trigger (orphan intake).
+    // The change logger never fires on creation, so the hook lives here.
+    notifyShipEvent({
+      workspaceId: req.workspaceId!,
+      documentId: newIssueId,
+      projectId: belongs_to.find(bt => bt.type === 'project')?.id ?? null,
+      eventType: 'created',
+    });
 
     // Auto-complete sprint_issues accountability when first issue is created in a sprint
     const sprintAssociations = belongs_to.filter(bt => bt.type === 'sprint');

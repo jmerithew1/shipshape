@@ -168,6 +168,25 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
     res.json({ status: 'ok' });
   });
 
+  // Readiness check (Week 5 Terraform requirement): proves the service can
+  // actually serve — DB reachable AND the FleetGraph agent tables exist.
+  // The agent-tables assertion exists so a silently-skipped migration can
+  // never hide again (cold-critic finding, DECISIONS.md 2026-08-03).
+  app.get('/ready', async (_req, res) => {
+    try {
+      const { pool } = await import('./db/client.js');
+      await pool.query(`SELECT 1 FROM agent_findings LIMIT 0`);
+      await pool.query(`SELECT 1 FROM agent_runs LIMIT 0`);
+      await pool.query(`SELECT 1 FROM agent_credibility LIMIT 0`);
+      res.json({ status: 'ready', agent_tables: true });
+    } catch (err) {
+      res.status(503).json({
+        status: 'not_ready',
+        reason: err instanceof Error ? err.message : 'unknown',
+      });
+    }
+  });
+
   // API documentation (no auth needed)
   setupSwagger(app);
 

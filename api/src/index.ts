@@ -35,6 +35,13 @@ async function main() {
   // Setup WebSocket collaboration server
   setupCollaboration(server);
 
+  // FleetGraph project-intelligence agent (Week 5): in-process event bus +
+  // sweep cron. No-ops safely when FLEETGRAPH_ENABLED=false; runs detectors
+  // rule-based when no ANTHROPIC_API_KEY is configured.
+  const { initFleetGraph } = await import('./fleetgraph/index.js');
+  const { pool } = await import('./db/client.js');
+  initFleetGraph(pool);
+
   // Start server
   server.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);

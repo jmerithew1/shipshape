@@ -59,6 +59,27 @@ export async function logDocumentChange(
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [documentId, field, oldValue, newValue, changedBy, automatedBy ?? null]
   );
+
+  // FleetGraph chokepoint: every field change through this logger becomes an
+  // agent trigger. Fire-and-forget — never blocks or fails the write path.
+  void (async () => {
+    try {
+      const { rows } = await pool.query(
+        `SELECT workspace_id FROM documents WHERE id = $1`,
+        [documentId],
+      );
+      if (rows[0]) {
+        const { notifyShipEvent } = await import('../fleetgraph/events.js');
+        notifyShipEvent({
+          workspaceId: rows[0].workspace_id,
+          documentId,
+          eventType: 'changed',
+        });
+      }
+    } catch {
+      /* agent trigger is best-effort by design */
+    }
+  })();
 }
 
 // =============================================================================

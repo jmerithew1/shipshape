@@ -97,11 +97,11 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
     })
     .addNode('fetchActivity', async (s: FleetStateType) => {
       const { rows } = await pool.query(
-        `SELECT dh.document_id, dh.field, dh.changed_at
+        `SELECT dh.document_id, dh.field, dh.created_at AS changed_at
            FROM document_history dh
            JOIN documents d ON d.id = dh.document_id
-          WHERE d.workspace_id = $1 AND dh.changed_at > NOW() - INTERVAL '7 days'
-          ORDER BY dh.changed_at DESC
+          WHERE d.workspace_id = $1 AND dh.created_at > NOW() - INTERVAL '7 days'
+          ORDER BY dh.created_at DESC
           LIMIT 300`,
         [s.workspaceId],
       );

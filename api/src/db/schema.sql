@@ -435,3 +435,73 @@ CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_id);
 -- Drop the legacy separate tables if they exist (greenfield cleanup)
 DROP TABLE IF EXISTS sprints CASCADE;
 DROP TABLE IF EXISTS projects CASCADE;
+
+-- ============================================================================
+-- FleetGraph agent tables (Week 5 — mirrors migration 038, snapshot convention)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS agent_findings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  project_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+  document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+  detector TEXT NOT NULL CHECK (detector IN (
+    'orphan_intake', 'stale_issue', 'stuck_review', 'urgent_idle',
+    'week_slip', 'due_soon_idle'
+  )),
+  dedup_key TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN (
+    'open', 'approved', 'changed', 'dismissed', 'snoozed', 'still_on_it', 'resolved'
+  )),
+  title TEXT NOT NULL,
+  body TEXT,
+  evidence JSONB NOT NULL DEFAULT '{}',
+  proposed_action JSONB,
+  thread_id TEXT,
+  notified_user_ids UUID[] NOT NULL DEFAULT '{}',
+  snooze_until TIMESTAMPTZ,
+  self_reported BOOLEAN NOT NULL DEFAULT FALSE,
+  rule_based_only BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_agent_findings_active_dedup
+  ON agent_findings (workspace_id, dedup_key) WHERE resolved_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_agent_findings_open
+  ON agent_findings (workspace_id, status) WHERE resolved_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_agent_findings_document
+  ON agent_findings (document_id);
+
+CREATE TABLE IF NOT EXISTS agent_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  project_id UUID,
+  trigger TEXT NOT NULL CHECK (trigger IN ('event', 'sweep', 'chat')),
+  mode TEXT NOT NULL CHECK (mode IN ('proactive', 'on_demand')),
+  path TEXT CHECK (path IN ('quiet', 'finding', 'chat', 'degraded', 'error')),
+  thread_id TEXT,
+  model TEXT,
+  input_tokens INTEGER NOT NULL DEFAULT 0,
+  output_tokens INTEGER NOT NULL DEFAULT 0,
+  latency_ms INTEGER,
+  findings_count INTEGER NOT NULL DEFAULT 0,
+  error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_runs_created ON agent_runs (created_at);
+CREATE INDEX IF NOT EXISTS idx_agent_runs_cost ON agent_runs (model, created_at)
+  WHERE input_tokens > 0;
+
+CREATE TABLE IF NOT EXISTS agent_credibility (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  finding_type TEXT NOT NULL,
+  alpha REAL NOT NULL DEFAULT 1.0,
+  beta REAL NOT NULL DEFAULT 1.0,
+  last_notified_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, finding_type)
+);
