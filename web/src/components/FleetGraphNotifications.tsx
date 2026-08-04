@@ -15,12 +15,17 @@ import { useToast } from '@/components/ui/Toast';
  * agent earns attention, it doesn't reserve screen space.
  */
 
-const SEEN_KEY = 'fleetgraph.seenFindingIds';
+const SEEN_KEY = 'fleetgraph.seenFindings';
 const TOASTED_KEY = 'fleetgraph.toastedFindingIds';
+
+/** A glance buys quiet for 4 hours, not forever — undecided findings
+ *  re-pulse so they can't be forgotten. Only a disposition clears them. */
+const SEEN_TTL_MS = 4 * 60 * 60 * 1000;
 
 function readIds(key: string): Set<string> {
   try {
-    return new Set(JSON.parse(localStorage.getItem(key) ?? '[]') as string[]);
+    const parsed = JSON.parse(localStorage.getItem(key) ?? '[]');
+    return new Set(Array.isArray(parsed) ? (parsed as string[]) : []);
   } catch {
     return new Set();
   }
@@ -29,6 +34,27 @@ function readIds(key: string): Set<string> {
 function writeIds(key: string, ids: Set<string>): void {
   // Cap growth: resolved findings never come back, old ids are inert.
   localStorage.setItem(key, JSON.stringify([...ids].slice(-200)));
+}
+
+function readSeenMap(): Record<string, number> {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, number>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSeenMap(map: Record<string, number>): void {
+  const entries = Object.entries(map).slice(-200);
+  localStorage.setItem(SEEN_KEY, JSON.stringify(Object.fromEntries(entries)));
+}
+
+function isSeenFresh(map: Record<string, number>, id: string): boolean {
+  const at = map[id];
+  return typeof at === 'number' && Date.now() - at < SEEN_TTL_MS;
 }
 
 export function FleetGraphNotifications() {
@@ -54,7 +80,7 @@ export function FleetGraphNotifications() {
     showToast(
       fresh.length === 1
         ? `FleetGraph: ${first.title}`
-        : `FleetGraph found ${fresh.length} things that need your call`,
+        : `FleetGraph: ${fresh.length} new alerts need attention`,
       'info',
       8000,
       { label: 'View', onClick: () => setOpen(true) },
@@ -64,25 +90,25 @@ export function FleetGraphNotifications() {
 
     // If the panel is already open, these count as seen immediately.
     if (openRef.current) {
-      const seen = readIds(SEEN_KEY);
-      fresh.forEach((f) => seen.add(f.id));
-      writeIds(SEEN_KEY, seen);
+      const seen = readSeenMap();
+      fresh.forEach((f) => { seen[f.id] = Date.now(); });
+      writeSeenMap(seen);
     }
     setSeenVersion((v) => v + 1);
   }, [findings, showToast]);
 
   if (findings.length === 0) return null;
 
-  const seen = readIds(SEEN_KEY);
-  const unseenCount = findings.filter((f) => !seen.has(f.id)).length;
+  const seen = readSeenMap();
+  const unseenCount = findings.filter((f) => !isSeenFresh(seen, f.id)).length;
 
   const toggle = () => {
     setOpen((o) => {
       const next = !o;
       if (next) {
-        const s = readIds(SEEN_KEY);
-        findings.forEach((f) => s.add(f.id));
-        writeIds(SEEN_KEY, s);
+        const m = readSeenMap();
+        findings.forEach((f) => { m[f.id] = Date.now(); });
+        writeSeenMap(m);
         setSeenVersion((v) => v + 1);
       }
       return next;
@@ -112,7 +138,7 @@ export function FleetGraphNotifications() {
             : 'bg-background border border-indigo-500/50 hover:border-indigo-500 text-foreground',
           anchor,
         )}
-        title={`FleetGraph: ${findings.length} finding${findings.length === 1 ? '' : 's'} need your call`}
+        title={`FleetGraph: ${findings.length} alert${findings.length === 1 ? '' : 's'} waiting for a decision`}
       >
         <span
           className={cn(
@@ -122,7 +148,9 @@ export function FleetGraphNotifications() {
         >
           F
         </span>
-        {unseenCount > 0 ? `${unseenCount} need${unseenCount === 1 ? 's' : ''} your call` : findings.length}
+        {unseenCount > 0
+          ? `${unseenCount} new alert${unseenCount === 1 ? '' : 's'}`
+          : `${findings.length} alert${findings.length === 1 ? '' : 's'}`}
       </button>
 
       {open && (
