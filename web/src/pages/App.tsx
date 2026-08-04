@@ -34,6 +34,7 @@ import { ContextTreeNav } from '@/components/ContextTreeNav';
 import { ProjectSetupWizard, ProjectSetupData } from '@/components/ProjectSetupWizard';
 import { SelectionPersistenceProvider } from '@/contexts/SelectionPersistenceContext';
 import { ActionItemsModal } from '@/components/ActionItemsModal';
+import { FleetGraphNotifications } from '@/components/FleetGraphNotifications';
 import { AccountabilityBanner } from '@/components/AccountabilityBanner';
 import { ProjectContextSidebar } from '@/components/sidebars/ProjectContextSidebar';
 
@@ -575,6 +576,9 @@ export function AppLayout() {
         open={actionItemsModalOpen}
         onClose={() => setActionItemsModalOpen(false)}
       />
+
+      {/* FleetGraph notifications - bottom-right on every page (Week 5) */}
+      <FleetGraphNotifications />
     </div>
     </SelectionPersistenceProvider>
     </TooltipProvider>

@@ -18,7 +18,7 @@ const DETECTOR_LABELS: Record<string, string> = {
   due_soon_idle: 'Due soon, no activity',
 };
 
-function FindingCard({ finding }: { finding: AgentFinding }) {
+export function FindingCard({ finding }: { finding: AgentFinding }) {
   const navigate = useNavigate();
   const disposition = useAgentDispositionMutation();
   const { data: members } = useTeamMembersQuery();
