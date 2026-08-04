@@ -42,6 +42,29 @@ export async function detectOrphanIntake(
     [workspaceId, ORPHAN_GRACE_SECONDS],
   );
 
+  if (rows.length === 0) return [];
+
+  // Propose an assignee deterministically: the workspace member with the
+  // lightest active load (fewest open in_progress/in_review issues). The
+  // model never picks people; it only phrases the card.
+  const load = await pool.query(
+    `SELECT u.id,
+            COUNT(d.id) FILTER (
+              WHERE d.properties->>'state' IN ('in_progress', 'in_review')
+                AND d.deleted_at IS NULL AND d.archived_at IS NULL
+            ) AS active_load
+       FROM users u
+       JOIN workspace_memberships wm ON wm.user_id = u.id AND wm.workspace_id = $1
+       LEFT JOIN documents d ON d.workspace_id = $1
+              AND d.document_type = 'issue'
+              AND d.properties->>'assignee_id' = u.id::text
+      GROUP BY u.id
+      ORDER BY active_load ASC, u.id
+      LIMIT 1`,
+    [workspaceId],
+  );
+  const proposedAssignee: string | null = load.rows[0]?.id ?? null;
+
   return rows.map((r) => ({
     detector: 'orphan_intake' as const,
     dedupKey: `orphan_intake:${r.id}`,
@@ -54,8 +77,19 @@ export async function detectOrphanIntake(
       graceSeconds: ORPHAN_GRACE_SECONDS,
       hasAssignee: false,
       hasWeek: false,
+      proposedAssigneeLoad: Number(load.rows[0]?.active_load ?? 0),
     },
     notifyUserIds: r.project_owner_id ? [r.project_owner_id] : [],
+    ...(proposedAssignee
+      ? {
+          proposedAction: {
+            type: 'assign_issue' as const,
+            issueId: r.id,
+            assigneeId: proposedAssignee,
+            reason: 'lightest current active load in the workspace',
+          },
+        }
+      : {}),
   }));
 }
 

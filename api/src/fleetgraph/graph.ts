@@ -179,8 +179,9 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
         await pool.query(
           `INSERT INTO agent_findings
              (workspace_id, project_id, document_id, detector, dedup_key,
-              severity, title, body, evidence, notified_user_ids, rule_based_only)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+              severity, title, body, evidence, notified_user_ids, rule_based_only,
+              proposed_action)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
            ON CONFLICT (workspace_id, dedup_key) WHERE resolved_at IS NULL
            DO NOTHING`,
           [
@@ -195,6 +196,7 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
             JSON.stringify(f.evidence),
             f.notifyUserIds,
             f.ruleBasedOnly,
+            f.proposedAction ? JSON.stringify(f.proposedAction) : null,
           ],
         );
       }

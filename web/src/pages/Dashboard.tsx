@@ -6,6 +6,7 @@ import { useDashboardActionItems } from '@/hooks/useDashboardActionItems';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/date-utils';
 import { DashboardVariantC } from '@/components/dashboard/DashboardVariantC';
+import { AgentFindings } from '@/components/AgentFindings';
 
 type DashboardView = 'my-work' | 'overview';
 
@@ -178,6 +179,9 @@ export function DashboardPage() {
                 : 'Cross-program overview of work transparency'}
             </p>
           </div>
+
+          {/* FleetGraph agent findings — approval cards (Week 5) */}
+          <AgentFindings />
 
           {currentView === 'my-work' ? (
             <DashboardVariantC />
