@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/Toast';
 import { issueKeys } from '@/hooks/useIssuesQuery';
 import { projectKeys, useProjectWeeksQuery } from '@/hooks/useProjectsQuery';
 import { TabBar } from '@/components/ui/TabBar';
+import { AgentChatPanel } from '@/components/AgentChatPanel';
 import { useCurrentDocument } from '@/contexts/CurrentDocumentContext';
 import {
   getTabsForDocument,
@@ -480,6 +481,12 @@ export function UnifiedDocumentPage() {
 
     return (
       <div className="flex h-full flex-col">
+        {/* FleetGraph context chat — scoped to this document (Week 5) */}
+        <AgentChatPanel
+          docType={document.document_type}
+          docId={id!}
+          docTitle={document.title}
+        />
         {/* Tab bar */}
         <div className="border-b border-border px-4">
           <TabBar
@@ -516,17 +523,25 @@ export function UnifiedDocumentPage() {
 
   // Non-tabbed documents render directly in editor
   return (
-    <UnifiedEditor
-      document={unifiedDocument}
-      sidebarData={sidebarData}
-      onUpdate={handleUpdate}
-      onTypeChange={handleTypeChange}
-      onDocumentConverted={handleDocumentConverted}
-      onBack={hideBackButton ? undefined : handleBack}
-      backLabel={hideBackButton ? undefined : backLabel}
-      onDelete={handleDelete}
-      showTypeSelector={true}
-      titleSuffix={standupAuthorName}
-    />
+    <>
+      {/* FleetGraph context chat — scoped to this document (Week 5) */}
+      <AgentChatPanel
+        docType={document.document_type}
+        docId={id!}
+        docTitle={document.title}
+      />
+      <UnifiedEditor
+        document={unifiedDocument}
+        sidebarData={sidebarData}
+        onUpdate={handleUpdate}
+        onTypeChange={handleTypeChange}
+        onDocumentConverted={handleDocumentConverted}
+        onBack={hideBackButton ? undefined : handleBack}
+        backLabel={hideBackButton ? undefined : backLabel}
+        onDelete={handleDelete}
+        showTypeSelector={true}
+        titleSuffix={standupAuthorName}
+      />
+    </>
   );
 }

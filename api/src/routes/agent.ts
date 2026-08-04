@@ -164,4 +164,49 @@ router.post(
   },
 );
 
+const chatSchema = z.object({
+  doc_type: z.string().min(1),
+  doc_id: z.string().uuid(),
+  project_id: z.string().uuid().nullable().optional(),
+  week_id: z.string().uuid().nullable().optional(),
+  message: z.string().min(1).max(4000),
+});
+
+// POST /api/agent/chat — on-demand door. Context-scoped: the panel posts
+// what the user is looking at; the graph reasons from that neighborhood.
+router.post('/chat', authMiddleware, async (req: Request, res: Response) => {
+  const parsed = chatSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid chat request', details: parsed.error.issues });
+    return;
+  }
+  try {
+    const { getFleetRuntime } = await import('../fleetgraph/index.js');
+    const runtime = getFleetRuntime();
+    if (!runtime) {
+      res.status(503).json({ error: 'FleetGraph is not initialized' });
+      return;
+    }
+    const result = await runtime.runTrigger({
+      kind: 'chat',
+      workspaceId: req.workspaceId!,
+      userId: req.userId!,
+      docType: parsed.data.doc_type,
+      docId: parsed.data.doc_id,
+      projectId: parsed.data.project_id ?? null,
+      weekId: parsed.data.week_id ?? null,
+      message: parsed.data.message,
+    });
+    res.json({
+      response:
+        result.chatResponse ??
+        "FleetGraph couldn't produce an answer for this request.",
+      degraded: result.path === 'degraded',
+    });
+  } catch (err) {
+    console.error('Agent chat error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
