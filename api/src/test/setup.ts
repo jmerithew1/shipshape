@@ -8,6 +8,12 @@ beforeAll(async () => {
   // Ensure test environment
   process.env.NODE_ENV = 'test'
 
+  // FleetGraph is off in route tests: its fire-and-forget event hooks issue
+  // extra pool queries that break strict pool.query mock sequences (and no
+  // route test wants a background agent run). FleetGraph's own suites
+  // re-enable it explicitly.
+  process.env.FLEETGRAPH_ENABLED = 'false'
+
   // Guard: this file TRUNCATEs 15 tables in whatever database DATABASE_URL
   // points at. Run unguarded against a dev database, `pnpm test` silently
   // destroys it — which happened for real on 2026-07-29 (ship_dev wiped;

@@ -62,6 +62,10 @@ export async function logDocumentChange(
 
   // FleetGraph chokepoint: every field change through this logger becomes an
   // agent trigger. Fire-and-forget — never blocks or fails the write path.
+  // Kill-switch check comes BEFORE any query: route tests mock pool.query
+  // with strict sequences, and an extra lookup here would consume their
+  // mocked responses (test setup sets FLEETGRAPH_ENABLED=false).
+  if (process.env.FLEETGRAPH_ENABLED === 'false') return;
   void (async () => {
     try {
       const { rows } = await pool.query(
