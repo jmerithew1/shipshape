@@ -4,8 +4,8 @@
 
 | Artifact | Link |
 | --- | --- |
-| Deployed app (public, Starter tier) | https://ship-api-il12.onrender.com |
-| Health / readiness | https://ship-api-il12.onrender.com/health · https://ship-api-il12.onrender.com/ready (asserts agent tables — returned `{"status":"ready","agent_tables":true}` on deploy day) |
+| Deployed app (public, Starter tier) | https://ship-api-r1om.onrender.com |
+| Health / readiness | https://ship-api-r1om.onrender.com/health · https://ship-api-r1om.onrender.com/ready (asserts agent tables — returned `{"status":"ready","agent_tables":true}` on deploy day) |
 | Repo (origin) | https://labs.gauntletai.com/jamesmerithew/shipshape |
 | Repo (GitHub mirror, CI + deploys) | https://github.com/jmerithew1/shipshape |
 | FLEETGRAPH.md (all MVP sections) | repo root — Agent Responsibility · Graph Diagram · 5 Use Cases · Trigger Model · Test Cases w/ trace links |
@@ -14,7 +14,8 @@
 | Trace — quiet path (dedup, zero LLM calls, 67 ms) | https://smith.langchain.com/public/08dd7d9f-dcd6-486a-9c43-d0ec8fc17639/r |
 | Trace — chat path (grounded, claim-vs-state) | https://smith.langchain.com/public/810f4f6b-648b-4e47-9a77-8145a0b3ecc6/r |
 | Terraform plan (annotated) | `terraform/render/out/10-plan-week5.txt` |
-| Terraform apply | `terraform/render/out/11-apply-week5-replace.txt` |
+| Terraform apply | `terraform/render/out/12-apply-week5-starter.txt` |
+| Destroy-and-redeploy proof | `terraform/render/out/13-destroy-week5.txt` + `out/14-apply-redeploy-week5.txt` |
 | Dev docs | `CHANGES.md` (Week 5 section: run / test / deploy / rollback) |
 | Decision log | `DECISIONS.md` (15 entries, each with a Rejected clause) |
 
@@ -27,7 +28,7 @@
 | FLEETGRAPH.md: Responsibility, Diagram, ≥5 Use Cases, Trigger Model | All complete; status banner separates ✅ shipped (file-cited) from 🔜 scheduled. |
 | ≥1 human-in-the-loop gate | Approval card → Approve executed live: issue assigned, `document_history.automated_by='fleetgraph'`. Executor is a deterministic allowlist (no delete/auth/external verbs). |
 | Agent chat + notifications accessible in UI | Global bottom-right FleetGraph widget on every page (toast on new findings, severity-scaled re-pulse, nothing rendered when quiet); "Ask FleetGraph" panel on every document view — scoped ("Discussing: <title>"), grounded (cites real state/assignee/timestamps). No standalone chat page. |
-| Deployed via Terraform: agent service, env config w/o secrets, /health + /ready, annotated plan, destroy-and-redeploy | `terraform/render/`: Starter tier (idling would kill the proactive guarantee), FleetGraph env via sensitive TF_VARs, `auto_deploy=false` + CI-gated deploy job. Plan/apply outputs committed. Destroy-and-redeploy proof scheduled Friday with scripted repopulation (documented in the plan). |
+| Deployed via Terraform: agent service, env config w/o secrets, /health + /ready, annotated plan, destroy-and-redeploy | `terraform/render/`: Starter tier (idling would kill the proactive guarantee), FleetGraph env via sensitive TF_VARs, `auto_deploy=false` + CI-gated deploy job. Plan/apply outputs committed. **Destroy-and-redeploy proof completed 2026-08-04**: full environment (project + Postgres + service) torn down (`terraform/render/out/13-destroy-week5.txt`) and recreated from config alone (`out/14-apply-redeploy-week5.txt`, "3 added"); fresh instance immediately served `/ready` `{"agent_tables":true}` on a brand-new database — the migration story works from nothing. Repopulation via the app's own first-run setup wizard. |
 | Trigger model documented + defended | FLEETGRAPH.md §Trigger Model — hybrid, with the cost/latency table and the "silence needs a clock" argument. |
 | Detection latency < 5 min | **Measured on production: 4 m 55 s** (issue 19:15:07 UTC → card 19:20:02 UTC, incl. the deliberate 90 s grace window; full timeline + trace below). Cost per run and runs/day documented and defended in FLEETGRAPH.md §Cost Analysis. |
 
