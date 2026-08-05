@@ -42,6 +42,10 @@ deploy. Migration 038 is additive-only; rollback is dropping the three
 
 # Week-4 implementation dev docs
 
+> **Consolidated report:** [docs/improvements-week4.md](docs/improvements-week4.md) — all 8
+> categories in one read (before → after → evidence → rollback), added in response
+> to Week-4 reviewer feedback. The sections below remain the primary artifacts.
+
 For the next engineer who inherits this codebase (implementation rule 8): what was added, how to
 run it, how to test it, how to roll it back. Every measurable claim links to a committed artifact —
 `bench/<cat>/out/rebaseline-<sha>` vs `after-<sha>` pairs, or `terraform/*/out/`, or

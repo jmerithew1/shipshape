@@ -1,0 +1,49 @@
+=== 2026-08-05T01:55:27.905Z — capture-migrate-run PHASE=after ===
+=== api/src/db/migrate.ts @ cbd9396d074f52c7ebf12d4173a44bae742f3b1b (git hash-object) ===
+
+[scenario 1] fresh install — empty database "week4_cat6_video"
+  (migration files on disk: 43)
+
+$ scenario 1: migrate against the empty database
+$ DATABASE_URL=postgresql://ship:***@localhost:5433/week4_cat6_video tsx src/db/migrate.ts   (cwd: api/)
+  Running database migrations...
+  ✅ Schema applied
+  ✅ Fresh install: schema.sql is the current snapshot; stamped 43 migrations as applied
+  exit=0
+  schema_migrations stamped: 43
+  VERDICT: exit 0 and all 43 migrations accounted for — deploy may proceed (post-fix behavior)
+
+[scenario 2] broken migration on the existing database (999_broken_repro.sql: "THIS IS NOT SQL;")
+
+$ scenario 2: migrate with a failing migration present
+$ DATABASE_URL=postgresql://ship:***@localhost:5433/week4_cat6_video tsx src/db/migrate.ts   (cwd: api/)
+  Running database migrations...
+  ✅ Schema applied
+    Running migration: 999_broken_repro.sql
+    ❌ Migration 999_broken_repro.sql FAILED and was rolled back
+  Database migration failed: error: syntax error at or near "THIS"
+      at C:\dev\shipshape\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async migrate (C:\dev\shipshape\api\src\db\migrate.ts:128:9) {
+    length: 92,
+    severity: 'ERROR',
+    code: '42601',
+    detail: undefined,
+    hint: undefined,
+    position: '1',
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'scan.l',
+    line: '1244',
+    routine: 'scanner_yyerror'
+  }
+  exit=1
+  schema_migrations stamped: 43
+  VERDICT: failing migration named, rolled back, exit 1 — the deploy stops (post-fix behavior)
+[artifact] recording: docs\pr-evidence\week4-cat6\migrate-after.webm

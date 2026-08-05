@@ -73,8 +73,13 @@ const emit = async (s) => {
 async function runMigrate(title) {
   await emit('');
   await emit(`$ ${title}`);
-  await emit(`$ DATABASE_URL=postgresql://ship:***@localhost:5433/${DB} pnpm -C api exec tsx src/db/migrate.ts`);
-  const child = spawn('pnpm', ['-C', 'api', 'exec', 'tsx', 'src/db/migrate.ts'], {
+  await emit(`$ DATABASE_URL=postgresql://ship:***@localhost:5433/${DB} tsx src/db/migrate.ts   (cwd: api/)`);
+  // tsx invoked via its bin shim directly, NOT `pnpm exec`: pnpm prints a
+  // misleading "Command tsx not found" epilogue after any non-zero child
+  // exit, which would put tool noise in the exact frame that matters.
+  const tsxBin = path.join('node_modules', '.bin', 'tsx');
+  const child = spawn(tsxBin, ['src/db/migrate.ts'], {
+    cwd: 'api',
     env: { ...process.env, DATABASE_URL: DB_URL },
     shell: true,
   });

@@ -1,0 +1,48 @@
+=== 2026-08-05T01:55:53.589Z — capture-migrate-run PHASE=before ===
+=== api/src/db/migrate.ts @ 2507ddd317e52338ac50173f59d9a9897843320d (git hash-object) ===
+
+[scenario 1] fresh install — empty database "week4_cat6_video"
+  (migration files on disk: 43)
+
+$ scenario 1: migrate against the empty database
+$ DATABASE_URL=postgresql://ship:***@localhost:5433/week4_cat6_video tsx src/db/migrate.ts   (cwd: api/)
+  Running database migrations...
+  ✅ Schema applied
+    Running migration: 001_properties_jsonb.sql
+    ✅ 001_properties_jsonb.sql applied
+    Running migration: 002_person_membership_decoupling.sql
+    ✅ 002_person_membership_decoupling.sql applied
+    Running migration: 003_document_history.sql
+    ✅ 003_document_history.sql applied
+    Running migration: 004_fix_person_user_id_backfill.sql
+    ✅ 004_fix_person_user_id_backfill.sql applied
+    Running migration: 005_create_missing_person_documents.sql
+    ✅ 005_create_missing_person_documents.sql applied
+    Running migration: 006_document_visibility.sql
+    ✅ 006_document_visibility.sql applied
+    Running migration: 007_archived_and_deleted_at.sql
+    ✅ 007_archived_and_deleted_at.sql applied
+    Running migration: 007b_remove_prefix_add_emoji.sql
+    ✅ 007b_remove_prefix_add_emoji.sql applied
+    Running migration: 008_consolidate_feedback.sql
+    ✅ 008_consolidate_feedback.sql applied
+    Running migration: 009_audit_logs_nullable_actor.sql
+    ✅ 009_audit_logs_nullable_actor.sql applied
+    Running migration: 010_oauth_state.sql
+  Database schema already exists, continuing...
+  exit=0
+  schema_migrations stamped: 10
+  VERDICT: exit 0 with 10/43 stamped — a green exit code on a half-migrated database (pre-fix behavior)
+
+[scenario 2] broken migration on the existing database (999_broken_repro.sql: "THIS IS NOT SQL;")
+
+$ scenario 2: migrate with a failing migration present
+$ DATABASE_URL=postgresql://ship:***@localhost:5433/week4_cat6_video tsx src/db/migrate.ts   (cwd: api/)
+  Running database migrations...
+  ✅ Schema applied
+    Running migration: 010_oauth_state.sql
+  Database schema already exists, continuing...
+  exit=0
+  schema_migrations stamped: 10
+  VERDICT: exit 0 with the failure swallowed — the deploy proceeds as if nothing happened (pre-fix behavior)
+[artifact] recording: docs\pr-evidence\week4-cat6\migrate-before.webm

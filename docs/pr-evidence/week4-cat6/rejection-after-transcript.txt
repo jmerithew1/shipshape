@@ -1,0 +1,35 @@
+=== 2026-08-05T01:56:17.544Z — capture-unhandled-rejection PHASE=after ===
+=== api/src/index.ts @ 4e49783a1fadb6175382f72e9279bd2b712cbc3a (git hash-object; API runs it via tsx) ===
+
+[step] booting API on :3791 through rejection-harness.ts (rejection at ready+30s)
+[step] starting vite preview on :4274 (proxying /api -> :3791)
+[api] Yjs collaboration server attached
+[api] Events WebSocket server attached
+[api] CAIA not configured, skipping initialization
+[api] [fleetgraph] enabled — sweep every 2m, LLM configured
+[api] API server running on http://localhost:3791
+[api] CORS origin: http://localhost:5173
+[api] [harness] /health is answering — server is up
+[probe] /health at start: HTTP 200
+[step] goto http://localhost:4274/login and sign in as dev@ship.local
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 connected (1 total connections)
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 disconnected (0 total connections)
+[step] signed in; user is working at http://localhost:4274/docs
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 connected (1 total connections)
+[step] waiting ~29s for the in-process rejection to fire
+[api] [harness] firing an un-awaited Promise.reject now (t=ready+30s)
+[api!] UNHANDLED PROMISE REJECTION (continuing to serve): Error: repro: stray rejection from a request handler
+[api!]     at Timeout._onTimeout (C:\dev\shipshape\docs\pr-evidence\week4-cat6\rejection-harness.ts:39:20)
+[api!]     at listOnTimeout (node:internal/timers:605:17)
+[api!]     at process.processTimers (node:internal/timers:541:7)
+[step] rejection fired in the API process at 2026-08-05T01:56:59.973Z
+[step] the signed-in user reloads the page they were on
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 disconnected (0 total connections)
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 connected (1 total connections)
+[probe] /health after the rejection: HTTP 200
+
+[result] reload outcome: rendered normally at http://localhost:4274/docs
+[result] API process exit so far: still running
+[result] VERDICT: rejection logged, API kept serving, the user never noticed (post-fix behavior)
+[api] [Events] User 356e6931-6317-411c-a032-ad88186a75f6 disconnected (0 total connections)
+[artifact] recording: docs\pr-evidence\week4-cat6\rejection-after.webm

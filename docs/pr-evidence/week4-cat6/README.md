@@ -83,6 +83,33 @@ phases; each transcript records the `git hash-object` of the hook build it ran a
 
 **Rollback:** revert the useSessionTimeout commit.
 
+## Visual evidence for Gaps 1–2 (2026-08-04, closing the reviewer's pointer)
+
+Reviewer feedback on the Week-4 final: only Gap 3 carried recordings; Gaps 1–2 relied on text
+transcripts. Both now have the same treatment — the committed capture scripts re-run the real
+before/after scenarios while Chromium records a live render of the actual child-process output
+(no text is staged; each transcript records the `git hash-object` of the source it ran against).
+
+**Gap 1 — silent migration failure** ([capture-migrate-run.mjs](capture-migrate-run.mjs)):
+- **Before** (pre-fix runner via `git show f3c89c5~1`): fresh install exits **0** with only
+  **10 of 43** migrations stamped; a broken migration is swallowed the same way — the lie on
+  camera. Recording: [migrate-before.webm](migrate-before.webm) ·
+  [fresh-install](migrate-before-01-fresh.png) · [broken-migration](migrate-before-02-broken.png) ·
+  [transcript](migrate-before-transcript.txt)
+- **After** (current code): fresh install baseline-stamps all 43, exit 0; the broken migration is
+  named, rolled back, exit **1** — the deploy stops. Recording:
+  [migrate-after.webm](migrate-after.webm) · [fresh-install](migrate-after-01-fresh.png) ·
+  [broken-migration](migrate-after-02-broken.png) · [transcript](migrate-after-transcript.txt)
+
+**Gap 2 — process-killing unhandled rejection** ([capture-unhandled-rejection.mjs](capture-unhandled-rejection.mjs),
+[rejection-harness.ts](rejection-harness.ts)):
+- **Before** (pre-fix entrypoint via `git show dd98511~1`): one stray rejection kills the API
+  (exit 1); the signed-in user's reload lands on `/login?expired=true`. Recording:
+  [rejection-before.webm](rejection-before.webm) · [transcript](rejection-before-transcript.txt)
+- **After** (current code): rejection logged loudly, `/health` 200 two seconds later, the user's
+  reload renders normally — nobody noticed. Recording:
+  [rejection-after.webm](rejection-after.webm) · [transcript](rejection-after-transcript.txt)
+
 ## Bonus (found the hard way) — `pnpm -C api test` TRUNCATEs whatever DATABASE_URL points at
 
 Live incident 2026-07-29: running the api suite with `.env.local`'s DATABASE_URL wiped `ship_dev`
