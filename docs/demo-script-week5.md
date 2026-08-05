@@ -38,9 +38,13 @@ title ("Demo: payment retries failing") → **no assignee, no week** → click o
 
 **1:10 — Tab 3, quiet trace** *(traces, different paths)*:
 > "Observability is LangSmith, on from day one. This is my favorite trace:
-> the agent swept a healthy project, found nothing, and stopped — 67
-> milliseconds, zero AI tokens. Knowing when to stay quiet is a designed
+> the agent swept a healthy project, found nothing, and stopped —
+> thirty-three milliseconds, zero AI tokens, and you can see there's no
+> model call anywhere in this run. Knowing when to stay quiet is a designed
 > outcome, and it's what makes this a graph and not a pipeline."
+
+*(The 0.03 s duration and 0 tokens are visible on the trace page itself; the
+input panel shows the sweep trigger — started by the clock, not a user.)*
 
 **1:40 — Tab 4, finding trace**:
 > "Same graph, different conditions, different path: here it detects a
