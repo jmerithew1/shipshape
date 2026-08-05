@@ -18,9 +18,10 @@ Recorder: Win + G (Game Bar) → Record (or Win + Alt + R), browser full-screen,
 ## Script
 
 **0:00 — Tab 1, Issues view.**
-> "This is FleetGraph running live on Ship — deployed on Render entirely
-> through Terraform. I'm going to create a problem, and while the agent finds
-> it on its own, I'll show you around."
+> "This is Ship — our project management tool, live on Render, deployed
+> entirely through Terraform. What I built this week is FleetGraph — the
+> intelligence agent living inside it. I'm going to create a problem in
+> Ship, and FleetGraph will find it on its own while I show you around."
 
 **0:15 — Create the trigger** *(proactive detection, real data)*: New issue →
 title ("Demo: payment retries failing") → **no assignee, no week** → click out.
