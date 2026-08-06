@@ -49,8 +49,11 @@ Create the issue: title, **no assignee, no week**, click out.
 > swept a healthy project, found nothing, and stopped — thirty-three
 > milliseconds, zero AI tokens, no model call anywhere in the run. Staying
 > quiet is a designed outcome. Measured across development: ninety-four
-> percent of all graph runs never touched a model — total AI spend to
-> build this, about four cents."
+> percent of all graph runs never touched a model — and when one does, a
+> triage run costs under a penny and a chat answer about three cents.
+> Total AI spend to build everything you're watching: about four cents.
+> The full measured breakdown — tokens in and out, projections at ten
+> thousand users — is in the cost analysis."
 
 **1:30 — Tab 3** (Input panel pre-loaded)
 > "Same graph, different day: one sweep caught everything wrong at once — a
