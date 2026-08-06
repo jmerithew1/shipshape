@@ -2,9 +2,9 @@
  * Deterministic detectors — plain SQL, no LLM. These gate the model: a sweep
  * over a healthy project ends here with zero candidates and zero tokens.
  *
- * MVP detectors: orphan_intake (the grader-provokable anchor) and
- * stale_issue. stuck_review / urgent_idle / week_slip / due_soon_idle land
- * Thursday (plan step 8).
+ * Detector family: orphan_intake (the grader-provokable anchor),
+ * stale_issue, stuck_review, urgent_idle, due_soon_idle (K3), week_slip —
+ * all shipped; thresholds are calendar-day v1 constants below.
  *
  * Recipient resolution is deterministic (FLEETGRAPH.md §Who it notifies):
  * assignee first, then project owner_id via RACI properties.

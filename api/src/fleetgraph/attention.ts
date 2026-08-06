@@ -115,9 +115,11 @@ export function gateRecipients(params: {
       notify.push(userId); // no history → default to interrupting (cold start)
       continue;
     }
-    // Forced probe: never let adaptation become permanent silence.
+    // Forced probe: never let adaptation become permanent silence. A row
+    // with no notification timestamp means this user has never been
+    // interrupted for this finding type — probe-eligible immediately.
     const last = row.last_notified_at ? new Date(row.last_notified_at) : null;
-    if (last && (now.getTime() - last.getTime()) / 86_400_000 > PROBE_DAYS) {
+    if (!last || (now.getTime() - last.getTime()) / 86_400_000 > PROBE_DAYS) {
       notify.push(userId);
       continue;
     }

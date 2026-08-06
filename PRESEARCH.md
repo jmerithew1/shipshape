@@ -1,5 +1,12 @@
 # PRESEARCH — FleetGraph (Week 5)
 
+> **Reading note (added 2026-08-06):** this file records the *design-time*
+> answers from the pre-search phase, preserved as-written. Where the shipped
+> architecture evolved (e.g. the HITL gate shipped as a REST disposition
+> endpoint rather than in-graph `interrupt()` nodes; two of the seven
+> discovered use cases were deliberately deferred), FLEETGRAPH.md is the
+> as-shipped source of truth.
+
 Completed pre-search checklist. Long-form reasoning lives in `FLEETGRAPH.md`;
 this file answers each prompt directly. Decisions logged in `DECISIONS.md`.
 
@@ -39,7 +46,7 @@ this file answers each prompt directly. Decisions logged in `DECISIONS.md`.
 
 ### 2. Use Case Discovery (minimum 5)
 
-Seven defined — FLEETGRAPH.md §Use Cases, each with role / trigger / detects-
+Seven discovered (five built, two deliberately deferred) — FLEETGRAPH.md §Use Cases, each with role / trigger / detects-
 produces / human-decides. Discovered from pain points the platform already
 witnesses (Weeks 1–4 usage): silent stalls, stuck reviews, midweek slips
 nobody names until retro, unowned intake, unlogged standups — plus the
@@ -102,7 +109,7 @@ PM (1, 3, 4, 5, 7), Engineer (1, 2, 7).
   surface.
 - **Dismiss / snooze:** dismissal records disposition and suppresses that
   condition instance permanently; snooze re-arms the dedup key with an expiry
-  (default 2 business days). Both resume the interrupted graph so the trace
+  (default 2 days, calendar v1). Both record dispositions so the audit trail
   shows the human's decision.
 
 ### 7. Error and Failure Handling

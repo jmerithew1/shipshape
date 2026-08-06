@@ -1,6 +1,6 @@
 # FLEETGRAPH — Project Intelligence Agent for Ship
 
-> **Status banner — MVP checkpoint (2026-08-04).**
+> **Status banner — Final (2026-08-06).**
 > Updated at each checkpoint. Shipped capabilities cite files/commits;
 > anything not yet wired stays labeled 🔜.
 
@@ -37,8 +37,8 @@ platform administration.
 
 | Signal | Source of truth | Why it matters |
 | --- | --- | --- |
-| Issue staleness (`in_progress` with no activity ≥ 3 business days during an active week) | `documents` + activity/comments | Silent stalls are the #1 drift mode |
-| Stuck reviews (`in_review` > 2 business days) | issue `state` transitions | Reviews are where urgent work quietly dies |
+| Issue staleness (`in_progress` with no activity ≥ 3 days — calendar days, v1) | `documents` + activity/comments | Silent stalls are the #1 drift mode |
+| Stuck reviews (`in_review` > 2 days — calendar days, v1) | issue `state` transitions | Reviews are where urgent work quietly dies |
 | Urgent-but-idle (`priority = urgent` and state ∉ {in_progress, in_review, done}) | issue properties | Priority that nobody is acting on is a lie |
 | Week slip risk (completion rate vs. elapsed time in the active week) | issues associated to active week | Catch slips midweek, not at retro |
 | Orphaned intake (issue created with no assignee and no week) | issue create events | Unowned work never ships |
@@ -168,7 +168,7 @@ flowchart TD
 ```
 
 **Conditional edges** (each produces a visibly different LangSmith trace —
-`api/src/fleetgraph/graph.ts:246-251`):
+`api/src/fleetgraph/graph.ts` (the conditional-edge block after `runDetectors`)):
 1. `runDetectors` → `recordQuiet` (proactive, zero candidates — zero tokens)
 2. `runDetectors` → `respond` (on-demand mode)
 3. `runDetectors` → `triage` → `notify` (candidates found)
@@ -179,9 +179,9 @@ writes the finding + allowlisted proposal; the human decides on the card
 the deterministic executor applies approved mutations with agent-attributed
 audit rows. An in-graph `interrupt()` + Postgres-checkpointer variant (gate
 visible inside the trace, resumable across restarts) is designed and
-scheduled with Thursday's work — the current gate is fully functional and
-verified live; the checkpointer version is trace-cosmetic, not
-safety-functional.
+**deliberately deferred post-submission** — the shipped REST gate is fully
+functional, regression-tested, and verified live; the checkpointer version
+is trace-cosmetic, not safety-functional.
 
 **State:** distinct keys per parallel fetch node (`issues`, `weeks`,
 `recentActivity`) plus `{ trigger, mode, workspaceId, projectScope,
@@ -204,8 +204,8 @@ behavior set.
 | # | Role | Trigger | Agent detects / produces | Human decides |
 | --- | --- | --- | --- | --- |
 | 1 | PM | Event: issue created, then still without assignee and week after a 90 s no-edit grace window (Ship's Untitled-first model means every issue is born momentarily orphaned) | Orphan finding + proposed assignee based on current load and history, with inline assignee picker on the card; grace window stated on the card | Approve / change (inline picker) / reject |
-| 2 | Engineer / PM | Sweep: `in_progress` issue, no activity ≥ 3 business days in active week | Stale-issue finding phrased about the artifact, drafted nudge to assignee; escalation to project owner is forewarned on the card, never silent | **Still on it** (one tap, resets clock, notifies nobody) / reassign / snooze |
-| 3 | Engineer | Event: issue enters `in_review`, then sweep finds it there > 2 business days — or `urgent` priority sitting idle | Stuck-review / urgent-idle finding, names who can unblock, drafts the ask (sent as the agent, attributed — never ghost-written) | Approve sending the nudge; approve any reassignment |
+| 2 | Engineer / PM | Sweep: `in_progress` issue, no activity ≥ 3 days (calendar, v1) | Stale-issue finding phrased about the artifact, drafted nudge to assignee; escalation to project owner is forewarned on the card, never silent | **Still on it** (one tap, resets clock, notifies nobody) / reassign / snooze |
+| 3 | Engineer | Event: issue enters `in_review`, then sweep finds it there > 2 days (calendar, v1) — or `urgent` priority sitting idle | Stuck-review / urgent-idle finding, names who can unblock, drafts the ask (sent as the agent, attributed — never ghost-written) | Approve sending the nudge; approve any reassignment |
 | 4 | PM | Sweep, midweek: completion rate vs. elapsed time in active week below threshold | Slip-risk forecast with evidence inline ("70% elapsed, 20% done") + scope-cut candidates as per-item checkboxes | Approve the checked subset; unchecked items recorded as dismissed |
 | 5 | All roles | User opens agent chat on an issue / week / project view | Grounded answers from the view's neighborhood; header + suggested questions prove the scoping at first paint; proposed actions where relevant | Approves any proposed mutation before it executes |
 
@@ -254,8 +254,9 @@ Event hooks shipped at MVP: the issue create route (`POST /api/issues`,
 `logDocumentChange` (`api/src/utils/document-crud.ts:63`) — chosen against
 call-site evidence, because the change logger alone never fires on creation.
 Hooks on the generic `POST /api/documents` create path and wiki→issue type
-conversion land Thursday; until then those paths are covered by the 2-minute
-sweep backstop (worst-case latency still inside the 5-minute window).
+conversion are **deliberately deferred**: those paths are covered by the
+2-minute sweep backstop (worst-case latency still inside the 5-minute
+window), so the extra hooks buy seconds, not correctness.
 Creation is the MVP
 anchor's trigger.
 
@@ -288,9 +289,9 @@ orders of magnitude tighter than needed — chosen anyway because it is free
 
 ## Test Cases
 
-*Full table due at Early Submission (Thursday). Rows 1, 5 and Q already carry
-real production/local trace links from the MVP timed rehearsal; rows 2–4 fill
-in as their seeded runs and detectors land Thursday.*
+*Complete. Rows 1, 5 and Q carry production/local trace links from the MVP
+timed rehearsal; rows 2–4 were filled 2026-08-06 from one seeded
+multi-detector sweep (see the note below the table).*
 
 | # | Ship state (seeded, real data — no mocks) | Expected output | Trace link |
 | --- | --- | --- | --- |
@@ -357,7 +358,8 @@ defense-day plan was ActionItems-surface cards plus a LangGraph `interrupt()`
 gate; live field feedback moved the surface to a global widget (findings must
 live where people are, DECISIONS.md 2026-08-04), and the interrupt-based
 in-graph gate — which makes the human decision visible inside the trace and
-resumable via the Postgres checkpointer — is scheduled with Thursday's work.
+resumable via the Postgres checkpointer — is deliberately deferred
+post-submission (see the graph section note).
 The shipped gate is equally safe (same executor, same allowlist); the
 interrupt variant is trace-visibility polish. Snooze re-arms the dedup key
 with an expiry. *Rejected:* new bell/inbox page (the widget is lighter and
@@ -398,8 +400,9 @@ stale terraform note, and `/ready` still asserts the agent tables exist so any
 future defect of this class can never hide; (4) `terraform
 destroy` takes `render_postgres` (and all data) with it, and the start command
 migrates but never seeds — so the destroy-and-redeploy proof includes a
-scripted repopulation step (`pnpm db:seed` + demo-scenario script) as a
-documented part of the procedure, plus a tfstate backup. Destroy-and-redeploy
+documented repopulation step (as executed 2026-08-04: the app's own
+first-run setup wizard on the fresh database; `pnpm db:seed` remains the
+scripted alternative), plus a tfstate backup. Destroy-and-redeploy
 test re-run for Week 5 with the agent in place.
 
 **Resilience (Engineering Requirements).** All outbound calls (Anthropic;
@@ -474,16 +477,6 @@ by project count) + 1–3 chat turns per active user per day. Worst-case daily
 LLM spend per active project ≈ 15 × $0.008 + 3 users × 3 × $0.029 ≈
 **$0.38/day** — the cost structure scales with problems found and questions
 asked, not with monitoring coverage (see §Trigger Model).
-
-**Development and testing costs** — tracked via `agent_runs` (tokens in/out,
-model, latency per run) + Anthropic console cross-check.
-
-| Item | Amount |
-| --- | --- |
-| Claude API — input tokens | *(measured at final)* |
-| Claude API — output tokens | *(measured at final)* |
-| Total invocations during development | *(measured at final)* |
-| Total development spend | *(measured at final)* |
 
 ### Production cost projections
 

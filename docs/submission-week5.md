@@ -36,7 +36,7 @@
 | --- | --- |
 | Graph + ≥1 proactive detection e2e, real data, no mocks | Orphan intake live: planted unassigned issue → sweep → Haiku-triaged card in `agent_findings` (`path=finding`, 2 055 ms). Trigger = in-process events (create route + `logDocumentChange` chokepoint) + 2-min SQL-only sweep. |
 | LangSmith tracing, ≥2 links, different execution paths | Three public links above: finding vs quiet vs chat — same graph, visibly different paths (quiet ends at `recordQuiet`, zero tokens). |
-| FLEETGRAPH.md: Responsibility, Diagram, ≥5 Use Cases, Trigger Model | All complete; status banner separates ✅ shipped (file-cited) from 🔜 scheduled. |
+| FLEETGRAPH.md: Responsibility, Diagram, ≥5 Use Cases, Trigger Model | All complete; every status-banner row is ✅ with a file citation. |
 | ≥1 human-in-the-loop gate | Approval card → Approve executed live: issue assigned, `document_history.automated_by='fleetgraph'`. Executor is a deterministic allowlist (no delete/auth/external verbs). |
 | Agent chat + notifications accessible in UI | Global bottom-right FleetGraph widget on every page (toast on new findings, severity-scaled re-pulse, nothing rendered when quiet); "Ask FleetGraph" panel on every document view — scoped ("Discussing: <title>"), grounded (cites real state/assignee/timestamps). No standalone chat page. |
 | Deployed via Terraform: agent service, env config w/o secrets, /health + /ready, annotated plan, destroy-and-redeploy | `terraform/render/`: Starter tier (idling would kill the proactive guarantee), FleetGraph env via sensitive TF_VARs, `auto_deploy=false` + CI-gated deploy job. Plan/apply outputs committed. **Destroy-and-redeploy proof completed 2026-08-04**: full environment (project + Postgres + service) torn down (`terraform/render/out/13-destroy-week5.txt`) and recreated from config alone (`out/14-apply-redeploy-week5.txt`, "3 added"); fresh instance immediately served `/ready` `{"agent_tables":true}` on a brand-new database — the migration story works from nothing. Repopulation via the app's own first-run setup wizard. |
@@ -65,7 +65,8 @@
 - Cards are built from behavioral-econ decisions (defaults, friction
   asymmetry, loss framing, incentive-compatible disclosure) — documented in
   FLEETGRAPH.md and DECISIONS.md; the credibility-weighted alerting
-  mechanism (E1) is schema'd and accumulating evidence since MVP, with
-  thresholding scheduled Thu–Fri.
+  mechanism (E1) is fully shipped: Thompson-sampled interrupt gate with
+  critical bypass and a forced probe (api/src/fleetgraph/attention.ts),
+  deterministically tested on both sides of the threshold.
 - Deferred by design, with rationale: accountability-gap detection, daily
   digest (FLEETGRAPH.md §Discovered, deliberately deferred).
