@@ -1,5 +1,25 @@
 # CHANGES — implementation dev docs
 
+## Week 5 addendum · Final scope shipped 2026-08-06
+
+**Added since MVP:** four more detectors (`stuck_review`, `urgent_idle`,
+`due_soon_idle`, `week_slip` — the last with a multi-item proposal and a
+per-item checkbox card whose server side only executes ids present in the
+stored proposal); `api/src/fleetgraph/attention.ts` (E1 credibility gate —
+discounted Beta + Thompson sampling, injectable RNG; K1 safe disclosure);
+CI E2E suite `api/src/fleetgraph/e2e-modes.test.ts` + `test-fakes.ts`
+(both agent modes + breaker-open degradation on intent-keyed fakes, zero
+live LLM — this is the durable graceful-degradation demonstration);
+regression suites `detectors.test.ts` + `agent.test.ts`.
+
+**Test it:** all suites run in CI automatically (`src/**/*.test.ts`).
+Locally: `pnpm --filter @ship/api test`. Week-slip needs an active week —
+computed from `workspaces.sprint_start_date`, not `properties.status`.
+
+**Roll back:** all additive; `FLEETGRAPH_ENABLED=false` remains the kill
+switch; attention gating degrades to notify-everyone if `agent_credibility`
+is empty (cold start = interrupt by default).
+
 ## Week 5 — FleetGraph (project-intelligence agent) · MVP 2026-08-04
 
 **What was built:** LangGraph.js agent inside the API — `api/src/fleetgraph/`

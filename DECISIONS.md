@@ -5,6 +5,25 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-06 — Final push in one day: detector family + E1 gate + CI E2E, agent-orchestrated
+
+James's call: collapse Early→Final into one push. Execution model: agents
+only ever create NEW files (E2E harness, regression suites); every shared
+file is serialized through one writer — zero merge collisions by
+construction; builders launch only against committed contracts. Shipped:
+stuck_review / urgent_idle / due_soon_idle (K3) / week_slip detectors with
+auto-resolve clauses; E1 Thompson-sampled credibility gate + K1 disclosure
+in `attention.ts` (injectable RNG; critical bypass; 5-day forced probe;
+visibility never gated — attention is); per-item checkbox card with
+server-side subset allowlist; CI E2E on intent-keyed fakes covering both
+modes + breaker-open degradation (the durable form of the
+graceful-degradation demo). One sweep detected all three seeded states in
+a single trace — linked per-row in Test Cases.
+**Rejected:** letting agents edit shared files in parallel (merge risk on a
+deadline); request-hash LLM fixtures (re-record treadmill — intent-keyed
+fakes instead); a recorded degradation video as the primary evidence (a CI
+test proves it on every push; a video proves it happened once).
+
 ## 2026-08-04 — Notification model: three iterations of live field feedback (James)
 
 The notification surface was redesigned three times in one evening by the

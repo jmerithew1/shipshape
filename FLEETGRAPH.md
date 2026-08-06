@@ -15,9 +15,10 @@
 | Context chat panel — embedded in the document view, scoped, 401-aware | ✅ shipped — `web/src/components/AgentChatPanel.tsx` |
 | LangSmith tracing with public links for distinct paths | ✅ shipped — Test Cases table |
 | `/health` + `/ready` (asserts agent tables exist) | ✅ shipped — `api/src/app.ts` |
-| Detectors: stuck-review / urgent-idle / week-slip / due-soon-idle | 🔜 designed — Thursday (plan step 8) |
-| E1 credibility thresholding (dispositions already feeding `agent_credibility`) | 🔜 designed — Thu–Fri |
-| CI E2E on recorded fixtures + regression per use case | 🔜 designed — Wednesday |
+| Detectors: stuck-review / urgent-idle / week-slip (checkbox proposal) / due-soon-idle (K3) | ✅ shipped — `api/src/fleetgraph/detectors.ts`, traced in Test Cases |
+| E1 credibility gate (Thompson-sampled interrupts) + K1 safe disclosure | ✅ shipped — `api/src/fleetgraph/attention.ts` (injectable RNG; critical bypass; forced probe; findings always visible — attention is gated, visibility is not) |
+| CI E2E both modes on stable intent-keyed fakes + breaker-open degradation | ✅ shipped — `api/src/fleetgraph/e2e-modes.test.ts` + `test-fakes.ts` (runs in CI, zero live LLM) |
+| Regression tests per use-case behavior | ✅ shipped — `api/src/fleetgraph/detectors.test.ts`, `api/src/routes/agent.test.ts` |
 
 > 2026-08-03, post-defense: a three-lens scoping pass (economics / psychology
 > / technology) amended this design before build start. Build scope is the 5
@@ -95,7 +96,26 @@ high 1 h / medium 2 h / low 4 h), after which an undecided finding re-pulses;
 only a disposition clears it for good; and zero findings renders **nothing**
 — the agent earns screen space, it does not reserve it. The agent earning the
 right to be listened to is a design goal: **the quiet path is a first-class
-graph outcome.**
+graph outcome.** (The grace-window + auto-resolve pair is PagerDuty's
+"Auto-Pause" noise-reduction pattern ported to project tooling.)
+
+**E1 — credibility-weighted interrupts** (`api/src/fleetgraph/attention.ts`):
+per (user × finding type) the agent keeps a discounted Beta posterior on
+"was this finding useful" — `α ← 0.9α + engaged; β ← 0.9β + ignored`,
+updated on every disposition (`api/src/routes/agent.ts`). Before
+interrupting, it samples `p̃ ~ Beta(α, β)` (Thompson sampling — exploration
+built in, no death spiral) and interrupts only when
+`severity ≥ θ₀ + c·(1 − p̃)`. Guards: critical always interrupts; a forced
+probe fires if a user has heard nothing for 5 days; and the finding row is
+**always** written — attention is gated, visibility is not. Suppressed
+recipients are recorded in the finding's evidence so the card can explain
+itself. No shipped competitor adapts per-user interrupt thresholds from
+response behavior (research pass, DECISIONS.md 2026-08-03).
+
+**K1 — safe disclosure (incentive compatibility):** a recent Still-on-it on
+the same document demotes the next finding one severity step, drops the
+owner escalation, and has triage frame the card as a proactive update
+("Self-reported:") — reporting bad news early always beats hiding it.
 
 ### How it knows who is on a project and their role
 
@@ -174,10 +194,12 @@ runs.
 
 ## Use Cases
 
-Five use cases defined. As of the MVP checkpoint: #1 (orphan) and #5 (chat)
-are built and traced on production, plus the quiet path; #2 (stale) is built
-and awaiting its seeded test-case trace; #3–#4 detectors land Thursday with
-their traces and regression tests (per-row status in the Test Cases table).
+Five use cases defined — **all five built, traced, and regression-tested**
+(per-row trace links in the Test Cases table; tests in
+`api/src/fleetgraph/detectors.test.ts`, `api/src/routes/agent.test.ts`, and
+the CI E2E suite `e2e-modes.test.ts`). The detector family also includes the
+K3 due-soon-idle rule and the urgent-idle proxy inside use case #3's
+behavior set.
 
 | # | Role | Trigger | Agent detects / produces | Human decides |
 | --- | --- | --- | --- | --- |
@@ -273,15 +295,21 @@ in as their seeded runs and detectors land Thursday.*
 | # | Ship state (seeded, real data — no mocks) | Expected output | Trace link |
 | --- | --- | --- | --- |
 | 1 | Issue created live with no assignee, no week, left untouched through the 90 s grace window (grader-provokable; this is the timed-latency test) | Orphan finding + proposed assignee + approval card, visible < 5 min. **Measured on production 2026-08-04: created 19:15:07 → card 19:20:02 = 4 m 55 s** (grace window reset while the title was typed, by design) | [prod trace](https://smith.langchain.com/public/06df5809-5e0a-431c-a00b-a6c2a2d26de6/r) · [local trace](https://smith.langchain.com/public/9e688edf-1545-4de8-8915-0b0d198e40e1/r) |
-| 2 | Issue `in_progress`, `updated_at` back-dated 4 business days, active week | Stale finding; nudge drafted to assignee; Still-on-it available; dedup key recorded | *(pending — Thu run)* |
-| 3 | Issue in `in_review` for 3 business days | Stuck-review finding naming reviewer path; attributed ask drafted | *(pending — detector lands Thu)* |
-| 4 | Active week, 70% elapsed, 20% issues done | Slip-risk finding, evidence inline, per-item checkbox card | *(pending — detector lands Thu)* |
+| 2 | Issue `in_progress`, `updated_at` back-dated 4 days (calendar days, v1) | Stale finding "Refactor auth session cache has had no activity…"; Still-on-it available; dedup key recorded | [sweep trace](https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r) — `stale_issue` candidate |
+| 3 | Issue in `in_review`, idle 3 days | Stuck-review finding "…in review, idle 2 days"; attributed ask | [same sweep trace](https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r) — `stuck_review` candidate |
+| 4 | Active week (computed window) 64% elapsed, 0/3 done | Slip finding, loss-framed ("all 3 issues not started with 64% of week elapsed"), high severity, per-item checkbox proposal | [same sweep trace](https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r) — `week_slip` candidate |
 | 5 | Chat opened on issue "Payment webhook retries fail silently": "What's the current state of this issue?" | Grounded answer citing the issue's real state/priority/assignee/timestamps; different trace shape from proactive runs | [chat trace](https://smith.langchain.com/public/810f4f6b-648b-4e47-9a77-8145a0b3ecc6/r) |
 | Q | Healthy project, sweep fires | **Quiet path** — trace ends at `recordQuiet`, zero LLM calls (run logged `path=quiet`, 67 ms) | [quiet-path trace](https://smith.langchain.com/public/08dd7d9f-dcd6-486a-9c43-d0ec8fc17639/r) |
 
 Test case Q is deliberate: the quiet path and the finding path are the two
 shared trace links for MVP — proof the graph branches ("a graph that looks
 identical across every run is a pipeline").
+
+Rows 2–4 share one trace on purpose: all three states were seeded and one
+sweep detected all of them in a single run — the trace's triage input shows
+the `stale_issue`, `stuck_review`, and `week_slip` candidates side by side,
+which demonstrates the detector family more strongly than three separate
+runs would.
 
 ---
 
@@ -390,12 +418,40 @@ deploys instead.
 
 ---
 
+**Attention as mechanism design (E1 + K1 + K3 + B1, shipped 2026-08-06).**
+Notification policy is code, not configuration: E1's Thompson-sampled
+credibility gate (`attention.ts`, injectable RNG so CI tests both sides of
+the threshold deterministically), K1's disclosure rule, K3's due-soon-idle
+detector (present-bias/student-syndrome), and B1's loss-framed slip copy in
+the triage prompt. *Rejected:* static per-org thresholds (what every
+competitor ships; can't distinguish Dana from Sam); greedy posterior-mean
+gating without sampling (death-spiral risk — a user who dismissed early
+would never be interrupted again); gating finding *visibility* rather than
+interrupts (hiding information from the panel punishes the user for the
+agent's miscalibration). The checkbox card's server side enforces an
+allowlist-within-the-allowlist: only issue ids present in the stored
+proposal can execute, whatever the client sends.
+
 ## Cost Analysis
 
-*Full measured analysis due at Final Submission, from the `agent_runs`
-accounting table + Anthropic console. The MVP-due performance metrics —
-cost per graph run and estimated runs per day — are documented and defended
-here now, as estimates built on one observed production run.*
+### Development and testing costs (measured, 2026-08-04 → 2026-08-06)
+
+Sources: LangSmith traces (per-call token counts, `fleetgraph` project) and
+the local `agent_runs` accounting table. CI and the test suites use fakes —
+zero live tokens by design.
+
+| Item | Amount |
+| --- | --- |
+| Claude API — input tokens | **11,484** (haiku 3,851 · sonnet 7,633) |
+| Claude API — output tokens | **1,608** (haiku 1,445 · sonnet 163) |
+| LLM calls during development | **7** (6 triage on claude-haiku-4-5, 1 chat on claude-sonnet-5) |
+| Graph invocations (local accounting table) | **130** — 122 quiet · 4 finding · 1 chat · 3 error (early column-name bug, fixed) |
+| — plus production sweeps | continuous 2-min cadence since 2026-08-04, ≈720/day, ~all quiet ($0) |
+| Total development LLM spend | **≈ $0.04** (haiku $0.011 + sonnet $0.025 at $1/$5 and $3/$15 per MTok) |
+
+The 130-run/7-LLM-call ratio is the cost architecture in one line: **94% of
+graph runs never touched a model.** Deterministic detectors and dedup gate
+the LLM, so spend tracks problems found, not monitoring performed.
 
 ### Cost per graph run (MVP estimate, defended)
 
@@ -429,12 +485,32 @@ model, latency per run) + Anthropic console cross-check.
 | Total invocations during development | *(measured at final)* |
 | Total development spend | *(measured at final)* |
 
-**Production projection model** (assumptions to defend, structure of the estimate):
-- Sweeps are SQL-only: 720/day/project (2-min default) × $0 LLM when quiet — sweep cost ≈ $0
-- LLM runs only on: rule hits (est. 5–15/project/day) + on-demand chat (est. 1–3/user/day)
-- Triage run ≈ 3–5k in / 0.5–1k out on Haiku; chat turn ≈ 4–8k in / 0.5–1k out on Sonnet
-- Cost cliffs: fetch-stage over-fetching (mitigated: scoped SQL, not "select the workspace"), chat sessions with long histories (mitigated: neighborhood cap + summary compaction)
+### Production cost projections
 
-| 100 users | 1,000 users | 10,000 users |
-| --- | --- | --- |
-| $___/mo *(computed at final)* | $___/mo | $___/mo |
+Assumptions (each defended; measured per-call sizes match the dev data
+above within its ranges):
+- **Proactive runs per project per day:** 8 LLM triage runs (rule hits;
+  sweeps themselves are SQL-only — 720/day/project at $0)
+- **On-demand invocations per user per day:** 0.5 chat turns (≈20% daily
+  actives × 2–3 questions)
+- **Average tokens per invocation:** triage ≈ 4k in / 0.75k out
+  (claude-haiku-4-5); chat ≈ 7.5k in / 0.5k out (claude-sonnet-5 — the
+  measured chat call was 7.6k in / 163 out)
+- **Cost per run:** triage ≈ $0.008 · chat ≈ $0.030 · quiet sweep $0
+- **Projects:** ≈ 1 per 10 users
+- **Estimated runs per day (1,000 users):** 72,000 sweeps ($0) + ~800
+  triage + ~500 chat
+
+| | 100 users | 1,000 users | 10,000 users |
+| --- | --- | --- | --- |
+| Triage (8/project/day) | $0.64/day | $6.40/day | $64/day |
+| Chat (0.5/user/day) | $1.45/day | $14.50/day | $145/day |
+| **LLM total** | **≈ $63/mo** | **≈ $630/mo** | **≈ $6,300/mo** |
+
+Structure of the number: chat dominates ~70% at every scale — the
+monitoring itself is nearly free. Stated cost levers, in order of impact:
+route chat to claude-haiku-4-5 (÷10 on the dominant term → ~$2.1k/mo at
+10k users), prompt-cache the stable neighborhood prefix, and cap chat
+neighborhoods (already designed). Cost cliffs and their mitigations:
+fetch-stage over-fetching (scoped SQL, never "select the workspace") and
+long chat histories (neighborhood cap + compaction).

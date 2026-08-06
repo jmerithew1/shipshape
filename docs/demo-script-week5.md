@@ -95,6 +95,19 @@ Stop recording (Win + Alt + R).
 | Trigger model (events + sweep + grace) | spoken at 0:15 / 3:00 / 3:30 |
 | FLEETGRAPH.md sections | repo artifacts — no camera time needed |
 
+## Final-scope addendum (optional 30 seconds, after the Approve beat)
+
+If re-recording for Final, add one beat while on the findings panel:
+
+> "Two more things shipped since the MVP. When a whole week is slipping,
+> the card lists the not-started issues with checkboxes — I approve moving
+> only the ones I check; the server refuses anything not in the agent's own
+> proposal. And the agent now keeps a credibility score on itself, per
+> person: if it's been wasting your attention, it raises its own bar before
+> interrupting you again — critical findings always get through, and it
+> re-checks in with you after five quiet days. Notifications as mechanism
+> design, not settings."
+
 ## Practical notes
 
 - Dry-run the first minute once: toast timing depends on the sweep. If the

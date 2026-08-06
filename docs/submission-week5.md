@@ -1,4 +1,15 @@
-# Week 5 MVP Submission — FleetGraph
+# Week 5 Submission — FleetGraph
+
+> **Final-scope status (2026-08-06):** everything below remains true, plus —
+> all five use cases built + traced + regression-tested (multi-detector
+> sweep trace: https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r);
+> E1 credibility-weighted interrupts + K1 safe disclosure shipped
+> (`api/src/fleetgraph/attention.ts`); per-item checkbox card for week-slip;
+> CI E2E for both agent modes + breaker-open degradation on stable
+> intent-keyed fakes (zero live LLM); Cost Analysis is measured (11,484 in /
+> 1,608 out tokens, 130 graph runs, ≈$0.04 dev spend — 94% of runs never
+> touched a model) with 100/1k/10k projections and stated assumptions in
+> FLEETGRAPH.md §Cost Analysis.
 
 ## Links
 
