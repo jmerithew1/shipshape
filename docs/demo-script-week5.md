@@ -1,4 +1,22 @@
-# Week 5 MVP Demo Recording — single-take, one-window script
+# Week 5 Demo Recording — FINAL cut (single-take, one window)
+
+**This is the Final-submission script** (5 tabs, ~5 min): the proven MVP
+flow plus one 40-second beat covering the full detector family, the
+checkbox card, and the credibility gate. Tab list: (1) Ship prod logged in,
+(2) /ready, (3) quiet trace 08dd7d9f…, (4) multi-detector sweep trace
+f2d6e21e-14f4-4e96-84e5-1a23f5267842, (5) prod timed-run trace 06df5809….
+New beat at ~1:50 (over tab 4): one sweep caught stale + stuck-review +
+week-slip at once; the slip title is loss-framed ("all 3 issues not started
+with 64% of week elapsed"); per-item checkboxes execute only the checked
+subset and the server refuses ids outside the agent's own proposal; the
+agent keeps a per-person credibility score on itself — wasted attention
+raises its own interrupt bar, critical always passes, five-day check-in.
+Also add at the wait beat: both modes E2E-tested in CI on fakes (zero live
+tokens) including a breaker-open degradation test; measured dev cost ≈4¢,
+94% of graph runs zero-LLM. Full final script as pasted in session
+2026-08-06; MVP cut below remains for reference.
+
+# Week 5 MVP Demo Recording — single-take, one-window script (MVP cut, recorded)
 
 Design constraints: simple, one browser window, every MVP requirement on
 camera, ~4–5 minutes. The trick: create the issue FIRST — the detection wait
