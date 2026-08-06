@@ -19,27 +19,55 @@ import type { FleetModels } from './models.js';
 import { BreakerOpenError } from './resilience.js';
 import {
   autoResolveCleared,
+  detectDueSoonIdle,
   detectOrphanIntake,
   detectStaleIssues,
+  detectStuckReview,
+  detectUrgentIdle,
+  detectWeekSlip,
 } from './detectors.js';
+import { applyDisclosureAndCredibility } from './attention.js';
 import type { TriagedFinding } from './types.js';
 
 const TRIAGE_SYSTEM_PROMPT = `You are FleetGraph, Ship's project-intelligence agent, writing notification cards.
 
 Hard rules:
-- Talk about the WORK, never the person. "Issue X has had no activity for 3 business days" — never "you haven't touched X".
+- Talk about the WORK, never the person. "Issue X has had no activity for 3 days" — never "you haven't touched X".
 - Ground every claim in the provided evidence. If a status claim (e.g. "almost done") contradicts the observed state, say what the data shows, neutrally.
-- Loss framing for risk: concrete outcomes ("this won't make Friday"), not abstract rates.
+- Loss framing for risk: concrete outcomes, not abstract rates. For week_slip findings, lead with what will miss the deadline ("N issues won't make the end of the week"), using evidence.notStartedCount/issueCount — never "completion rate X% at Y% elapsed".
+- Self-reported findings (evidence.selfReported = true) are framed as proactive updates, never as failures — prefix "Self-reported:".
 - One card per finding: a title (max 90 chars, leads with the plain-English claim) and a body (max 2 sentences: evidence receipt + what happens next, including any forewarned escalation).
 
 Respond in JSON: [{"dedupKey": "...", "title": "...", "body": "..."}] — one entry per finding, nothing else.`;
 
+/** Deterministic titles used whenever the model is unavailable or misses a key. */
+function ruleBasedTitle(c: { detector: string; documentTitle: string; evidence: Record<string, unknown> }): string {
+  switch (c.detector) {
+    case 'orphan_intake':
+      return `"${c.documentTitle}" has no assignee and no week`;
+    case 'stale_issue':
+      return `"${c.documentTitle}" has had no activity for ${String(c.evidence.idleDays ?? 3)} days`;
+    case 'stuck_review':
+      return `"${c.documentTitle}" has been sitting in review for ${String(c.evidence.idleDays ?? 2)}+ days`;
+    case 'urgent_idle':
+      return `"${c.documentTitle}" is urgent but nobody has started it`;
+    case 'due_soon_idle':
+      return `"${c.documentTitle}" is due ${String(c.evidence.dueDate ?? 'soon')} with no recent activity`;
+    case 'week_slip':
+      return `${String(c.evidence.notStartedCount ?? '?')} issue(s) in "${c.documentTitle}" won't make the end of the week`;
+    default:
+      return `"${c.documentTitle}" needs attention`;
+  }
+}
+
 export interface FleetGraphDeps {
   pool: Pool;
   models: FleetModels;
+  /** Injectable RNG for the E1 Thompson-sampling gate (seeded in tests). */
+  rng?: () => number;
 }
 
-export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
+export function buildFleetGraph({ pool, models, rng = Math.random }: FleetGraphDeps) {
   const graph = new StateGraph(FleetState)
     .addNode('ingestTrigger', async (s: FleetStateType) => ({
       mode: s.trigger.kind === 'chat' ? ('on_demand' as const) : ('proactive' as const),
@@ -112,11 +140,15 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
       // Housekeeping first: cards whose condition cleared disappear.
       await autoResolveCleared(pool, s.workspaceId);
 
-      const [orphans, stale] = await Promise.all([
+      const detected = await Promise.all([
         detectOrphanIntake(pool, s.workspaceId),
         detectStaleIssues(pool, s.workspaceId),
+        detectStuckReview(pool, s.workspaceId),
+        detectUrgentIdle(pool, s.workspaceId),
+        detectDueSoonIdle(pool, s.workspaceId),
+        detectWeekSlip(pool, s.workspaceId),
       ]);
-      const candidates = [...orphans, ...stale];
+      const candidates = detected.flat();
 
       // Dedup against active findings: known-and-notified costs zero tokens.
       if (candidates.length === 0) return { candidates };
@@ -126,7 +158,12 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
         [s.workspaceId],
       );
       const known = new Set(rows.map((r) => r.dedup_key));
-      return { candidates: candidates.filter((c) => !known.has(c.dedupKey)) };
+      const fresh = candidates.filter((c) => !known.has(c.dedupKey));
+      if (fresh.length === 0) return { candidates: fresh };
+
+      // K1 safe disclosure + E1 credibility gate — deterministic policy
+      // applied BEFORE the LLM sees anything (attention.ts).
+      return { candidates: await applyDisclosureAndCredibility(pool, s.workspaceId, fresh, rng) };
     })
 
     .addNode('recordQuiet', async () => ({ path: 'quiet' as const }))
@@ -135,10 +172,7 @@ export function buildFleetGraph({ pool, models }: FleetGraphDeps) {
       const fallback = (): TriagedFinding[] =>
         s.candidates.map((c) => ({
           ...c,
-          title:
-            c.detector === 'orphan_intake'
-              ? `"${c.documentTitle}" has no assignee and no week`
-              : `"${c.documentTitle}" has had no activity for ${String(c.evidence.idleDays ?? 3)} days`,
+          title: ruleBasedTitle(c),
           body: 'Rule-based (unranked) — the reasoning model was unavailable when this was detected.',
           ruleBasedOnly: true,
         }));

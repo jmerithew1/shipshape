@@ -48,6 +48,9 @@ const dispositionSchema = z.object({
   action: z.enum(['approve', 'change', 'dismiss', 'snooze', 'still_on_it']),
   // For 'change' on an assign proposal: the human-chosen assignee.
   assignee_id: z.string().uuid().optional(),
+  // For multi-item proposals (week-slip checkbox card): the CHECKED subset.
+  // Approve executes only these; unchecked items are recorded as declined.
+  issue_ids: z.array(z.string().uuid()).optional(),
 });
 
 // POST /api/agent/findings/:id/disposition
@@ -81,45 +84,91 @@ router.post(
           type?: string;
           issueId?: string;
           assigneeId?: string;
+          weekId?: string;
+          items?: Array<{ issueId: string; title: string }>;
         } | null;
 
-        // Deterministic allowlist: the ONLY mutation this endpoint can
-        // perform today is assigning an issue. Anything else is a 409.
-        if (!proposal || proposal.type !== 'assign_issue' || !proposal.issueId) {
-          res.status(409).json({
-            error: 'This finding has no executable proposal',
-          });
-          return;
-        }
-        const targetAssignee = action === 'change' ? assignee_id : proposal.assigneeId;
-        if (!targetAssignee) {
-          res.status(400).json({ error: 'change requires assignee_id' });
-          return;
-        }
+        // Deterministic allowlist: the ONLY mutations this endpoint can
+        // perform are (1) assigning an issue, (2) removing checked issues
+        // from a week. Anything else is a 409 — there is no delete, auth,
+        // or external verb here by design.
+        if (proposal?.type === 'assign_issue' && proposal.issueId) {
+          const targetAssignee = action === 'change' ? assignee_id : proposal.assigneeId;
+          if (!targetAssignee) {
+            res.status(400).json({ error: 'change requires assignee_id' });
+            return;
+          }
 
-        const updated = await pool.query(
-          `UPDATE documents
-              SET properties = jsonb_set(properties, '{assignee_id}', to_jsonb($1::text)),
-                  updated_at = NOW()
-            WHERE id = $2 AND workspace_id = $3 AND document_type = 'issue'
-              AND deleted_at IS NULL
-            RETURNING id`,
-          [targetAssignee, proposal.issueId, req.workspaceId],
-        );
-        if (updated.rowCount === 0) {
-          res.status(409).json({ error: 'Target issue no longer exists' });
+          const updated = await pool.query(
+            `UPDATE documents
+                SET properties = jsonb_set(properties, '{assignee_id}', to_jsonb($1::text)),
+                    updated_at = NOW()
+              WHERE id = $2 AND workspace_id = $3 AND document_type = 'issue'
+                AND deleted_at IS NULL
+              RETURNING id`,
+            [targetAssignee, proposal.issueId, req.workspaceId],
+          );
+          if (updated.rowCount === 0) {
+            res.status(409).json({ error: 'Target issue no longer exists' });
+            return;
+          }
+          // Agent-attributed audit trail: the human approved, the agent acted.
+          await logDocumentChange(
+            proposal.issueId,
+            'assignee_id',
+            null,
+            targetAssignee,
+            req.userId!,
+            'fleetgraph',
+          );
+          executed = `assigned to ${targetAssignee}`;
+        } else if (
+          proposal?.type === 'move_issues_out_of_week' &&
+          proposal.weekId &&
+          Array.isArray(proposal.items)
+        ) {
+          // Checkbox-card subset: execute ONLY ids the human checked, and
+          // only ids that were actually in the proposal (allowlist within
+          // the allowlist — the client cannot smuggle extra issues).
+          const proposedIds = new Set(proposal.items.map((i) => i.issueId));
+          const checked = (parsed.data.issue_ids ?? [...proposedIds]).filter((id) =>
+            proposedIds.has(id),
+          );
+          if (checked.length === 0) {
+            res.status(400).json({ error: 'approve requires at least one checked issue' });
+            return;
+          }
+
+          const moved: string[] = [];
+          for (const issueId of checked) {
+            const del = await pool.query(
+              `DELETE FROM document_associations da
+                USING documents i
+                WHERE da.document_id = $1 AND da.related_id = $2
+                  AND da.relationship_type = 'sprint'
+                  AND i.id = da.document_id AND i.workspace_id = $3
+                RETURNING da.document_id`,
+              [issueId, proposal.weekId, req.workspaceId],
+            );
+            if ((del.rowCount ?? 0) > 0) {
+              // Precedent: weeks.ts scope-change timeline logs field='sprint_id'.
+              await logDocumentChange(issueId, 'sprint_id', proposal.weekId, null, req.userId!, 'fleetgraph');
+              moved.push(issueId);
+            }
+          }
+          const declined = [...proposedIds].filter((id) => !checked.includes(id));
+          await pool.query(
+            `UPDATE agent_findings
+                SET evidence = evidence || jsonb_build_object(
+                      'movedIssueIds', $2::jsonb, 'declinedIssueIds', $3::jsonb)
+              WHERE id = $1`,
+            [finding.id, JSON.stringify(moved), JSON.stringify(declined)],
+          );
+          executed = `moved ${moved.length} issue(s) out of the week (${declined.length} declined)`;
+        } else {
+          res.status(409).json({ error: 'This finding has no executable proposal' });
           return;
         }
-        // Agent-attributed audit trail: the human approved, the agent acted.
-        await logDocumentChange(
-          proposal.issueId,
-          'assignee_id',
-          null,
-          targetAssignee,
-          req.userId!,
-          'fleetgraph',
-        );
-        executed = `assigned to ${targetAssignee}`;
       }
 
       const statusByAction: Record<string, string> = {

@@ -61,7 +61,14 @@ export interface CandidateFinding {
 export type ProposedAction =
   | { type: 'assign_issue'; issueId: string; assigneeId: string; reason: string }
   | { type: 'post_agent_comment'; documentId: string; body: string }
-  | { type: 'move_issue_out_of_week'; issueId: string; weekId: string; reason: string };
+  | { type: 'move_issue_out_of_week'; issueId: string; weekId: string; reason: string }
+  | {
+      /** Multi-item proposal for the per-item checkbox card (week slip). */
+      type: 'move_issues_out_of_week';
+      weekId: string;
+      items: Array<{ issueId: string; title: string; state: string; priority: string }>;
+      reason: string;
+    };
 
 export interface TriagedFinding extends CandidateFinding {
   title: string;

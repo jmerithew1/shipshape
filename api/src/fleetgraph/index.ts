@@ -37,15 +37,26 @@ export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetR
       if (!models) {
         // No LLM configured: still meaningless to run triage/chat, but the
         // deterministic half must not silently die. Run detectors directly.
-        const { detectOrphanIntake, detectStaleIssues, autoResolveCleared } = await import(
-          './detectors.js'
-        );
+        const {
+          detectDueSoonIdle,
+          detectOrphanIntake,
+          detectStaleIssues,
+          detectStuckReview,
+          detectUrgentIdle,
+          detectWeekSlip,
+          autoResolveCleared,
+        } = await import('./detectors.js');
         await autoResolveCleared(pool, trigger.workspaceId);
-        const [orphans, stale] = await Promise.all([
+        const detected = await Promise.all([
           detectOrphanIntake(pool, trigger.workspaceId),
           detectStaleIssues(pool, trigger.workspaceId),
+          detectStuckReview(pool, trigger.workspaceId),
+          detectUrgentIdle(pool, trigger.workspaceId),
+          detectDueSoonIdle(pool, trigger.workspaceId),
+          detectWeekSlip(pool, trigger.workspaceId),
         ]);
-        for (const f of [...orphans, ...stale]) {
+        const all = detected.flat();
+        for (const f of all) {
           await pool.query(
             `INSERT INTO agent_findings
                (workspace_id, project_id, document_id, detector, dedup_key,
@@ -68,8 +79,8 @@ export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetR
             ],
           );
         }
-        const path: RunPath = orphans.length + stale.length > 0 ? 'degraded' : 'quiet';
-        await logRun(pool, trigger, mode, path, null, Date.now() - started, orphans.length + stale.length);
+        const path: RunPath = all.length > 0 ? 'degraded' : 'quiet';
+        await logRun(pool, trigger, mode, path, null, Date.now() - started, all.length);
         return { path, chatResponse: null };
       }
 
