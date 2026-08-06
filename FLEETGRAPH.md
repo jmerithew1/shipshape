@@ -435,6 +435,18 @@ agent's miscalibration). The checkbox card's server side enforces an
 allowlist-within-the-allowlist: only issue ids present in the stored
 proposal can execute, whatever the client sends.
 
+## Engineering Requirements
+
+All five graded engineering requirements, each with its enforcement point:
+
+| ☑ | Requirement | Evidence |
+| --- | --- | --- |
+| ☑ | **Regression tests with rollback** — every use-case behaviour has a corresponding regression test; a failing CI run never stays deployed | Behaviour→test mapping: orphan+proposal+grace → `detectors.test.ts` ("orphan_intake: fires only past the 90s grace…") + `agent.test.ts` approve/change; stale+Still-on-it → `detectors.test.ts` + `agent.test.ts` still_on_it; stuck-review/urgent-idle/due-soon-idle → `detectors.test.ts`; week-slip checkbox subset → `detectors.test.ts` week_slip block + `agent.test.ts` subset/smuggling/400 tests; chat → `e2e-modes.test.ts`. Rollback: `auto_deploy=false` (`terraform/render/main.tf`) means the CI `deploy` job is the only push-driven path to production — no green `checks`+`secret-scan`, no deploy; a bad *shipped* behaviour rolls back via documented `git revert` + push (CHANGES.md), and `FLEETGRAPH_ENABLED=false` is the no-deploy kill switch |
+| ☑ | **E2E tests for critical workflows, both modes, in CI** — (1) event introduced → agent surfaces it within the window; (2) context-aware chat → grounded response | `api/src/fleetgraph/e2e-modes.test.ts`, auto-run by CI's api test step (verified in CI run 31122756650 logs: `✓ src/fleetgraph/e2e-modes.test.ts (4 tests)`): proactive seed→sweep→card-served with latency assertion; on-demand chat through the real route with grounding assertions |
+| ☑ | **External services mocked with stable fakes** — tests pass in CI regardless of network/API availability; the running agent still uses real Ship data | `api/src/fleetgraph/test-fakes.ts`: intent-keyed fakes (`FakeTriageModel` parses the real candidate payload and answers by dedup key — never request-hash fixtures); zero live LLM/network in any test; the deployed agent runs against the live database (no mocks) — the two requirements are satisfied simultaneously, as the assignment intends |
+| ☑ | **Retries, timeouts, circuit breakers; graceful degradation** | `api/src/fleetgraph/models.ts` (30 s timeout, 3 retries w/ exponential backoff via ChatAnthropic) + `resilience.ts` (breaker: opens after 5 consecutive failures, half-open probe at 60 s). Degradation is *demonstrated durably in CI on every push*: the breaker-open E2E test proves rule-based findings still land (`rule_based_only=true`) and chat answers honestly — nothing crashes or hangs. Ship-API-down is not a separate failure domain (in-process agent); sweeps resume idempotently via dedup keys |
+| ☑ | **Developer documentation** | `CHANGES.md` — Week-5 sections (MVP + Final addendum): what was built, run/test locally, deploy, roll back — written for the next engineer |
+
 ## Cost Analysis
 
 ### Development and testing costs (measured, 2026-08-04 → 2026-08-06)

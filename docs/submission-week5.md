@@ -43,6 +43,16 @@
 | Trigger model documented + defended | FLEETGRAPH.md §Trigger Model — hybrid, with the cost/latency table and the "silence needs a clock" argument. |
 | Detection latency < 5 min | **Measured on production: 4 m 55 s** (issue 19:15:07 UTC → card 19:20:02 UTC, incl. the deliberate 90 s grace window; full timeline + trace below). Cost per run and runs/day documented and defended in FLEETGRAPH.md §Cost Analysis. |
 
+## Engineering requirements → evidence
+
+| Requirement | Evidence |
+| --- | --- |
+| Regression test per use-case behaviour | 26 FleetGraph tests: `api/src/fleetgraph/detectors.test.ts` (13), `api/src/routes/agent.test.ts` (9), `api/src/fleetgraph/e2e-modes.test.ts` (4) — full behaviour→test mapping in FLEETGRAPH.md §Engineering Requirements |
+| CI failure → rollback (no failing build stays deployed) | `auto_deploy=false`; the CI `deploy` job runs only after `checks` + `secret-scan` pass on main (`.github/workflows/ci.yml`); revert procedure + kill switch documented in CHANGES.md |
+| E2E both modes in CI on stable fakes | `e2e-modes.test.ts` in the CI api-test step (run 31122756650: 4/4) — proactive detection-within-window + grounded context chat + breaker-open degradation, zero live LLM |
+| Retries / timeouts / circuit breakers + graceful degradation | ChatAnthropic 30s timeout + 3 backoff retries; breaker (5 fails → open, 60s half-open); degradation proven by a CI test on every push (rule-based findings still land, chat degrades honestly) |
+| Developer documentation | CHANGES.md Week-5 sections (run / test / deploy / rollback) |
+
 ## Timed rehearsal on production (2026-08-04, live Render instance)
 
 - Issue "demo issue" created (no assignee, no week): **19:15:07 UTC**
