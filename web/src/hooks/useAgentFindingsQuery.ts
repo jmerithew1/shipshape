@@ -13,6 +13,8 @@ export interface AgentFinding {
     type: string;
     issueId?: string;
     assigneeId?: string;
+    weekId?: string;
+    items?: Array<{ issueId: string; title: string; state: string; priority: string }>;
     reason?: string;
   } | null;
   document_id: string | null;
@@ -49,10 +51,12 @@ export function useAgentDispositionMutation() {
       findingId: string;
       action: AgentDisposition;
       assignee_id?: string;
+      issue_ids?: string[];
     }) => {
       const response = await apiPost(`/api/agent/findings/${params.findingId}/disposition`, {
         action: params.action,
         ...(params.assignee_id ? { assignee_id: params.assignee_id } : {}),
+        ...(params.issue_ids ? { issue_ids: params.issue_ids } : {}),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));

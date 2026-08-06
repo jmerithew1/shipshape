@@ -24,12 +24,30 @@ export function FindingCard({ finding }: { finding: AgentFinding }) {
   const { data: members } = useTeamMembersQuery();
   const [changing, setChanging] = useState(false);
   const [chosenAssignee, setChosenAssignee] = useState('');
+  // Checkbox card (week slip): default-checked — agreeing is one click,
+  // editing is easy, all-or-nothing is never forced (choice architecture).
+  const items = finding.proposed_action?.type === 'move_issues_out_of_week'
+    ? finding.proposed_action.items ?? []
+    : [];
+  const [checked, setChecked] = useState<Set<string>>(
+    () => new Set(items.map((i) => i.issueId)),
+  );
 
-  const act = (action: AgentDisposition, assignee_id?: string) => {
-    disposition.mutate({ findingId: finding.id, action, assignee_id });
+  const toggleItem = (id: string) => {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const act = (action: AgentDisposition, assignee_id?: string, issue_ids?: string[]) => {
+    disposition.mutate({ findingId: finding.id, action, assignee_id, issue_ids });
   };
 
   const canExecute = finding.proposed_action?.type === 'assign_issue';
+  const isCheckboxCard = items.length > 0;
   const assignable = (members ?? []).filter((m) => m.user_id && !m.isPending);
 
   return (
@@ -60,8 +78,44 @@ export function FindingCard({ finding }: { finding: AgentFinding }) {
           </button>
           {finding.body && <p className="text-xs text-muted mt-1">{finding.body}</p>}
 
+          {/* Per-item checkbox list (week-slip multi-issue proposal) */}
+          {isCheckboxCard && (
+            <div className="mt-2 rounded-lg border border-border divide-y divide-border">
+              {items.map((item) => (
+                <label
+                  key={item.issueId}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer hover:bg-indigo-500/5"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked.has(item.issueId)}
+                    onChange={() => toggleItem(item.issueId)}
+                    className="accent-indigo-600"
+                  />
+                  <span className="flex-1 truncate text-foreground">{item.title}</span>
+                  <span className="text-muted uppercase text-[10px] tracking-wide">
+                    {item.priority} · {item.state}
+                  </span>
+                </label>
+              ))}
+              <div className="px-3 py-1.5 text-[11px] text-muted">
+                {checked.size} of {items.length} selected — only checked issues move out;
+                unchecked stay in the week
+              </div>
+            </div>
+          )}
+
           {/* Disposition row */}
           <div className="flex flex-wrap items-center gap-2 mt-2">
+            {isCheckboxCard && (
+              <button
+                onClick={() => act('approve', undefined, [...checked])}
+                disabled={disposition.isPending || checked.size === 0}
+                className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                Move {checked.size} out
+              </button>
+            )}
             {canExecute && !changing && (
               <button
                 onClick={() => act('approve')}
