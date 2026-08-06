@@ -192,8 +192,9 @@ router.post(
         [statusByAction[action], finding.id, req.workspaceId, SNOOZE_BUSINESS_DAYS],
       );
 
-      // E1 credibility evidence (schema now, thresholding Thursday):
-      // engaged = approve/change/still_on_it, ignored = dismiss.
+      // E1 credibility evidence (gate: fleetgraph/attention.ts). Snooze
+      // counts as ignored ("not useful right now") — it re-arms, so a later
+      // engaged disposition recovers the score.
       const engaged = action !== 'dismiss' && action !== 'snooze';
       await pool.query(
         `INSERT INTO agent_credibility (user_id, finding_type, alpha, beta)

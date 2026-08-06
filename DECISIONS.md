@@ -88,9 +88,9 @@ repeated-game mechanism no shipped competitor has (verified: Swarmia,
 LinearB, Asana AI, Linear, Height all use static thresholds): per
 (user × finding_type) discounted Beta posterior on usefulness
 (α←λα+y, β←λβ+(1−y), λ=0.9), Thompson-sampled notify threshold, guards
-against death spirals (decay, θ cap, critical-severity bypass, forced probe).
-Schema lands in migration 038; logic lands Thu–Fri after the compliant
-baseline. Seeded RNG in tests.
+against death spirals (decay; the threshold is implicitly capped at θ0+c —
+critical's rank — and critical bypasses the gate entirely; forced probe).
+Shipped 2026-08-06 in api/src/fleetgraph/attention.ts, seeded RNG in tests.
 
 Ten outside game-theory proposals were adversarially reviewed against the
 schema and logged decisions; three kernels survived: **K1 safe disclosure**
