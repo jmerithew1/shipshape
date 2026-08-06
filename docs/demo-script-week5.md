@@ -1,45 +1,30 @@
-# Week 5 Demo — FINAL cut: complete walkthrough & script
+# Week 5 Demo — FINAL cut, 3 tabs (single take, ~4:30)
 
-Single take, one browser window, 5 tabs, ~5 minutes. Stage every tab BEFORE
-recording so each switch lands on a pre-loaded money shot.
+Easiest version that still covers every graded item. The live toast is the
+star; receipts not shown on camera live in docs/submission-week5.md, where
+graders verify them anyway.
 
-## Part 1 — Stage the tabs
+## Part 1 — Stage the tabs (before recording)
 
 ### Tab 1 — Ship (live app)
-- URL: https://ship-api-r1om.onrender.com — logged in.
-- Stage: project → Issues tab, "New issue" one click away.
-- Shows: creating the orphan (trigger); later the chat panel; finally the
-  toast + pulsing button + approval card (the live proof).
+- https://ship-api-r1om.onrender.com — logged in, on your project's
+  **Issues** view, "New issue" one click away.
+- Carries the whole product story: create the orphan → chat → toast →
+  approve.
 
-### Tab 2 — /ready
-- URL: https://ship-api-r1om.onrender.com/ready
-- Stage: loaded. One JSON line.
-- Point at: `agent_tables: true` — refuses "ready" unless the agent's tables
-  exist; came up green on a brand-new DB after the destroy-and-rebuild.
+### Tab 2 — quiet-path trace
+- https://smith.langchain.com/public/08dd7d9f-dcd6-486a-9c43-d0ec8fc17639/r
+- Stage: root run selected; duration (0.03 s) and 0 tokens visible.
+- Point at: the span list (three parallel fetches → runDetectors →
+  recordQuiet) and what ISN'T there — no model call anywhere.
 
-### Tab 3 — quiet-path trace
-- URL: https://smith.langchain.com/public/08dd7d9f-dcd6-486a-9c43-d0ec8fc17639/r
-- Stage: root run selected; duration (0.03 s) + 0 tokens visible.
-- Point at: span list (ingestTrigger → three parallel fetches →
-  runDetectors → recordQuiet) and what's NOT there — no model call; the
-  0 tokens / 0.03 s figures; Input shows `"kind":"sweep"` (clock, not user).
-
-### Tab 4 — multi-detector sweep trace
-- URL: https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r
-- Stage: click the `triage` span → Input panel. Four candidates visible:
-  orphan ("Fix login flow timeout"), stale ("Refactor auth session cache"),
-  stuck review ("Add rate limiting to webhook endpoint"), week-slip
-  ("Demo Week") with its `proposedAction.items` list (three issue titles).
-- Point at: span tree (ONE run); the four stacked candidates (three detector
-  types at once); the items array — literally the checkbox card's contents;
-  then flip to Output — loss-framed slip title ("all 3 issues not started
-  with 64% of week elapsed").
-
-### Tab 5 — production timed-run trace
-- URL: https://smith.langchain.com/public/06df5809-5e0a-431c-a00b-a6c2a2d26de6/r
-- Stage: root run selected; the 19:20 UTC start timestamp near the top.
-- Use: a TWO-SECOND receipt at the payoff beat — issue created 19:15:07,
-  this run 19:20:02 = the measured 4m55s. Flick, show, flick back.
+### Tab 3 — multi-detector sweep trace
+- https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r
+- Stage: click the **triage** span → **Input** panel, so the four candidates
+  are already on screen (orphan, stale, stuck review, week-slip with its
+  `proposedAction.items` list of three issues).
+- Point at: four candidates in one run; the items array (= the checkbox
+  card's contents); then flip to **Output** for the loss-framed slip title.
 
 Recorder: Win + Alt + R, full-screen browser, mic on. Dry-run minute one
 once for toast timing.
@@ -47,71 +32,66 @@ once for toast timing.
 ## Part 2 — Script
 
 **0:00 — Tab 1** (setup + trigger)
-> "This is Ship, live on Render, deployed entirely through Terraform. Inside
-> it lives FleetGraph, the project-intelligence agent I built this week.
-> Watch — I'll create a problem and the agent will find it on its own while
-> I show you around."
+> "This is Ship, live on Render, deployed entirely through Terraform —
+> service, database, and config all from one repo; earlier this week we
+> destroyed the whole environment and rebuilt it from the config alone, and
+> the readiness endpoint came up green on a brand-new database, agent
+> tables and all. Inside Ship lives FleetGraph, the project-intelligence
+> agent I built this week. Watch — I'll create a problem, and the agent
+> will find it on its own while I show you around."
 
-Create the issue: title, no assignee, no week, click out.
+Create the issue: title, **no assignee, no week**, click out.
 > "New issue, nobody owns it, no week planned. Nobody's going to tell the
 > agent. The clock starts now."
 
-**0:40 — Tab 2** (point at agent_tables: true)
-> "Everything — service, database, config — is Terraform. This readiness
-> endpoint refuses to report ready unless the agent's tables actually exist
-> in the database. We proved it the hard way: destroyed the entire
-> environment, rebuilt it from the config alone, and this endpoint came up
-> green on a brand-new database."
-
-**1:10 — Tab 3** (span list, then 0 tokens / 0.03 s)
-> "Traces are LangSmith, on from day one. My favorite trace: the agent swept
-> a healthy project, found nothing, and stopped — thirty-three milliseconds,
-> zero AI tokens, and look — no model call anywhere in this run. Staying
+**0:50 — Tab 2** (quiet trace)
+> "Traces are LangSmith, on from day one. My favorite trace: the agent
+> swept a healthy project, found nothing, and stopped — thirty-three
+> milliseconds, zero AI tokens, no model call anywhere in the run. Staying
 > quiet is a designed outcome. Measured across development: ninety-four
-> percent of all graph runs never touched a model. Total AI spend to build
-> this: about four cents."
+> percent of all graph runs never touched a model — total AI spend to
+> build this, about four cents."
 
-**1:50 — Tab 4** (Input panel pre-loaded)
+**1:30 — Tab 3** (Input panel pre-loaded)
 > "Same graph, different day: one sweep caught everything wrong at once — a
 > stale issue, a stuck review, a slipping week, even an unassigned orphan.
-> Four problems, one run." (point at items array) "The slipping week comes
-> with a proposal — these three not-started issues — and in the UI that's a
-> card with per-item checkboxes: I move only the ones I check, and the
-> server refuses to touch anything that wasn't in the agent's own proposal."
-> (flip to Output) "And look how it phrases it: 'all 3 issues not started
-> with 64% of the week elapsed' — it leads with what's about to be lost,
-> never a percentage dashboard. One more thing you can't see in a
-> screenshot: the agent keeps a credibility score on itself, per person. If
-> it's been wasting your attention, it raises its own bar before
-> interrupting you again — critical always gets through, and it checks back
-> in after five quiet days."
+> Four problems, one run." (point at the items array) "The slipping week
+> comes with a proposal — these three not-started issues — and in the UI
+> that's a card with per-item checkboxes: I move only the ones I check,
+> and the server refuses to touch anything that wasn't in the agent's own
+> proposal." (flip to Output) "Look at the phrasing: 'all 3 issues not
+> started with 64% of the week elapsed' — it leads with what's about to be
+> lost, never a percentage dashboard. And the agent keeps a credibility
+> score on itself, per person: waste someone's attention and it raises its
+> own bar before interrupting them again — critical always gets through,
+> and it checks back in after five quiet days."
 
-**2:50 — Tab 1, open any issue → Ask FleetGraph → click a suggested question**
+**2:30 — Tab 1, open any issue → "Ask FleetGraph" → click a suggested question**
 > "Chat lives where you are — it says what it's scoped to, and the answer
 > cites this issue's real state and timestamps. No standalone chatbot page."
 
-**3:30 — wait beat (anywhere on Tab 1)**
-> "Meanwhile the agent's on the clock — it deliberately waits ninety seconds
-> after your last edit so it never nags you mid-thought. And everything
-> you're watching is locked in CI: both agent modes run end-to-end on every
-> push with fake models — zero live tokens — including a test that opens the
+**3:10 — wait beat (anywhere on Tab 1)**
+> "Meanwhile the agent's on the clock — it deliberately waits ninety
+> seconds after your last edit so it never nags you mid-thought. All of
+> this is locked in CI too: both agent modes run end-to-end on every push
+> with fake models — zero live tokens — including a test that opens the
 > circuit breaker and proves the agent degrades gracefully instead of
 > crashing."
 
-**~4:00 — payoff: toast slides in, button pulses**
+**~3:40 — payoff: toast slides in, button pulses**
 > "There it is — found on its own, well inside five minutes. On the timed
-> production test: four minutes fifty-five —" (flick to Tab 5, two seconds)
-> "— timeline and trace are public."
+> production test it was four minutes fifty-five, and that timeline and
+> trace are public on the submission page."
 
-**4:15 — open the card, Approve**
+**3:55 — open the card, Approve**
 > "It proposes the fix — assign to the least-loaded teammate — but it never
 > touches anyone's plan without a human. I approve, the agent executes, and
 > the audit trail records both: human decided, agent acted."
 
-**4:35 — close**
-> "One graph, two doors. Deterministic checks in front of the model, a human
-> on every gate, Terraform under all of it, and an agent that earns the
-> right to interrupt. That's FleetGraph."
+**4:15 — close**
+> "One graph, two doors. Deterministic checks in front of the model, a
+> human on every gate, Terraform under all of it, and an agent that earns
+> the right to interrupt. That's FleetGraph."
 
 Stop recording.
 
@@ -119,16 +99,17 @@ Stop recording.
 
 | Graded item | Where |
 | --- | --- |
-| Proactive detection e2e, real data, timed | 0:00 create → 4:00 toast, live |
-| Traces, different execution paths | Tabs 3 / 4 / 5 |
-| All 5 use cases | orphan live · stale/stuck/slip on Tab 4 · chat 2:50 |
-| HITL + allowlist | 4:15 approve + server-refusal line at 1:50 |
-| Chat + notifications, embedded | 2:50 + 4:00 |
-| Terraform, /ready, destroy-redeploy | 0:40 |
-| Trigger model + grace window | 0:00 / 3:30 |
-| Measured cost story | 1:10 (94%, four cents) |
-| Engineering reqs (E2E in CI, degradation) | 3:30 |
-| E1 credibility + checkbox + loss framing | 1:50 |
+| Proactive detection e2e, real data, timed | 0:00 create → 3:40 toast, live |
+| Traces, different execution paths | Tabs 2 / 3 |
+| All 5 use cases | orphan live · stale/stuck/slip on Tab 3 · chat 2:30 |
+| HITL + allowlist | 3:55 approve + server-refusal line at 1:30 |
+| Chat + notifications, embedded | 2:30 + 3:40 |
+| Terraform, /ready, destroy-redeploy | spoken 0:00 |
+| Trigger model + grace window | 0:00 / 3:10 |
+| Measured cost story | 0:50 (94%, four cents) |
+| Engineering reqs (E2E in CI, degradation) | 3:10 |
+| E1 credibility + checkbox + loss framing | 1:30 |
+| Timed 4m55s receipt | spoken 3:40 (trace link in submission doc) |
 
 ## Practical notes
 - If the toast lands early, react early — either order covers everything.
