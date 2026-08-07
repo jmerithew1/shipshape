@@ -1,5 +1,14 @@
 # Week 5 Submission — FleetGraph
 
+> **Detection-speed fix (2026-08-07, from Early reviewer feedback "4 m 55 s
+> is very close to the limit"):** the event bus now schedules a grace-expiry
+> recheck ~100 s after the last edit (`api/src/fleetgraph/events.ts`,
+> `GRACE_RECHECK_MS`), so orphan detection no longer depends on 2-minute
+> sweep alignment — expected ≈ 1 m 45 s from last edit. Timing contract
+> tested in `events.test.ts`. The 4 m 55 s figure below stands as the Early
+> measurement (sweep-only path); a re-measured production timing will
+> replace it here once the fix is deployed and timed.
+>
 > **Final-scope status (2026-08-06):** everything below remains true, plus —
 > all five use cases built + traced + regression-tested (multi-detector
 > sweep trace: https://smith.langchain.com/public/f2d6e21e-14f4-4e96-84e5-1a23f5267842/r);

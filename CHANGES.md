@@ -1,5 +1,16 @@
 # CHANGES — implementation dev docs
 
+## Week 5 addendum 2 · Detection-speed fix 2026-08-07 (reviewer feedback)
+
+`events.ts` gains a per-workspace **grace-expiry recheck** timer
+(`GRACE_RECHECK_MS` = orphan grace + 10 s, re-armed per edit like the
+debounce): orphan detection no longer waits for sweep alignment, dropping
+expected latency from a sweep-dependent 3–5 min to ≈ 1 m 45 s after the last
+edit. `FleetTrigger` event runs may now carry `eventType: 'grace_recheck'`
+(visible in traces). Timing contract: `events.test.ts` (fake timers).
+No schema, env, or rollback changes — the sweep is unchanged and remains the
+backstop; `FLEETGRAPH_ENABLED=false` still kills all timers.
+
 ## Week 5 addendum · Final scope shipped 2026-08-06
 
 **Added since MVP:** four more detectors (`stuck_review`, `urgent_idle`,

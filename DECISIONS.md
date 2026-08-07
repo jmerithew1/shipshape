@@ -5,6 +5,26 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-07 — Detection speed: grace-expiry recheck on the event bus (reviewer feedback)
+
+Early graded 100/100 with one flag: 4 m 55 s detection is too close to the
+5-minute limit. Root cause was mechanism, not tuning: the event-path run
+fires 30 s after creation — while the orphan is still inside its 90 s grace
+window — so actual detection rode the wall-clock-aligned 2-minute sweep, and
+every title edit re-armed the grace clock on top of that. Fix: a second
+per-workspace timer on the bus (`GRACE_RECHECK_MS` = grace + 10 s, re-armed
+per edit exactly like the grace window) that re-runs the graph right after
+grace can first be satisfied. Expected orphan latency drops to ≈ 1 m 45 s
+from the grader's last edit, deterministic; the sweep remains the backstop
+for events lost to a restart. Timing contract locked by
+`events.test.ts` (5 tests, fake timers), including a guard that the recheck
+always exceeds the grace window.
+**Rejected:** shrinking the 90 s grace window (it's a manners decision — the
+psychology lens, not a perf knob); a 1-minute sweep default (doubles quiet
+runs/day for a worst case that stays sweep-aligned; fixes the average, not
+the mechanism); firing detection inside the create request (couples agent
+latency to user-facing writes).
+
 ## 2026-08-06 — Final push in one day: detector family + E1 gate + CI E2E, agent-orchestrated
 
 James's call: collapse Early→Final into one push. Execution model: agents

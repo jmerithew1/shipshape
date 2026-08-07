@@ -21,7 +21,7 @@ export type FleetTrigger =
       workspaceId: string;
       projectId: string | null;
       documentId: string;
-      eventType: 'created' | 'changed';
+      eventType: 'created' | 'changed' | 'grace_recheck';
     }
   | { kind: 'sweep'; workspaceId: string }
   | {

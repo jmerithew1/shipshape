@@ -237,8 +237,11 @@ sweep.** ✅ shipped (`api/src/fleetgraph/events.ts`, `index.ts`).
 Because FleetGraph lives inside the Ship API process (see Architecture
 Decisions), "webhooks" collapse into something better: **in-process event
 emission** — a handful of deliberate hook points, not a per-route retrofit of
-all ~82 mutating handlers. The agent subscribes, debounces per project (30 s),
-and runs the graph. No HTTP hop, no webhook auth, no delivery failure mode.
+all ~82 mutating handlers. The agent subscribes, debounces per workspace
+(30 s), and runs the graph — plus a **grace-expiry recheck** ~100 s after the
+last edit (re-armed per edit, mirroring the grace window itself) so
+grace-windowed detectors never wait on sweep alignment. No HTTP hop, no
+webhook auth, no delivery failure mode.
 Yjs editor activity needs no hook at all for staleness purposes: the
 collaboration server already bumps `documents.updated_at` on content edits
 (`api/src/collaboration/index.ts:173`).
@@ -272,13 +275,19 @@ candidates, records the quiet path, and ends — zero tokens. Findings are
 deduped before triage, so a known-and-notified condition also costs zero.
 
 **Latency budget for the graded timed test:** grader creates an issue → create
-route emits in-process → 90 s no-edit grace window for orphan detection (see
-Use Cases — Ship's Untitled-first model means every issue is born momentarily
-unassigned; firing instantly would be a noise firehose) → 30 s debounce →
-graph run (fetch + detect ≈ 1–2 s SQL, triage ≈ 5–15 s LLM) → card visible.
-Expected ≈ 2–3 minutes for the orphan case, < 60 s for non-grace-window
-events, against a 5-minute goal. Time-based conditions are bounded by the
-2-minute sweep interval.
+route emits in-process → 30 s debounce run (typically quiet: the orphan is
+still inside its 90 s no-edit grace window — see Use Cases; Ship's
+Untitled-first model means every issue is born momentarily unassigned, and
+firing instantly would be a noise firehose) → grace-expiry recheck fires
+~100 s after the last edit (`GRACE_RECHECK_MS`, `events.ts` — re-armed per
+edit exactly like the grace window) → graph run (fetch + detect ≈ 1–2 s SQL,
+triage ≈ 5–15 s LLM) → card visible. Expected **≈ 1 m 45 s – 2 m** from the
+grader's last edit for the orphan case, < 60 s for non-grace-window events,
+against a 5-minute goal. Time-based conditions are bounded by the 2-minute
+sweep interval, which also backstops the event path across restarts.
+(History: the Early submission measured 4 m 55 s because detection then rode
+the sweep only — reviewer feedback flagged the thin margin, and the recheck
+removes the sweep-alignment variance that caused it.)
 
 **Staleness tolerance:** event-driven detections are near-real-time; drift
 detections (staleness, slip) have day-scale deadlines, so a 2-minute sweep is
