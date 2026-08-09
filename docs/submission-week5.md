@@ -83,23 +83,26 @@
 
 ## Social post draft (X — hook → receipts → lesson, per week-4 reviewer feedback)
 
-Main post (fits one post; demo video uploaded natively; links in a reply):
+Main post (fits one post; demo video uploaded natively; repo link in-post
+by owner's call, live-app link in the reply):
 
-> Built an agent that knows when to shut up.
+> An agent that knows when to shut up.
 >
 > FleetGraph, live in our PM tool:
 > • Finds orphaned & slipping work on its own — 1m42s in prod
-> • 94% of runs: zero tokens. $0.04 AI spend
-> • Human approval on every change
+> • 94% of runs: zero tokens, 4¢ spend
+> • Human gate on every change
 >
-> Rule: model proposes, deterministic code disposes. @GauntletAI
+> Model proposes, deterministic code disposes. @GauntletAI
+> https://github.com/jmerithew1/shipshape
 
-Reply (the proudest-part follow-up):
+Reply (the proudest-part follow-up + live app):
 
 > Proudest mechanism: it keeps a credibility score on itself, per person.
 > Waste someone's attention and it raises its own bar before interrupting
-> you again — critical always gets through. Notifications as mechanism
-> design, not a settings page.
+> you again — critical always gets through.
+>
+> Live demo: https://ship-api-r1om.onrender.com
 
 ## Notes for graders
 
