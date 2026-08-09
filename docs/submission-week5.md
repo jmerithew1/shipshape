@@ -1,13 +1,18 @@
 # Week 5 Submission — FleetGraph
 
-> **Detection-speed fix (2026-08-07, from Early reviewer feedback "4 m 55 s
-> is very close to the limit"):** the event bus now schedules a grace-expiry
-> recheck ~100 s after the last edit (`api/src/fleetgraph/events.ts`,
-> `GRACE_RECHECK_MS`), so orphan detection no longer depends on 2-minute
-> sweep alignment — expected ≈ 1 m 45 s from last edit. Timing contract
-> tested in `events.test.ts`. The 4 m 55 s figure below stands as the Early
-> measurement (sweep-only path); a re-measured production timing will
-> replace it here once the fix is deployed and timed.
+> **Detection-speed fix (from Early reviewer feedback "4 m 55 s is very
+> close to the limit") — measured on production 2026-08-09: 1 m 42 s.**
+> The event bus now schedules a grace-expiry recheck ~100 s after the last
+> edit (`api/src/fleetgraph/events.ts`, `GRACE_RECHECK_MS`), so orphan
+> detection no longer depends on 2-minute sweep alignment. Timed run:
+> issue created 14:10:34 UTC → finding written 14:12:16 UTC; public trace
+> (trigger input shows `eventType: "grace_recheck"`):
+> https://smith.langchain.com/public/51407873-1514-4bbf-a6dc-9c6d76735522/r
+> The same run is its own control: the 2-minute sweep fired at 14:12:00,
+> when the issue was 86 s old — 4 s inside the grace window — so the old
+> sweep-only path would have detected at ~3 m 26 s. Timing contract locked
+> by `events.test.ts`. The 4 m 55 s figure below stands as the Early
+> measurement (sweep-only path).
 >
 > **Final-scope status (2026-08-06):** everything below remains true, plus —
 > all five use cases built + traced + regression-tested (multi-detector
@@ -77,6 +82,13 @@
   agent-attributed assignment) runs from the same widget.
 
 ## Notes for graders
+
+**Demo access (to provoke the agent yourself):** log in at the deployed app
+as `demo@ship.local` / `demo1234`, create an issue with **no assignee and no
+week**, and stop editing — the finding card lands ≈ 1 m 42 s after your last
+edit (90 s deliberate grace window + ~10 s recheck buffer + triage), toast +
+pulsing button bottom-right. Approve from the card to watch the HITL loop
+execute the assignment.
 
 - The quiet path is a first-class, traced outcome: a healthy project costs
   $0 in tokens at any scale, because deterministic SQL detectors gate the

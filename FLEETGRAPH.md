@@ -281,13 +281,18 @@ Untitled-first model means every issue is born momentarily unassigned, and
 firing instantly would be a noise firehose) → grace-expiry recheck fires
 ~100 s after the last edit (`GRACE_RECHECK_MS`, `events.ts` — re-armed per
 edit exactly like the grace window) → graph run (fetch + detect ≈ 1–2 s SQL,
-triage ≈ 5–15 s LLM) → card visible. Expected **≈ 1 m 45 s – 2 m** from the
-grader's last edit for the orphan case, < 60 s for non-grace-window events,
-against a 5-minute goal. Time-based conditions are bounded by the 2-minute
-sweep interval, which also backstops the event path across restarts.
-(History: the Early submission measured 4 m 55 s because detection then rode
-the sweep only — reviewer feedback flagged the thin margin, and the recheck
-removes the sweep-alignment variance that caused it.)
+triage ≈ 5–15 s LLM) → card visible. **Measured on production 2026-08-09:
+1 m 42 s** from creation (created 14:10:34 UTC → finding 14:12:16 UTC;
+[public trace](https://smith.langchain.com/public/51407873-1514-4bbf-a6dc-9c6d76735522/r)
+— trigger input shows `eventType: "grace_recheck"`). < 60 s for
+non-grace-window events, against a 5-minute goal. Time-based conditions are
+bounded by the 2-minute sweep interval, which also backstops the event path
+across restarts. (History: the Early submission measured 4 m 55 s because
+detection then rode the sweep only — reviewer feedback flagged the thin
+margin, and the recheck removes the sweep-alignment variance that caused
+it. The 2026-08-09 timed run doubles as its own control: the sweep fired
+when the issue was 86 s old — 4 s inside grace — so the old path would have
+taken ~3 m 26 s on the identical scenario.)
 
 **Staleness tolerance:** event-driven detections are near-real-time; drift
 detections (staleness, slip) have day-scale deadlines, so a 2-minute sweep is
