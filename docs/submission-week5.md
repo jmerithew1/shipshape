@@ -81,6 +81,26 @@
   nothing when there are no findings. The full HITL loop (Approve →
   agent-attributed assignment) runs from the same widget.
 
+## Social post draft (X — hook → receipts → lesson, per week-4 reviewer feedback)
+
+Main post (fits one post; demo video uploaded natively; links in a reply):
+
+> Built an agent that knows when to shut up.
+>
+> FleetGraph, live in our PM tool:
+> • Finds orphaned & slipping work on its own — 1m42s in prod
+> • 94% of runs: zero tokens. $0.04 AI spend
+> • Human approval on every change
+>
+> Rule: model proposes, deterministic code disposes. @GauntletAI
+
+Reply (the proudest-part follow-up):
+
+> Proudest mechanism: it keeps a credibility score on itself, per person.
+> Waste someone's attention and it raises its own bar before interrupting
+> you again — critical always gets through. Notifications as mechanism
+> design, not a settings page.
+
 ## Notes for graders
 
 **Demo access (to provoke the agent yourself):** log in at the deployed app
