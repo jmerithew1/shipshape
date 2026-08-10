@@ -1,175 +1,208 @@
 <title>Week 6 Defense — PlugForge in 5 Minutes</title>
 <style>
-  :root {
-    --paper: #FBFAF7; --ink: #1C2530; --muted: #5B6672; --line: #E3E1D9;
-    --accent: #177245; --slate: #3D5A78; --danger: #A63D2F;
-    --chip-bg: #EEF3EE; --box-bg: #F4F3EE; --mono-bg: #EFEEE8;
-  }
+  :root { --bg:#FFFFFF; --ink:#111111; --muted:#6B6B6B; --line:#E2E2E2; --box:#F6F6F6; }
   @media (prefers-color-scheme: dark) {
-    :root { --paper: #141A21; --ink: #E8E6E0; --muted: #9AA4AE; --line: #2A343F;
-      --accent: #4CAF7D; --slate: #8FB0CE; --danger: #D07A6B;
-      --chip-bg: #1B2B22; --box-bg: #1A222B; --mono-bg: #1E2833; }
+    :root { --bg:#0E1116; --ink:#E8E8E8; --muted:#8E979F; --line:#262B33; --box:#161B22; }
   }
-  :root[data-theme="dark"] { --paper: #141A21; --ink: #E8E6E0; --muted: #9AA4AE; --line: #2A343F;
-    --accent: #4CAF7D; --slate: #8FB0CE; --danger: #D07A6B;
-    --chip-bg: #1B2B22; --box-bg: #1A222B; --mono-bg: #1E2833; }
-  :root[data-theme="light"] { --paper: #FBFAF7; --ink: #1C2530; --muted: #5B6672; --line: #E3E1D9;
-    --accent: #177245; --slate: #3D5A78; --danger: #A63D2F;
-    --chip-bg: #EEF3EE; --box-bg: #F4F3EE; --mono-bg: #EFEEE8; }
+  :root[data-theme="dark"]  { --bg:#0E1116; --ink:#E8E8E8; --muted:#8E979F; --line:#262B33; --box:#161B22; }
+  :root[data-theme="light"] { --bg:#FFFFFF; --ink:#111111; --muted:#6B6B6B; --line:#E2E2E2; --box:#F6F6F6; }
 
-  html { background: var(--paper); }
-  body { color: var(--ink); font: 15px/1.5 "Segoe UI", -apple-system, system-ui, sans-serif;
-    margin: 0; padding: 2.2rem 1.2rem 3rem; }
-  .sheet { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.15rem; }
-  h1, h2 { font-family: Charter, Georgia, "Times New Roman", serif; text-wrap: balance; margin: 0; }
-  h1 { font-size: 1.9rem; line-height: 1.15; }
-  .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .72rem; color: var(--muted); margin-bottom: .35rem; }
-  .thesis { color: var(--muted); max-width: 62ch; margin-top: .4rem; }
-  .thesis strong { color: var(--ink); }
-  code, .mono { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: .86em;
-    background: var(--mono-bg); padding: .08em .35em; border-radius: 3px; }
+  html { background: var(--bg); }
+  body { color: var(--ink); margin: 0; padding: 3rem 1.25rem 4rem;
+    font: 15px/1.55 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  .sheet { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .5rem; letter-spacing: -0.015em; text-wrap: balance; }
+  .kicker { font-family: Consolas, "Cascadia Code", monospace; font-size: .72rem;
+    text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin-bottom: .8rem; }
+  .thesis { color: var(--muted); margin: 0 0 1rem; max-width: 58ch; }
+  .thesis b { color: var(--ink); font-weight: 600; }
 
-  .beat { display: grid; grid-template-columns: 2.4rem 1fr auto; gap: .35rem .85rem;
-    border-top: 1px solid var(--line); padding-top: .85rem; }
-  .beat-n { font-family: Charter, Georgia, serif; font-size: 1.5rem; color: var(--accent);
-    line-height: 1.1; font-variant-numeric: tabular-nums; }
-  .beat h2 { font-size: 1.12rem; grid-column: 2; }
-  .beat .time { grid-column: 3; color: var(--muted); font-size: .78rem;
-    font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: .25rem; }
-  .beat .body { grid-column: 2 / 4; display: flex; flex-direction: column; gap: .3rem; }
-  .why { color: var(--slate); }
-  .why b { font-weight: 600; }
-  .receipt { font-size: .82rem; color: var(--muted); }
-  .receipt code { font-size: .95em; }
+  section { border-top: 1px solid var(--line); padding: 1.4rem 0; }
+  .n { font-family: Consolas, monospace; font-size: .78rem; color: var(--muted); display: block; margin-bottom: .25rem; }
+  h2 { font-size: 1.05rem; margin: 0 0 .4rem; letter-spacing: -0.01em; }
+  p { margin: 0; }
+  .line { color: var(--muted); max-width: 60ch; }
+  .line b { color: var(--ink); font-weight: 600; }
+  code { font-family: Consolas, "Cascadia Code", monospace; font-size: .85em; }
 
-  .tfbox { background: var(--box-bg); border: 1px solid var(--line); border-radius: 6px;
-    padding: .9rem 1rem; display: flex; flex-direction: column; gap: .5rem; }
-  .tfbox .label { text-transform: uppercase; letter-spacing: .12em; font-size: .7rem; color: var(--danger); font-weight: 600; }
-  .spine { overflow-x: auto; }
-  .spine code { display: inline-block; background: none; padding: 0; white-space: nowrap; }
-  .tfbox ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .22rem; }
-  .tfbox li { font-size: .86rem; }
-  .tfbox li b { color: var(--danger); font-weight: 600; }
-  .legend { font-size: .8rem; color: var(--muted); }
+  figure { margin: 1rem 0 0; }
+  svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: .75rem; color: var(--muted); margin-top: .35rem;
+    font-family: Consolas, monospace; }
+  .d-label { font: 11px Consolas, monospace; fill: currentColor; }
+  .d-mut   { font: 10px Consolas, monospace; fill: currentColor; opacity: .55; }
+  .d-box   { fill: none; stroke: currentColor; stroke-width: 1; }
+  .d-fill  { fill: var(--box); stroke: currentColor; stroke-width: 1; }
+  .d-edge  { stroke: currentColor; stroke-width: 1; fill: none; }
+  .d-dash  { stroke: currentColor; stroke-width: 1; fill: none; stroke-dasharray: 4 3; opacity: .5; }
 
-  .cuts { border-top: 1px solid var(--line); padding-top: .8rem; font-size: .85rem; color: var(--muted); }
-  .cuts b { color: var(--ink); }
-  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
-  .chip { background: var(--chip-bg); border-radius: 999px; padding: .18em .7em; font-size: .78rem; color: var(--ink); }
+  ul.tight { margin: .5rem 0 0; padding-left: 1.05rem; color: var(--muted); }
+  ul.tight li { margin: .15rem 0; }
+  ul.tight b { color: var(--ink); font-weight: 600; }
+  footer { border-top: 1px solid var(--line); padding-top: 1rem; color: var(--muted); font-size: .82rem; }
 </style>
 
 <div class="sheet">
   <header>
-    <div class="kicker">Architecture Defense · Monday Aug 11, 1:00 PM CT · James Merithew</div>
-    <h1>PlugForge: Ship stops being an app and becomes a platform</h1>
-    <p class="thesis">The grade is one loop: a stranger goes from <code>pnpm install @ship/sdk</code>
-    to a <strong>verified signed webhook in their terminal</strong> in under 30 minutes — scripted in CI
-    in under 60 seconds. Every choice below exists to make that loop short and provable.</p>
+    <div class="kicker">Architecture defense · Mon Aug 11 · 1:00 pm CT</div>
+    <h1>Ship stops being an app and becomes a platform.</h1>
+    <p class="thesis">The grade is one loop: a stranger installs the SDK and has a
+      <b>verified, signed webhook in their terminal</b>. Everything below exists to make that loop
+      short and provable.</p>
+    <figure>
+      <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
+        <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/></marker></defs>
+        <rect class="d-box" x="2"   y="14" width="92" height="30"/>
+        <rect class="d-box" x="140" y="14" width="92" height="30"/>
+        <rect class="d-box" x="278" y="14" width="92" height="30"/>
+        <rect class="d-box" x="416" y="14" width="92" height="30"/>
+        <rect class="d-fill" x="554" y="14" width="104" height="30"/>
+        <text class="d-label" x="48"  y="33" text-anchor="middle">install</text>
+        <text class="d-label" x="186" y="33" text-anchor="middle">login</text>
+        <text class="d-label" x="324" y="33" text-anchor="middle">subscribe</text>
+        <text class="d-label" x="462" y="33" text-anchor="middle">create</text>
+        <text class="d-label" x="606" y="33" text-anchor="middle">verified ✓</text>
+        <line class="d-edge" x1="94"  y1="29" x2="134" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="232" y1="29" x2="272" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="370" y1="29" x2="410" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="508" y1="29" x2="548" y2="29" marker-end="url(#a)"/>
+      </svg>
+      <figcaption>ttfe drill · &lt;60 s in CI on every PR · ≤30 min for a human with only the docs</figcaption>
+    </figure>
   </header>
 
-  <section class="beat">
-    <div class="beat-n">1</div>
-    <h2>One gate, one shape, one spec — the contract can't drift</h2>
-    <div class="time">0:00–1:15</div>
-    <div class="body">
-      <p>OAuth 2.0 hand-rolled — Auth Code + PKCE for the browser, Device Grant for the CLI — on the
-      token patterns this repo already trusts. OAuth tokens flow through the <em>same</em> bearer
-      validator that guards the API today: one gate, one revocation path. Every public failure is one
-      <code>ApiError</code> shape; the OpenAPI 3.1 spec is <em>generated from route metadata</em>, and the
-      SDK is parity-diffed against it in CI.</p>
-      <p class="why"><b>Why hand-rolled?</b> No library implements the Device Grant — the hard part was
-      ours either way — and the easy part (PKCE S256) is five lines of crypto. <b>Why generated?</b>
-      A hand-written spec lies within a week; a generated one structurally can't.</p>
-      <p class="receipt">Receipts: <code>api/src/middleware/auth.ts</code> (existing bearer path) ·
-      <code>oauth-state.ts</code> (proven one-time-consume) · fitness test enumerates every v1 route</p>
-    </div>
+  <section>
+    <span class="n">01</span>
+    <h2>One gate, one shape, one spec</h2>
+    <p class="line">OAuth tokens flow through the <b>same validator</b> that already guards the API.
+      Every failure is one <code>ApiError</code> shape. The OpenAPI spec is <b>generated from the
+      routes</b> — it structurally cannot lie — and the SDK is diffed against it in CI.</p>
+    <figure>
+      <svg viewBox="0 0 660 58" role="img" aria-label="Every public request crosses five middleware in order: auth, scope, rate, handler, audit">
+        <rect class="d-box" x="2"   y="14" width="100" height="30"/>
+        <rect class="d-box" x="142" y="14" width="80" height="30"/>
+        <rect class="d-box" x="262" y="14" width="80" height="30"/>
+        <rect class="d-box" x="382" y="14" width="90" height="30"/>
+        <rect class="d-box" x="512" y="14" width="80" height="30"/>
+        <text class="d-label" x="52"  y="33" text-anchor="middle">auth 401</text>
+        <text class="d-label" x="182" y="33" text-anchor="middle">scope 403</text>
+        <text class="d-label" x="302" y="33" text-anchor="middle">rate 429</text>
+        <text class="d-label" x="427" y="33" text-anchor="middle">handler</text>
+        <text class="d-label" x="552" y="33" text-anchor="middle">audit</text>
+        <line class="d-edge" x1="102" y1="29" x2="136" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="222" y1="29" x2="256" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="342" y1="29" x2="376" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="472" y1="29" x2="506" y2="29" marker-end="url(#a)"/>
+        <text class="d-mut" x="2" y="10">/api/v1 — separately named files; the interview answer is the directory listing</text>
+      </svg>
+    </figure>
   </section>
 
-  <section class="beat">
-    <div class="beat-n">2</div>
-    <h2>Webhooks: one Postgres table is queue, retries, DLQ, and log</h2>
-    <div class="time">1:15–2:15</div>
-    <div class="body">
-      <p>Stripe-style <code>t=,v1=</code> HMAC signatures. Retry ladder 1s→30m with jitter, 4xx
-      dead-letters, replay keeps the original <code>Idempotency-Key</code>. All of it is rows in
-      <code>webhook_deliveries</code> — the required retry schedule forces persistence anyway, so the
-      persistence <em>is</em> the queue.</p>
-      <p class="why"><b>Why no Redis/broker?</b> Single-instance deploy makes in-process delivery
-      correct, not just cheap — and the queue-backed deliverer stays a drop-in behind the same
-      interface (that's the Liskov requirement, satisfied honestly). <b>Why does
-      <code>webhooks tail</code> work on a laptop?</b> Same trust model as <code>stripe listen</code>:
-      the server relays the raw signed payload; the CLI verifies the HMAC locally — the key never
-      leaves the client.</p>
-    </div>
+  <section>
+    <span class="n">02</span>
+    <h2>One Postgres table is the whole webhook system</h2>
+    <p class="line">The required retry ladder forces persistence anyway — so the persistence
+      <b>is</b> the queue. DLQ is a status. Replay keeps the original idempotency key. The
+      queue-backed deliverer stays a drop-in behind the same interface.</p>
+    <figure>
+      <svg viewBox="0 0 660 108" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, retries loop back, six failures dead-letter, replay re-posts with the same idempotency key">
+        <rect class="d-box"  x="2"   y="14" width="86"  height="30"/>
+        <rect class="d-fill" x="148" y="14" width="120" height="30"/>
+        <rect class="d-box"  x="328" y="14" width="110" height="30"/>
+        <rect class="d-box"  x="548" y="14" width="110" height="30"/>
+        <text class="d-label" x="45"  y="33" text-anchor="middle">write</text>
+        <text class="d-label" x="208" y="33" text-anchor="middle">outbox table</text>
+        <text class="d-label" x="383" y="33" text-anchor="middle">sign t=,v1=</text>
+        <text class="d-label" x="603" y="33" text-anchor="middle">subscriber</text>
+        <line class="d-edge" x1="88"  y1="29" x2="142" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="268" y1="29" x2="322" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="438" y1="29" x2="542" y2="29" marker-end="url(#a)"/>
+        <text class="d-mut" x="112" y="25" text-anchor="middle">publishes</text>
+        <text class="d-mut" x="490" y="25" text-anchor="middle">POST</text>
+        <path class="d-dash" d="M 603 44 L 603 66 L 208 66 L 208 44" marker-end="url(#a)"/>
+        <text class="d-mut" x="405" y="62" text-anchor="middle">5xx → retry 1s·4s·16s·1m·5m·30m + jitter</text>
+        <rect class="d-box" x="148" y="76" width="120" height="26"/>
+        <text class="d-label" x="208" y="93" text-anchor="middle">DLQ</text>
+        <path class="d-edge" d="M 148 89 L 60 89 L 60 46" marker-end="url(#a)" opacity=".4"/>
+        <path class="d-edge" d="M 268 89 L 640 89 L 640 46" marker-end="url(#a)"/>
+        <text class="d-mut" x="454" y="85" text-anchor="middle">replay — same Idempotency-Key</text>
+        <text class="d-mut" x="104" y="85" text-anchor="middle">6 fails / 4xx</text>
+      </svg>
+    </figure>
   </section>
 
-  <section class="beat">
-    <div class="beat-n">3</div>
+  <section>
+    <span class="n">03</span>
     <h2>The agent walks in the front door</h2>
-    <div class="time">2:15–3:15</div>
-    <div class="body">
-      <p>FleetGraph (Week 5) trades its private DB pool for the public SDK, behind a feature flag —
-      authenticating as an OAuth app (Client Credentials, first-party machine-to-machine). Same scopes,
-      same rate limits, same audit trail as any stranger.</p>
-      <p class="why"><b>Why?</b> The audit rows are the proof of the whole platform: if our own agent
-      can live on the public API, a third party can. Cost shape unchanged — the platform makes
-      <em>zero</em> LLM calls; one call per agent turn, exactly as graded last week.</p>
-      <p class="receipt">Proof: Part-2 test suite passes flag-on and flag-off · agent's
-      <code>client_id</code> visible in the public audit log · LangSmith before/after shows identical token volume</p>
-    </div>
+    <p class="line">FleetGraph trades its private DB pool for the public SDK, behind a flag.
+      <b>Same scopes, same rate limits, same audit trail</b> as a stranger — the audit rows are the
+      proof the platform is real. Cost unchanged: the platform makes zero LLM calls.</p>
+    <figure>
+      <svg viewBox="0 0 660 96" role="img" aria-label="Before: the agent queried the database directly. After: the agent goes through the SDK and public API into the same domain logic">
+        <text class="d-mut" x="2" y="24">before</text>
+        <rect class="d-box" x="60" y="8" width="90" height="28"/>
+        <text class="d-label" x="105" y="26" text-anchor="middle">agent</text>
+        <path class="d-dash" d="M 150 22 L 560 22" marker-end="url(#a)"/>
+        <text class="d-mut" x="350" y="17" text-anchor="middle">raw SQL — invisible, unlimited</text>
+        <text class="d-mut" x="2" y="72">after</text>
+        <rect class="d-box" x="60" y="56" width="90" height="28"/>
+        <rect class="d-box" x="210" y="56" width="80" height="28"/>
+        <rect class="d-fill" x="350" y="56" width="90" height="28"/>
+        <text class="d-label" x="105" y="74" text-anchor="middle">agent</text>
+        <text class="d-label" x="250" y="74" text-anchor="middle">SDK</text>
+        <text class="d-label" x="395" y="74" text-anchor="middle">/api/v1</text>
+        <line class="d-edge" x1="150" y1="70" x2="204" y2="70" marker-end="url(#a)"/>
+        <line class="d-edge" x1="290" y1="70" x2="344" y2="70" marker-end="url(#a)"/>
+        <line class="d-edge" x1="440" y1="70" x2="554" y2="70" marker-end="url(#a)"/>
+        <text class="d-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
+        <rect class="d-box" x="560" y="8" width="98" height="76"/>
+        <text class="d-label" x="609" y="50" text-anchor="middle">database</text>
+      </svg>
+    </figure>
   </section>
 
-  <section class="beat">
-    <div class="beat-n">4</div>
-    <h2>Infrastructure is the code — Terraform describes the deployment</h2>
-    <div class="time">3:15–4:15</div>
-    <div class="body">
-      <p>Terraform is the recipe; Render is the kitchen. <code>terraform/render/</code> declares the
-      entire deployment — three resources — and <code>terraform apply</code> from a clean machine IS the
-      deploy. Destroy-and-redeploy was proven and graded in Week 5. IAM least-privilege runs the real
-      production secrets code path (<code>loadProductionSecrets()</code> → SSM) against a
-      terraform-managed scratch — admin policy locked down to one <code>ssm:GetParameter</code> ARN,
-      allow proven, deny proven, zero contact with the graded deployment.</p>
-      <p class="why"><b>Why Render, not an ECS stack?</b> We defend the deployment that actually serves
-      you, not a theater stack built for vocabulary compliance — and the gap to the brief's ECS wording
-      is mapped openly, line by line.</p>
-    </div>
-  </section>
-
-  <section class="tfbox">
-    <div class="label">Blast-radius crib — the three resources</div>
-    <div class="spine"><code>render_project.ship ─▶ render_postgres.ship ─(DSN)─▶ render_web_service.api</code></div>
-    <ul>
-      <li><b>Project env replaced</b> → both children replaced → database destroyed (free tier, no backups) → repopulation runbook.</li>
-      <li><b>Postgres region/version</b> → replacement → data loss; region must match the service or the private-network DSN stops resolving.</li>
-      <li><b>Service env vars</b> → in-place, but triggers a deploy; <code>DATABASE_URL</code> is derived — it changes because Postgres changed.</li>
-      <li><b>Service replaced</b> → <code>SESSION_SECRET</code> regenerates → every user logged out.</li>
-      <li><b>starter→free</b> → looks harmless (<code>~</code>) → idling kills cron + webhook poller silently.</li>
+  <section>
+    <span class="n">04</span>
+    <h2>Terraform is the recipe; Render is the kitchen</h2>
+    <p class="line">Three declared resources are the whole deployment — <code>terraform apply</code>
+      from a clean machine <b>is</b> the deploy, and destroy-and-redeploy is already proven.
+      IAM least-privilege runs the real secrets code path on a terraform-managed scratch:
+      admin → one <code>ssm:GetParameter</code> ARN, allow proven, deny proven.</p>
+    <figure>
+      <svg viewBox="0 0 660 52" role="img" aria-label="Terraform dependency spine: project contains postgres and web service; the database connection string flows from postgres to the service">
+        <rect class="d-box" x="2"   y="12" width="130" height="30"/>
+        <rect class="d-box" x="230" y="12" width="130" height="30"/>
+        <rect class="d-box" x="470" y="12" width="188" height="30"/>
+        <text class="d-label" x="67"  y="31" text-anchor="middle">project</text>
+        <text class="d-label" x="295" y="31" text-anchor="middle">postgres</text>
+        <text class="d-label" x="564" y="31" text-anchor="middle">web service</text>
+        <line class="d-edge" x1="132" y1="27" x2="224" y2="27" marker-end="url(#a)"/>
+        <line class="d-edge" x1="360" y1="27" x2="464" y2="27" marker-end="url(#a)"/>
+        <text class="d-mut" x="178" y="22" text-anchor="middle">env id</text>
+        <text class="d-mut" x="412" y="22" text-anchor="middle">DSN</text>
+      </svg>
+      <figcaption>blast radius: replace project → both children rebuilt, data gone · replace postgres → data gone + DSN rotates · replace service → sessions gone</figcaption>
+    </figure>
+    <ul class="tight">
+      <li><b><code>-/+</code> means replace.</b> Find the attribute that forces it, then walk right along the spine.</li>
+      <li><b><code>~</code> on env vars still deploys.</b> <code>DATABASE_URL</code> changes because postgres changed, not because someone typed it.</li>
+      <li><b>starter → free looks harmless.</b> Idling silently kills the cron and the webhook poller.</li>
     </ul>
-    <div class="legend">Read order: summary line → any <code>-/+</code>? name the forcing attribute → walk the spine downstream → name the risky ops → state the rollback. <code>~</code> in-place · <code>-/+</code> replace · <code>(known after apply)</code> computed, cascades.</div>
   </section>
 
-  <section class="beat">
-    <div class="beat-n">5</div>
-    <h2>What we deliberately didn't build</h2>
-    <div class="time">4:15–5:00</div>
-    <div class="body">
-      <p class="why">Scope was chosen, not defaulted into — each cut has a one-line defense and a
-      preserved seam for the day it's needed.</p>
-      <div class="chips">
-        <span class="chip">Message broker — interface preserves the swap</span>
-        <span class="chip">Service-layer refactor — week-eating, zero grader value</span>
-        <span class="chip">OAuth libraries — they skip the part we must build</span>
-        <span class="chip">ECS side-stack — theater deployment</span>
-        <span class="chip">Platform-layer AI — the brief itself calls it scope creep</span>
-      </div>
-    </div>
+  <section>
+    <span class="n">05</span>
+    <h2>Deliberately not built</h2>
+    <p class="line">No message broker (single instance; the interface keeps the swap open) · no
+      service-layer refactor (week-eating, invisible to graders) · no OAuth library (they skip the
+      part we must build) · no ECS side-stack (we defend the deployment that serves you) · no
+      platform AI (the brief itself calls it scope creep).</p>
   </section>
 
-  <footer class="cuts">
-    <b>If pushed on risk:</b> de-scope ladder is pre-committed — PKCE-only with loopback CLI login,
-    then existing API tokens driving the drill. The drill is the rubric; everything upstream of it
-    ships first. Full ledger: <code>docs/week6-requirements.md</code> · decisions with rejected
-    alternatives: <code>DECISIONS.md</code>.
+  <footer>
+    If pushed on risk: the de-scope ladder is pre-committed — PKCE-only with loopback CLI login, then
+    existing API tokens driving the drill. Ledger: <code>docs/week6-requirements.md</code> ·
+    decisions + rejected alternatives: <code>DECISIONS.md</code>
   </footer>
 </div>
