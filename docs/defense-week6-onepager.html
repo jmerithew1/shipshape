@@ -68,11 +68,12 @@
 
 <div class="sheet">
   <header class="hero">
-    <div class="micro">Architecture defense · Mon Aug 11 · 13:00 CT · <b>James Merithew</b></div>
+    <div class="micro">Architecture plan · defense Mon Aug 11 · build week Aug 10–16 · <b>James Merithew</b></div>
     <h1>SHIP <span class="arrow">→</span> PLATFORM</h1>
     <p class="thesis">If someone who has never seen Ship can install the SDK, log in, create a
       document, and get a <b>verified notification back</b> — from the docs alone, in under
-      30 minutes — the platform works. CI proves it on every change.</p>
+      30 minutes — the platform works. The same loop becomes a CI test that runs on every
+      change, so the developer experience isn't claimed, it's continuously proven.</p>
     <figure>
       <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
         <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
@@ -96,6 +97,7 @@
       </svg>
     </figure>
     <div class="pills">
+      <span class="micro" style="align-self:center">TARGETS</span>
       <span class="pill">TTFE CI <b>&lt;60s</b></span>
       <span class="pill">HUMAN <b>≤30min</b></span>
       <span class="pill">FLAKE <b>0%</b> / 20 runs</span>
@@ -107,11 +109,12 @@
   <section>
     <div class="sec-head"><span class="n">01</span><h2>One gate, one shape, one spec</h2></div>
     <p class="line">New OAuth logins flow into the access check Ship already has — <b>one place
-      decides who's allowed</b>. The API docs are <span class="sig">generated from the code
-      itself</span>, and the SDK is checked against them on every build.</p>
+      decides who's allowed</b>. When the API fails, it fails the same way every time — one error
+      format, tested on every route. And the docs are <span class="sig">generated from the code
+      itself</span>, with the SDK checked against them on every build.</p>
     <figure>
       <svg viewBox="0 0 660 58" role="img" aria-label="Every public request crosses five middleware in order: auth, scope, rate, handler, audit">
-        <text class="d-blue" x="2" y="9">/api/v1 — SEPARATELY NAMED FILES; THE INTERVIEW ANSWER IS THE DIRECTORY LISTING</text>
+        <text class="d-blue" x="2" y="9">/api/v1 — EVERY REQUEST, SAME ORDER, EACH CHECK ITS OWN FILE</text>
         <rect class="d-box" x="2"   y="18" width="100" height="30"/>
         <rect class="d-box" x="142" y="18" width="80" height="30"/>
         <rect class="d-box" x="262" y="18" width="80" height="30"/>
@@ -195,8 +198,8 @@
     <div class="sec-head"><span class="n">04</span><h2>Terraform is the recipe; Render is the kitchen</h2></div>
     <p class="line">Three resources describe the whole deployment — <code>terraform apply</code>
       from a clean machine <b>is</b> the deploy, and destroy-and-rebuild is already proven.
-      Least-privilege tested where the code actually touches AWS (production secrets):
-      <span class="sig">allow proven, deny proven</span>, zero contact with the live deploy.</p>
+      Least-privilege runs where the code actually touches AWS — production secrets:
+      <span class="sig">prove allow, prove deny</span>, zero contact with the live deploy.</p>
     <figure>
       <svg viewBox="0 0 660 52" role="img" aria-label="Terraform dependency spine: project contains postgres and web service; the database connection string flows from postgres to the service">
         <rect class="d-box" x="2"   y="12" width="130" height="30"/>
