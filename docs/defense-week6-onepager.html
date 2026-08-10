@@ -1,11 +1,11 @@
 <title>Week 6 Defense — PlugForge in 5 Minutes</title>
 <style>
-  :root { --bg:#FFFFFF; --ink:#111111; --muted:#6B6B6B; --line:#E2E2E2; --box:#F6F6F6; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0E1116; --ink:#E8E8E8; --muted:#8E979F; --line:#262B33; --box:#161B22; }
+  /* Deliberately single-theme: white ground, ink text, two semantic colors only —
+     green = the platform working, red = destructive blast radius. */
+  :root, :root[data-theme="dark"], :root[data-theme="light"] {
+    --bg:#FFFFFF; --ink:#111111; --muted:#6B6B6B; --line:#E2E2E2; --box:#F6F6F6;
+    --ok:#0A6B36; --ok-bg:#EAF5EE; --danger:#B03A26;
   }
-  :root[data-theme="dark"]  { --bg:#0E1116; --ink:#E8E8E8; --muted:#8E979F; --line:#262B33; --box:#161B22; }
-  :root[data-theme="light"] { --bg:#FFFFFF; --ink:#111111; --muted:#6B6B6B; --line:#E2E2E2; --box:#F6F6F6; }
 
   html { background: var(--bg); }
   body { color: var(--ink); margin: 0; padding: 3rem 1.25rem 4rem;
@@ -35,6 +35,14 @@
   .d-fill  { fill: var(--box); stroke: currentColor; stroke-width: 1; }
   .d-edge  { stroke: currentColor; stroke-width: 1; fill: none; }
   .d-dash  { stroke: currentColor; stroke-width: 1; fill: none; stroke-dasharray: 4 3; opacity: .5; }
+  .d-ok-box   { fill: var(--ok-bg); stroke: var(--ok); stroke-width: 1; }
+  .d-ok-text  { font: 11px Consolas, monospace; fill: var(--ok); font-weight: 600; }
+  .d-ok-mut   { font: 10px Consolas, monospace; fill: var(--ok); }
+  .d-dgr-box  { fill: none; stroke: var(--danger); stroke-width: 1; }
+  .d-dgr-text { font: 11px Consolas, monospace; fill: var(--danger); }
+  .d-dgr-mut  { font: 10px Consolas, monospace; fill: var(--danger); }
+  .ok { color: var(--ok); font-weight: 600; }
+  .danger { color: var(--danger); font-weight: 600; }
 
   ul.tight { margin: .5rem 0 0; padding-left: 1.05rem; color: var(--muted); }
   ul.tight li { margin: .15rem 0; }
@@ -57,12 +65,12 @@
         <rect class="d-box" x="140" y="14" width="92" height="30"/>
         <rect class="d-box" x="278" y="14" width="92" height="30"/>
         <rect class="d-box" x="416" y="14" width="92" height="30"/>
-        <rect class="d-fill" x="554" y="14" width="104" height="30"/>
+        <rect class="d-ok-box" x="554" y="14" width="104" height="30"/>
         <text class="d-label" x="48"  y="33" text-anchor="middle">install</text>
         <text class="d-label" x="186" y="33" text-anchor="middle">login</text>
         <text class="d-label" x="324" y="33" text-anchor="middle">subscribe</text>
         <text class="d-label" x="462" y="33" text-anchor="middle">create</text>
-        <text class="d-label" x="606" y="33" text-anchor="middle">verified ✓</text>
+        <text class="d-ok-text" x="606" y="33" text-anchor="middle">verified ✓</text>
         <line class="d-edge" x1="94"  y1="29" x2="134" y2="29" marker-end="url(#a)"/>
         <line class="d-edge" x1="232" y1="29" x2="272" y2="29" marker-end="url(#a)"/>
         <line class="d-edge" x1="370" y1="29" x2="410" y2="29" marker-end="url(#a)"/>
@@ -122,12 +130,12 @@
         <text class="d-mut" x="490" y="25" text-anchor="middle">POST</text>
         <path class="d-dash" d="M 603 44 L 603 66 L 208 66 L 208 44" marker-end="url(#a)"/>
         <text class="d-mut" x="405" y="62" text-anchor="middle">5xx → retry 1s·4s·16s·1m·5m·30m + jitter</text>
-        <rect class="d-box" x="148" y="76" width="120" height="26"/>
-        <text class="d-label" x="208" y="93" text-anchor="middle">DLQ</text>
+        <rect class="d-dgr-box" x="148" y="76" width="120" height="26"/>
+        <text class="d-dgr-text" x="208" y="93" text-anchor="middle">DLQ</text>
         <path class="d-edge" d="M 148 89 L 60 89 L 60 46" marker-end="url(#a)" opacity=".4"/>
         <path class="d-edge" d="M 268 89 L 640 89 L 640 46" marker-end="url(#a)"/>
         <text class="d-mut" x="454" y="85" text-anchor="middle">replay — same Idempotency-Key</text>
-        <text class="d-mut" x="104" y="85" text-anchor="middle">6 fails / 4xx</text>
+        <text class="d-dgr-mut" x="104" y="85" text-anchor="middle">6 fails / 4xx</text>
       </svg>
     </figure>
   </section>
@@ -148,14 +156,14 @@
         <text class="d-mut" x="2" y="72">after</text>
         <rect class="d-box" x="60" y="56" width="90" height="28"/>
         <rect class="d-box" x="210" y="56" width="80" height="28"/>
-        <rect class="d-fill" x="350" y="56" width="90" height="28"/>
+        <rect class="d-ok-box" x="350" y="56" width="90" height="28"/>
         <text class="d-label" x="105" y="74" text-anchor="middle">agent</text>
         <text class="d-label" x="250" y="74" text-anchor="middle">SDK</text>
         <text class="d-label" x="395" y="74" text-anchor="middle">/api/v1</text>
         <line class="d-edge" x1="150" y1="70" x2="204" y2="70" marker-end="url(#a)"/>
         <line class="d-edge" x1="290" y1="70" x2="344" y2="70" marker-end="url(#a)"/>
         <line class="d-edge" x1="440" y1="70" x2="554" y2="70" marker-end="url(#a)"/>
-        <text class="d-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
+        <text class="d-ok-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
         <rect class="d-box" x="560" y="8" width="98" height="76"/>
         <text class="d-label" x="609" y="50" text-anchor="middle">database</text>
       </svg>
@@ -182,10 +190,10 @@
         <text class="d-mut" x="178" y="22" text-anchor="middle">env id</text>
         <text class="d-mut" x="412" y="22" text-anchor="middle">DSN</text>
       </svg>
-      <figcaption>blast radius: replace project → both children rebuilt, data gone · replace postgres → data gone + DSN rotates · replace service → sessions gone</figcaption>
+      <figcaption>blast radius: replace project → both children rebuilt, <span class="danger">data gone</span> · replace postgres → <span class="danger">data gone</span> + DSN rotates · replace service → <span class="danger">sessions gone</span></figcaption>
     </figure>
     <ul class="tight">
-      <li><b><code>-/+</code> means replace.</b> Find the attribute that forces it, then walk right along the spine.</li>
+      <li><b><code class="danger">-/+</code> means replace.</b> Find the attribute that forces it, then walk right along the spine.</li>
       <li><b><code>~</code> on env vars still deploys.</b> <code>DATABASE_URL</code> changes because postgres changed, not because someone typed it.</li>
       <li><b>starter → free looks harmless.</b> Idling silently kills the cron and the webhook poller.</li>
     </ul>
