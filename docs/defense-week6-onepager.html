@@ -1,9 +1,8 @@
 <title>Week 6 Defense — PlugForge in 5 Minutes</title>
 <style>
-  /* Stark black-and-white × electric lime × technical editorial.
-     Single-theme by design: this page commits to the dark stage look.
-     Lime = signal (status, key metrics, the moments that matter).
-     Blue = technical annotation. Everything else is achromatic. */
+  /* Stark black-and-white × electric lime × technical editorial. Single-theme
+     by design. Lime = signal. Blue = technical annotation. Motion = the
+     mechanism running, never decoration. */
   :root, :root[data-theme="dark"], :root[data-theme="light"] {
     --bg:#0A0A0B; --surface:#101012; --ink:#FAFAFA; --muted:#8A8F98;
     --line:#232326; --lime:#C8FF4D; --blue:#6AA6FF;
@@ -20,18 +19,29 @@
 
   .hero { padding-bottom: 2rem; }
   h1 { margin: .9rem 0 .6rem; font-weight: 800; letter-spacing: -0.03em;
-    font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.02; text-wrap: balance; }
-  h1 .arrow { color: var(--lime); font-weight: 800; }
-  .thesis { color: var(--muted); max-width: 56ch; margin: 0 0 1.2rem; }
+    font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.02; text-wrap: balance;
+    animation: rise .6s ease-out both; }
+  h1 .arrow { color: var(--lime); font-weight: 800; display: inline-block;
+    animation: arrowIn .7s cubic-bezier(.2,.8,.2,1) .25s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes arrowIn { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+  .thesis { color: var(--muted); max-width: 56ch; margin: 0 0 1.2rem;
+    animation: rise .6s ease-out .15s both; }
   .thesis b { color: var(--ink); font-weight: 600; }
 
   .pills { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.1rem 0 0; }
   .pill { border: 1px solid var(--line); border-radius: 999px; padding: .32em .85em;
     font-family: Consolas, monospace; font-size: .72rem; color: var(--muted);
-    letter-spacing: .04em; white-space: nowrap; }
+    letter-spacing: .04em; white-space: nowrap; animation: rise .5s ease-out both; }
+  .pill:nth-child(2) { animation-delay: .35s } .pill:nth-child(3) { animation-delay: .45s }
+  .pill:nth-child(4) { animation-delay: .55s } .pill:nth-child(5) { animation-delay: .65s }
+  .pill:nth-child(6) { animation-delay: .75s }
   .pill b { color: var(--lime); font-weight: 400; }
 
   section { border-top: 1px solid var(--line); padding: 1.6rem 0; }
+  .reveal { opacity: 0; transform: translateY(12px);
+    transition: opacity .55s ease-out, transform .55s ease-out; }
+  .reveal.in { opacity: 1; transform: none; }
   .sec-head { display: flex; align-items: baseline; gap: .9rem; margin-bottom: .45rem; }
   .n { font-family: Consolas, monospace; font-size: .72rem; color: var(--lime); letter-spacing: .1em; }
   h2 { font-size: 1.14rem; margin: 0; font-weight: 700; letter-spacing: -0.015em; }
@@ -57,6 +67,12 @@
   .d-lime-text { font: 11px Consolas, monospace; fill: var(--lime); }
   .d-lime-mut  { font: 10px Consolas, monospace; fill: var(--lime); }
 
+  @media (prefers-reduced-motion: reduce) {
+    h1, h1 .arrow, .thesis, .pill { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .anim { display: none; }
+  }
+
   ul.tight { margin: .7rem 0 0; padding-left: 1.05rem; color: var(--muted); }
   ul.tight li { margin: .22rem 0; }
   ul.tight b { color: var(--ink); font-weight: 600; }
@@ -75,15 +91,20 @@
       every change.</p>
     <figure>
       <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
-        <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0 L8 4 L0 8 z" fill="#4A4A50"/></marker>
-        <marker id="al" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0 L8 4 L0 8 z" fill="#C8FF4D"/></marker></defs>
+        <defs>
+          <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="#4A4A50"/></marker>
+          <marker id="al" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="#C8FF4D"/></marker>
+        </defs>
         <rect class="d-box" x="2"   y="14" width="92" height="30"/>
         <rect class="d-box" x="140" y="14" width="92" height="30"/>
         <rect class="d-box" x="278" y="14" width="92" height="30"/>
         <rect class="d-box" x="416" y="14" width="92" height="30"/>
         <rect class="d-lime-box" x="554" y="14" width="104" height="30"/>
+        <rect class="anim" x="554" y="14" width="104" height="30" fill="#C8FF4D" opacity="0">
+          <animate attributeName="opacity" values="0;0;0;0.22;0" keyTimes="0;0.8;0.87;0.92;1" dur="4.5s" repeatCount="indefinite"/>
+        </rect>
         <text class="d-label" x="48"  y="33" text-anchor="middle">install</text>
         <text class="d-label" x="186" y="33" text-anchor="middle">login</text>
         <text class="d-label" x="324" y="33" text-anchor="middle">subscribe</text>
@@ -93,6 +114,10 @@
         <line class="d-edge" x1="232" y1="29" x2="272" y2="29" marker-end="url(#a)"/>
         <line class="d-edge" x1="370" y1="29" x2="410" y2="29" marker-end="url(#a)"/>
         <line class="d-edge" x1="508" y1="29" x2="548" y2="29" marker-end="url(#al)"/>
+        <circle class="anim" r="3.2" fill="#C8FF4D">
+          <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0.86;1" keyTimes="0;0.8;1" calcMode="linear" path="M 20 29 H 606"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.82;1" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
       </svg>
     </figure>
     <div class="pills">
@@ -105,7 +130,7 @@
     </div>
   </header>
 
-  <section>
+  <section class="reveal">
     <div class="sec-head"><span class="n">01</span><h2>One gate, one shape, one spec</h2></div>
     <p class="line"><b>One place decides who's allowed.</b> One error format everywhere.
       Docs <span class="sig">generated from the code</span> — the SDK is checked against them in CI.</p>
@@ -126,11 +151,15 @@
         <line class="d-edge" x1="222" y1="33" x2="256" y2="33" marker-end="url(#a)"/>
         <line class="d-edge" x1="342" y1="33" x2="376" y2="33" marker-end="url(#a)"/>
         <line class="d-edge" x1="472" y1="33" x2="506" y2="33" marker-end="url(#a)"/>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="3.5s" repeatCount="indefinite" path="M 10 33 H 550"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
       </svg>
     </figure>
   </section>
 
-  <section>
+  <section class="reveal">
     <div class="sec-head"><span class="n">02</span><h2>One Postgres table is the whole webhook system</h2></div>
     <p class="line">A delivery is a row — status, attempts, next retry. <b>The table is the
       queue.</b> Every delivery is <span class="sig">signed</span>.</p>
@@ -157,21 +186,29 @@
         <path class="d-edge" d="M 268 91 L 640 91 L 640 46" marker-end="url(#a)"/>
         <text class="d-lime-mut" x="104" y="87" text-anchor="middle">6 fails / 4xx</text>
         <text class="d-blue" x="454" y="87" text-anchor="middle">replay — same Idempotency-Key</text>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="6s" repeatCount="indefinite"
+            path="M 20 29 H 600 L 603 44 L 603 66 H 208 L 208 44 L 208 29 H 600"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.93;1" dur="6s" repeatCount="indefinite"/>
+        </circle>
       </svg>
+      <figcaption>a delivery goes out signed · fails · comes back on the schedule · succeeds — or dead-letters and gets replayed with the <span class="sig">same key</span></figcaption>
     </figure>
   </section>
 
-  <section>
+  <section class="reveal">
     <div class="sec-head"><span class="n">03</span><h2>The agent walks in the front door</h2></div>
     <p class="line">The agent loses its database shortcut — it logs in like any developer:
       <span class="sig">scoped, rate-limited, audited</span>. My own agent tests the platform.</p>
     <figure>
       <svg viewBox="0 0 660 96" role="img" aria-label="Before: the agent queried the database directly. After: the agent goes through the SDK and public API into the same database">
         <text class="d-mut" x="2" y="24">before</text>
-        <rect class="d-box" x="60" y="8" width="90" height="28"/>
-        <text class="d-label" x="105" y="26" text-anchor="middle">agent</text>
-        <path class="d-dash" d="M 150 22 L 560 22" marker-end="url(#a)"/>
-        <text class="d-mut" x="350" y="17" text-anchor="middle">raw SQL — invisible, unlimited</text>
+        <g opacity=".45">
+          <rect class="d-box" x="60" y="8" width="90" height="28"/>
+          <text class="d-label" x="105" y="26" text-anchor="middle">agent</text>
+          <path class="d-dash" d="M 150 22 L 560 22" marker-end="url(#a)"/>
+          <text class="d-mut" x="350" y="17" text-anchor="middle">raw SQL — invisible, unlimited</text>
+        </g>
         <text class="d-mut" x="2" y="72">after</text>
         <rect class="d-box" x="60" y="56" width="90" height="28"/>
         <rect class="d-box" x="210" y="56" width="80" height="28"/>
@@ -185,11 +222,15 @@
         <text class="d-lime-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
         <rect class="d-box" x="560" y="8" width="98" height="76"/>
         <text class="d-label" x="609" y="50" text-anchor="middle">database</text>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="3.8s" repeatCount="indefinite" path="M 70 70 H 600"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3.8s" repeatCount="indefinite"/>
+        </circle>
       </svg>
     </figure>
   </section>
 
-  <section>
+  <section class="reveal">
     <div class="sec-head"><span class="n">04</span><h2>Terraform is the recipe; Render is the kitchen</h2></div>
     <p class="line">Three resources, one <code>terraform apply</code> — destroy-and-rebuild already
       proven. Least-privilege on the secrets path: <span class="sig">prove allow, prove deny</span>,
@@ -207,7 +248,7 @@
         <text class="d-blue" x="178" y="22" text-anchor="middle">env id</text>
         <text class="d-blue" x="412" y="22" text-anchor="middle">DSN</text>
       </svg>
-      <figcaption>blast radius: replace project → both children rebuilt, <span class="sig">data gone</span> ·
+      <figcaption>blast radius flows left → right: replace project → both children rebuilt, <span class="sig">data gone</span> ·
         replace postgres → <span class="sig">data gone</span> + DSN rotates ·
         replace service → <span class="sig">sessions gone</span></figcaption>
     </figure>
@@ -218,16 +259,33 @@
     </ul>
   </section>
 
-  <section>
+  <section class="reveal">
     <div class="sec-head"><span class="n">05</span><h2>Deliberately not built</h2></div>
     <p class="line">No queue service. No rewriting working code. No AI for AI's sake.
       <b>Scope was chosen, not defaulted into.</b> If time runs short, the CLI login gets
       simpler — the loop stays.</p>
   </section>
 
-  <footer>
+  <footer class="reveal">
     <span class="micro">RECEIPTS</span> — requirement ledger: <code>docs/week6-requirements.md</code> ·
     every decision with its rejected alternative: <code>DECISIONS.md</code> ·
     terraform crib: <code>docs/defense-week6-terraform-map.md</code>
   </footer>
 </div>
+
+<script>
+  (function () {
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.reveal');
+    if (reduced || !('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+</script>
