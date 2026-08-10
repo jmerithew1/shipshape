@@ -70,10 +70,9 @@
   <header class="hero">
     <div class="micro">Architecture plan · defense Mon Aug 11 · build week Aug 10–16 · <b>James Merithew</b></div>
     <h1>SHIP <span class="arrow">→</span> PLATFORM</h1>
-    <p class="thesis">If someone who has never seen Ship can install the SDK, log in, create a
-      document, and get a <b>verified notification back</b> — from the docs alone, in under
-      30 minutes — the platform works. The same loop becomes a CI test that runs on every
-      change, so the developer experience isn't claimed, it's continuously proven.</p>
+    <p class="thesis">A stranger installs the SDK, logs in, creates a document, and gets a
+      <b>verified notification back</b> — docs only, under 30 minutes. CI runs the same loop on
+      every change.</p>
     <figure>
       <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
         <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
@@ -108,10 +107,8 @@
 
   <section>
     <div class="sec-head"><span class="n">01</span><h2>One gate, one shape, one spec</h2></div>
-    <p class="line">New OAuth logins flow into the access check Ship already has — <b>one place
-      decides who's allowed</b>. When the API fails, it fails the same way every time — one error
-      format, tested on every route. And the docs are <span class="sig">generated from the code
-      itself</span>, with the SDK checked against them on every build.</p>
+    <p class="line"><b>One place decides who's allowed.</b> One error format everywhere.
+      Docs <span class="sig">generated from the code</span> — the SDK is checked against them in CI.</p>
     <figure>
       <svg viewBox="0 0 660 58" role="img" aria-label="Every public request crosses five middleware in order: auth, scope, rate, handler, audit">
         <text class="d-blue" x="2" y="9">/api/v1 — EVERY REQUEST, SAME ORDER, EACH CHECK ITS OWN FILE</text>
@@ -135,9 +132,8 @@
 
   <section>
     <div class="sec-head"><span class="n">02</span><h2>One Postgres table is the whole webhook system</h2></div>
-    <p class="line">Every delivery is a database row — status, attempts, next retry.
-      <b>The table is the queue.</b> Each delivery is signed, so the receiver can verify it came
-      from Ship, <span class="sig">unchanged</span>.</p>
+    <p class="line">A delivery is a row — status, attempts, next retry. <b>The table is the
+      queue.</b> Every delivery is <span class="sig">signed</span>.</p>
     <figure>
       <svg viewBox="0 0 660 110" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, retries loop back, six failures dead-letter, replay re-posts with the same idempotency key">
         <rect class="d-box"  x="2"   y="14" width="86"  height="30"/>
@@ -167,9 +163,8 @@
 
   <section>
     <div class="sec-head"><span class="n">03</span><h2>The agent walks in the front door</h2></div>
-    <p class="line">Last week the agent had a shortcut straight to the database. This week it logs
-      in like any developer — <span class="sig">limited permissions, rate limits, every action
-      recorded</span>. My own agent becomes a test of the platform.</p>
+    <p class="line">The agent loses its database shortcut — it logs in like any developer:
+      <span class="sig">scoped, rate-limited, audited</span>. My own agent tests the platform.</p>
     <figure>
       <svg viewBox="0 0 660 96" role="img" aria-label="Before: the agent queried the database directly. After: the agent goes through the SDK and public API into the same database">
         <text class="d-mut" x="2" y="24">before</text>
@@ -196,10 +191,9 @@
 
   <section>
     <div class="sec-head"><span class="n">04</span><h2>Terraform is the recipe; Render is the kitchen</h2></div>
-    <p class="line">Three resources describe the whole deployment — <code>terraform apply</code>
-      from a clean machine <b>is</b> the deploy, and destroy-and-rebuild is already proven.
-      Least-privilege runs where the code actually touches AWS — production secrets:
-      <span class="sig">prove allow, prove deny</span>, zero contact with the live deploy.</p>
+    <p class="line">Three resources, one <code>terraform apply</code> — destroy-and-rebuild already
+      proven. Least-privilege on the secrets path: <span class="sig">prove allow, prove deny</span>,
+      never touching the live deploy.</p>
     <figure>
       <svg viewBox="0 0 660 52" role="img" aria-label="Terraform dependency spine: project contains postgres and web service; the database connection string flows from postgres to the service">
         <rect class="d-box" x="2"   y="12" width="130" height="30"/>
@@ -226,9 +220,9 @@
 
   <section>
     <div class="sec-head"><span class="n">05</span><h2>Deliberately not built</h2></div>
-    <p class="line">No message queue — one server doesn't need it, and the seam is there for later.
-      No rewriting code that already works. No AI for AI's sake. <b>Scope was chosen, not
-      defaulted into.</b> If time runs short: the CLI login gets simpler — the core loop stays.</p>
+    <p class="line">No queue service. No rewriting working code. No AI for AI's sake.
+      <b>Scope was chosen, not defaulted into.</b> If time runs short, the CLI login gets
+      simpler — the loop stays.</p>
   </section>
 
   <footer>
