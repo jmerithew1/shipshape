@@ -281,37 +281,33 @@
       proven. Least-privilege on the secrets path: <span class="sig">prove allow, prove deny</span>,
       never touching the live deploy.</p>
     <figure>
-      <svg viewBox="0 0 660 52" role="img" aria-label="Terraform dependency spine: a change to the project ripples to postgres, whose connection string ripples to the web service">
-        <rect class="d-box" x="2"   y="12" width="130" height="30"/>
-        <rect class="d-box" x="230" y="12" width="130" height="30"/>
-        <rect class="d-box" x="470" y="12" width="188" height="30"/>
-        <!-- blast-radius ripple: change lands on project → travels to postgres →
-             DSN carries it to the service, which lights brightest (most downstream) -->
-        <rect class="glow anim" x="2" y="12" width="130" height="30" opacity="0">
-          <animate attributeName="opacity" values="0;0.2;0.2;0;0" keyTimes="0;0.05;0.13;0.2;1" dur="8s" repeatCount="indefinite"/></rect>
-        <rect class="glow anim" x="230" y="12" width="130" height="30" opacity="0">
-          <animate attributeName="opacity" values="0;0;0.2;0.2;0;0" keyTimes="0;0.33;0.4;0.48;0.55;1" dur="8s" repeatCount="indefinite"/></rect>
-        <rect class="glow anim" x="470" y="12" width="188" height="30" opacity="0">
-          <animate attributeName="opacity" values="0;0;0.3;0.3;0;0" keyTimes="0;0.7;0.77;0.85;0.92;1" dur="8s" repeatCount="indefinite"/></rect>
-        <text class="d-label" x="67"  y="31" text-anchor="middle">project</text>
-        <text class="d-label" x="295" y="31" text-anchor="middle">postgres</text>
-        <text class="d-label" x="564" y="31" text-anchor="middle">web service</text>
-        <line class="d-edge" x1="132" y1="27" x2="224" y2="27" marker-end="url(#a)"/>
-        <line class="d-edge" x1="360" y1="27" x2="464" y2="27" marker-end="url(#a)"/>
-        <text class="d-blue" x="178" y="22" text-anchor="middle">env id</text>
-        <text class="d-blue" x="412" y="22" text-anchor="middle">DSN</text>
-        <circle class="anim" r="3" fill="#C8FF4D" opacity="0">
-          <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.18;0.35;1" calcMode="linear" path="M 132 27 H 224"/>
-          <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.18;0.2;0.33;0.36;1" dur="8s" repeatCount="indefinite"/>
-        </circle>
-        <circle class="anim" r="3" fill="#C8FF4D" opacity="0">
-          <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.53;0.7;1" calcMode="linear" path="M 360 27 H 464"/>
-          <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.53;0.55;0.68;0.71;1" dur="8s" repeatCount="indefinite"/>
-        </circle>
+      <svg viewBox="0 0 660 128" role="img" aria-label="Terraform structure: the project contains postgres and the web service; the DSN is the one reference between them. Animation cycles three change scenarios, lighting up only what each one destroys.">
+        <!-- structure: containment, not flow. project is the environment the
+             other two live INSIDE; the only edge is the DSN reference. -->
+        <rect class="d-box" x="2" y="26" width="656" height="98" rx="2"/>
+        <text class="d-mut" x="16" y="44">project</text>
+        <rect class="d-box" x="40"  y="62" width="160" height="38"/>
+        <rect class="d-box" x="400" y="62" width="218" height="38"/>
+        <!-- scenario glows -->
+        <rect class="glow anim" x="400" y="62" width="218" height="38" opacity="0">
+          <animate attributeName="opacity" values="0;0.14;0.14;0;0;0.14;0.14;0;0" keyTimes="0;0.05;0.26;0.31;0.40;0.45;0.61;0.65;1" dur="12s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="40" y="62" width="160" height="38" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.22;0.22;0;0" keyTimes="0;0.38;0.43;0.61;0.65;1" dur="12s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="2" y="26" width="656" height="98" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.12;0.12;0;0" keyTimes="0;0.71;0.76;0.94;0.98;1" dur="12s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="120" y="85" text-anchor="middle">postgres</text>
+        <text class="d-label" x="509" y="85" text-anchor="middle">web service</text>
+        <line class="d-edge" x1="200" y1="81" x2="394" y2="81" marker-end="url(#a)"/>
+        <text class="d-blue" x="297" y="76" text-anchor="middle">DSN</text>
+        <!-- scenario captions, one per phase -->
+        <text class="d-mut" x="2" y="12" opacity="0">SCENARIO 1 — ~ env var on the service: it redeploys. nothing else moves
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.03;0.28;0.33;1" dur="12s" repeatCount="indefinite"/></text>
+        <text class="d-lime-mut" x="2" y="12" opacity="0">SCENARIO 2 — -/+ postgres: data gone · DSN rotates → service redeploys too
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.41;0.63;0.68;1" dur="12s" repeatCount="indefinite"/></text>
+        <text class="d-lime-mut" x="2" y="12" opacity="0">SCENARIO 3 — -/+ project: everything inside is rebuilt
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.74;0.96;0.99;1" dur="12s" repeatCount="indefinite"/></text>
       </svg>
-      <figcaption>blast radius flows left → right: replace project → both children rebuilt, <span class="sig">data gone</span> ·
-        replace postgres → <span class="sig">data gone</span> + DSN rotates ·
-        replace service → <span class="sig">sessions gone</span></figcaption>
+      <figcaption>not a pipeline — a containment tree. damage spreads to whatever <span class="sig">contains or references</span> the thing you changed</figcaption>
     </figure>
     <ul class="tight">
       <li><b><span class="sig">-/+</span> means replace.</b> Find the attribute that forces it, then walk right along the spine.</li>
