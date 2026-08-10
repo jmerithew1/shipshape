@@ -70,9 +70,9 @@
   <header class="hero">
     <div class="micro">Architecture defense · Mon Aug 11 · 13:00 CT · <b>James Merithew</b></div>
     <h1>SHIP <span class="arrow">→</span> PLATFORM</h1>
-    <p class="thesis">The grade is one loop: a stranger installs the SDK and gets a
-      <b>verified, signed webhook in their terminal</b>. Every decision below exists to make that
-      loop short and provable.</p>
+    <p class="thesis">If someone who has never seen Ship can install the SDK, log in, create a
+      document, and get a <b>verified notification back</b> — from the docs alone, in under
+      30 minutes — the platform works. CI proves it on every change.</p>
     <figure>
       <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
         <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
@@ -106,11 +106,9 @@
 
   <section>
     <div class="sec-head"><span class="n">01</span><h2>One gate, one shape, one spec</h2></div>
-    <p class="line">OAuth tokens flow through the <b>same validator</b> that already guards the API.
-      Every failure is one <code>ApiError</code> shape. The OpenAPI spec is
-      <span class="sig">generated from the routes</span> — it structurally cannot lie — and the SDK
-      is diffed against it in CI. Hand-rolled grants because no library implements the Device Grant:
-      the hard part was ours either way.</p>
+    <p class="line">New OAuth logins flow into the access check Ship already has — <b>one place
+      decides who's allowed</b>. The API docs are <span class="sig">generated from the code
+      itself</span>, and the SDK is checked against them on every build.</p>
     <figure>
       <svg viewBox="0 0 660 58" role="img" aria-label="Every public request crosses five middleware in order: auth, scope, rate, handler, audit">
         <text class="d-blue" x="2" y="9">/api/v1 — SEPARATELY NAMED FILES; THE INTERVIEW ANSWER IS THE DIRECTORY LISTING</text>
@@ -134,12 +132,9 @@
 
   <section>
     <div class="sec-head"><span class="n">02</span><h2>One Postgres table is the whole webhook system</h2></div>
-    <p class="line">The required retry ladder forces persistence anyway — so the persistence
-      <b>is</b> the queue. DLQ is a status. Replay keeps the original idempotency key. No broker:
-      single-instance deploy makes in-process delivery <b>correct</b>, and the queue-backed
-      deliverer stays a drop-in behind the same interface. <code>webhooks tail</code> works like
-      <code>stripe listen</code>: the CLI verifies the HMAC locally — <span class="sig">the key
-      never leaves the client</span>.</p>
+    <p class="line">Every delivery is a database row — status, attempts, next retry.
+      <b>The table is the queue.</b> Each delivery is signed, so the receiver can verify it came
+      from Ship, <span class="sig">unchanged</span>.</p>
     <figure>
       <svg viewBox="0 0 660 110" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, retries loop back, six failures dead-letter, replay re-posts with the same idempotency key">
         <rect class="d-box"  x="2"   y="14" width="86"  height="30"/>
@@ -169,10 +164,9 @@
 
   <section>
     <div class="sec-head"><span class="n">03</span><h2>The agent walks in the front door</h2></div>
-    <p class="line">FleetGraph trades its private DB pool for the public SDK, behind a flag.
-      <span class="sig">Same scopes, same rate limits, same audit trail as a stranger</span> — the
-      audit rows are the proof the platform is real. Cost shape unchanged: zero platform LLM calls,
-      one call per agent turn, token volume verified before/after in LangSmith.</p>
+    <p class="line">Last week the agent had a shortcut straight to the database. This week it logs
+      in like any developer — <span class="sig">limited permissions, rate limits, every action
+      recorded</span>. My own agent becomes a test of the platform.</p>
     <figure>
       <svg viewBox="0 0 660 96" role="img" aria-label="Before: the agent queried the database directly. After: the agent goes through the SDK and public API into the same database">
         <text class="d-mut" x="2" y="24">before</text>
@@ -199,11 +193,10 @@
 
   <section>
     <div class="sec-head"><span class="n">04</span><h2>Terraform is the recipe; Render is the kitchen</h2></div>
-    <p class="line">Three declared resources are the whole deployment — <code>terraform apply</code>
-      from a clean machine <b>is</b> the deploy, and destroy-and-redeploy is already proven and
-      graded. IAM least-privilege runs the real secrets code path on a terraform-managed scratch:
-      admin → one <code>ssm:GetParameter</code> ARN, <span class="sig">allow proven, deny
-      proven</span>, zero contact with the graded deployment.</p>
+    <p class="line">Three resources describe the whole deployment — <code>terraform apply</code>
+      from a clean machine <b>is</b> the deploy, and destroy-and-rebuild is already proven.
+      Least-privilege tested where the code actually touches AWS (production secrets):
+      <span class="sig">allow proven, deny proven</span>, zero contact with the live deploy.</p>
     <figure>
       <svg viewBox="0 0 660 52" role="img" aria-label="Terraform dependency spine: project contains postgres and web service; the database connection string flows from postgres to the service">
         <rect class="d-box" x="2"   y="12" width="130" height="30"/>
@@ -230,17 +223,14 @@
 
   <section>
     <div class="sec-head"><span class="n">05</span><h2>Deliberately not built</h2></div>
-    <p class="line">No message broker (single instance; the interface keeps the swap open) · no
-      service-layer refactor (week-eating, invisible to graders) · no OAuth library (they skip the
-      part we must build) · no ECS side-stack (we defend the deployment that serves you) · no
-      platform AI (the brief itself calls it scope creep). <b>Scope was chosen, not defaulted
-      into.</b></p>
+    <p class="line">No message queue — one server doesn't need it, and the seam is there for later.
+      No rewriting code that already works. No AI for AI's sake. <b>Scope was chosen, not
+      defaulted into.</b> If time runs short: the CLI login gets simpler — the core loop stays.</p>
   </section>
 
   <footer>
-    <span class="micro">IF PUSHED ON RISK</span> — de-scope ladder is pre-committed: PKCE-only with
-    loopback CLI login, then existing API tokens driving the drill. The drill is the rubric;
-    everything upstream of it ships first. Ledger: <code>docs/week6-requirements.md</code> ·
-    decisions + rejected alternatives: <code>DECISIONS.md</code>
+    <span class="micro">RECEIPTS</span> — requirement ledger: <code>docs/week6-requirements.md</code> ·
+    every decision with its rejected alternative: <code>DECISIONS.md</code> ·
+    terraform crib: <code>docs/defense-week6-terraform-map.md</code>
   </footer>
 </div>
