@@ -82,5 +82,49 @@ export default tseslint.config(
       // bootstrap, tracked as debt.
       '@typescript-eslint/no-this-alias': 'warn',
     },
+  },
+  // ── Week 6 public/internal boundary (PlugForge). Added BEFORE any
+  // cross-import exists — this decision is far cheaper to enforce than to
+  // retrofit (assignment's "one-way door"). Both rules are errors: a
+  // violation fails lint, and lint failure fails the CI build.
+  {
+    // The public platform surface may never import internal route handlers.
+    // Public v1 handlers are thin and own their SQL; sharing handler code
+    // with /api would let internal semantics leak into the public contract.
+    files: ['api/src/platform/**/*.ts'],
+    ignores: ['api/src/platform/**/*.test.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/routes/*'],
+              message:
+                'Public platform code must not import internal route handlers (public/internal boundary, Week 6).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // External integrations speak to Ship exclusively through the SDK.
+    // This is what makes "the agent is a platform citizen" true rather
+    // than aspirational.
+    files: ['integrations/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/api/src/**', '@ship/api', '@ship/api/*', '@ship/shared', '@ship/shared/*'],
+              message: 'integrations/ may import only @ship/sdk (workspace dependency rule, Week 6).',
+            },
+          ],
+        },
+      ],
+    },
   }
 );

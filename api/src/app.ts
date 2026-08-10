@@ -36,6 +36,7 @@ import weeklyPlansRoutes, { weeklyRetrosRouter } from './routes/weekly-plans.js'
 import { documentCommentsRouter, commentsRouter } from './routes/comments.js';
 import { setupSwagger } from './swagger.js';
 import { initializeCAIA } from './services/caia.js';
+import { createV1Router } from './platform/api/v1/router.js';
 
 // Validate SESSION_SECRET in production
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -179,7 +180,12 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
       await pool.query(`SELECT 1 FROM agent_findings LIMIT 0`);
       await pool.query(`SELECT 1 FROM agent_runs LIMIT 0`);
       await pool.query(`SELECT 1 FROM agent_credibility LIMIT 0`);
-      res.json({ status: 'ready', agent_tables: true });
+      // Week 6 platform tables (migration 039) — same silent-migration guard.
+      await pool.query(`SELECT 1 FROM oauth_apps LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_authorization_codes LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_device_codes LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_refresh_tokens LIMIT 0`);
+      res.json({ status: 'ready', agent_tables: true, platform_tables: true });
     } catch (err) {
       res.status(503).json({
         status: 'not_ready',
@@ -190,6 +196,12 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
 
   // API documentation (no auth needed)
   setupSwagger(app);
+
+  // Public platform API (Week 6). Bearer-token-only surface: no CSRF wrapper
+  // (no cookie auth is accepted here), no shared middleware with the internal
+  // /api routes below — the public/internal boundary is structural. Mounted
+  // before the internal routes so nothing can shadow the /api/v1 prefix.
+  app.use('/api/v1', createV1Router());
 
   // Setup routes (CSRF protected - first-time setup only)
   app.use('/api/setup', conditionalCsrf, setupRoutes);

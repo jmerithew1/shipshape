@@ -14,6 +14,12 @@ beforeAll(async () => {
   // re-enable it explicitly.
   process.env.FLEETGRAPH_ENABLED = 'false'
 
+  // Same rule for Week-6 webhook publication (mirrors FLEETGRAPH_ENABLED):
+  // the event-bus hook at the write chokepoints must check this BEFORE any
+  // query, or the strict pool.query mock sequences above break. Webhook
+  // suites re-enable it explicitly.
+  process.env.WEBHOOKS_ENABLED = 'false'
+
   // Guard: this file TRUNCATEs 15 tables in whatever database DATABASE_URL
   // points at. Run unguarded against a dev database, `pnpm test` silently
   // destroys it — which happened for real on 2026-07-29 (ship_dev wiped;
