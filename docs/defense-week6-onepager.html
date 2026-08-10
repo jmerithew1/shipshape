@@ -38,10 +38,18 @@
   .pill:nth-child(6) { animation-delay: .75s }
   .pill b { color: var(--lime); font-weight: 400; }
 
-  section { border-top: 1px solid var(--line); padding: 1.6rem 0; }
-  .reveal { opacity: 0; transform: translateY(12px);
-    transition: opacity .55s ease-out, transform .55s ease-out; }
-  .reveal.in { opacity: 1; transform: none; }
+  section, footer { border-top: 1px solid var(--line); padding: 1.6rem 0; }
+  /* Entrance cascade. (The artifact viewer sizes the page full-height, so the
+     document itself never scrolls — scroll-triggered reveals can't fire there.
+     A timed cascade always plays.) */
+  .reveal { animation: rise .65s ease-out both; }
+  section:nth-of-type(1) { animation-delay: .55s }
+  section:nth-of-type(2) { animation-delay: .75s }
+  section:nth-of-type(3) { animation-delay: .95s }
+  section:nth-of-type(4) { animation-delay: 1.15s }
+  section:nth-of-type(5) { animation-delay: 1.35s }
+  footer.reveal { animation-delay: 1.5s; padding-bottom: 0; }
+
   .sec-head { display: flex; align-items: baseline; gap: .9rem; margin-bottom: .45rem; }
   .n { font-family: Consolas, monospace; font-size: .72rem; color: var(--lime); letter-spacing: .1em; }
   h2 { font-size: 1.14rem; margin: 0; font-weight: 700; letter-spacing: -0.015em; }
@@ -66,10 +74,10 @@
   .d-lime-box  { fill: rgba(200,255,77,.08); stroke: var(--lime); stroke-width: 1; }
   .d-lime-text { font: 11px Consolas, monospace; fill: var(--lime); }
   .d-lime-mut  { font: 10px Consolas, monospace; fill: var(--lime); }
+  .glow { fill: #C8FF4D; pointer-events: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    h1, h1 .arrow, .thesis, .pill { animation: none; }
-    .reveal { opacity: 1; transform: none; transition: none; }
+    h1, h1 .arrow, .thesis, .pill, .reveal { animation: none; }
     .anim { display: none; }
   }
 
@@ -78,7 +86,7 @@
   ul.tight b { color: var(--ink); font-weight: 600; }
   ul.tight .sig { color: var(--lime); font-family: Consolas, monospace; font-size: .9em; }
 
-  footer { border-top: 1px solid var(--line); padding-top: 1.1rem; color: var(--muted); font-size: .82rem; }
+  footer { color: var(--muted); font-size: .82rem; border-bottom: none; }
   footer code { font-size: .78rem; }
 </style>
 
@@ -102,9 +110,17 @@
         <rect class="d-box" x="278" y="14" width="92" height="30"/>
         <rect class="d-box" x="416" y="14" width="92" height="30"/>
         <rect class="d-lime-box" x="554" y="14" width="104" height="30"/>
-        <rect class="anim" x="554" y="14" width="104" height="30" fill="#C8FF4D" opacity="0">
-          <animate attributeName="opacity" values="0;0;0;0.22;0" keyTimes="0;0.8;0.87;0.92;1" dur="4.5s" repeatCount="indefinite"/>
-        </rect>
+        <!-- box glows, timed to the dot's linear travel from x=20 to x=606 (7s) -->
+        <rect class="glow anim" x="2" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.16;0.16;0;0;0" keyTimes="0;0.06;0.13;0.5;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="140" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.205;0.284;0.362;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="278" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.44;0.519;0.597;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="416" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.676;0.755;0.833;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="554" y="14" width="104" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.28;0;0" keyTimes="0;0.911;0.955;0.999;1" dur="7s" repeatCount="indefinite"/></rect>
         <text class="d-label" x="48"  y="33" text-anchor="middle">install</text>
         <text class="d-label" x="186" y="33" text-anchor="middle">login</text>
         <text class="d-label" x="324" y="33" text-anchor="middle">subscribe</text>
@@ -115,8 +131,8 @@
         <line class="d-edge" x1="370" y1="29" x2="410" y2="29" marker-end="url(#a)"/>
         <line class="d-edge" x1="508" y1="29" x2="548" y2="29" marker-end="url(#al)"/>
         <circle class="anim" r="3.2" fill="#C8FF4D">
-          <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0.86;1" keyTimes="0;0.8;1" calcMode="linear" path="M 20 29 H 606"/>
-          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.82;1" dur="4.5s" repeatCount="indefinite"/>
+          <animateMotion dur="7s" repeatCount="indefinite" path="M 20 29 H 606"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.96;1" dur="7s" repeatCount="indefinite"/>
         </circle>
       </svg>
     </figure>
@@ -142,6 +158,17 @@
         <rect class="d-box" x="262" y="18" width="80" height="30"/>
         <rect class="d-box" x="382" y="18" width="90" height="30"/>
         <rect class="d-box" x="512" y="18" width="80" height="30"/>
+        <!-- glows timed to dot travel x=10→592 (6s) -->
+        <rect class="glow anim" x="2" y="18" width="100" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.079;0.158;0.5;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="142" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.227;0.287;0.347;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="262" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.433;0.502;0.57;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="382" y="18" width="90" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.639;0.717;0.794;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="512" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.863;0.93;0.999;1" dur="6s" repeatCount="indefinite"/></rect>
         <text class="d-label" x="52"  y="37" text-anchor="middle">auth 401</text>
         <text class="d-label" x="182" y="37" text-anchor="middle">scope 403</text>
         <text class="d-label" x="302" y="37" text-anchor="middle">rate 429</text>
@@ -152,8 +179,8 @@
         <line class="d-edge" x1="342" y1="33" x2="376" y2="33" marker-end="url(#a)"/>
         <line class="d-edge" x1="472" y1="33" x2="506" y2="33" marker-end="url(#a)"/>
         <circle class="anim" r="3" fill="#C8FF4D">
-          <animateMotion dur="3.5s" repeatCount="indefinite" path="M 10 33 H 550"/>
-          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3.5s" repeatCount="indefinite"/>
+          <animateMotion dur="6s" repeatCount="indefinite" path="M 10 33 H 592"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.95;1" dur="6s" repeatCount="indefinite"/>
         </circle>
       </svg>
     </figure>
@@ -164,11 +191,20 @@
     <p class="line">A delivery is a row — status, attempts, next retry. <b>The table is the
       queue.</b> Every delivery is <span class="sig">signed</span>.</p>
     <figure>
-      <svg viewBox="0 0 660 110" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, retries loop back, six failures dead-letter, replay re-posts with the same idempotency key">
+      <svg viewBox="0 0 660 110" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, a failure loops back through the retry schedule, then succeeds">
         <rect class="d-box"  x="2"   y="14" width="86"  height="30"/>
         <rect class="d-box"  x="148" y="14" width="120" height="30"/>
         <rect class="d-box"  x="328" y="14" width="110" height="30"/>
         <rect class="d-box"  x="548" y="14" width="110" height="30"/>
+        <!-- glows timed to the 9s out → fail → retry → out again cycle -->
+        <rect class="glow anim" x="2" y="14" width="86" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.024;0.047;0.5;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="148" y="14" width="120" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.14;0;0" keyTimes="0;0.089;0.13;0.172;0.70;0.715;0.73;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="328" y="14" width="110" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.14;0;0" keyTimes="0;0.214;0.25;0.29;0.811;0.85;0.888;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="548" y="14" width="110" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.28;0;0" keyTimes="0;0.366;0.385;0.402;0.964;0.985;0.999;1" dur="9s" repeatCount="indefinite"/></rect>
         <text class="d-label" x="45"  y="33" text-anchor="middle">write</text>
         <text class="d-label" x="208" y="33" text-anchor="middle">outbox table</text>
         <text class="d-label" x="383" y="33" text-anchor="middle">sign t=,v1=</text>
@@ -187,9 +223,9 @@
         <text class="d-lime-mut" x="104" y="87" text-anchor="middle">6 fails / 4xx</text>
         <text class="d-blue" x="454" y="87" text-anchor="middle">replay — same Idempotency-Key</text>
         <circle class="anim" r="3" fill="#C8FF4D">
-          <animateMotion dur="6s" repeatCount="indefinite"
+          <animateMotion dur="9s" repeatCount="indefinite"
             path="M 20 29 H 600 L 603 44 L 603 66 H 208 L 208 44 L 208 29 H 600"/>
-          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.93;1" dur="6s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.97;1" dur="9s" repeatCount="indefinite"/>
         </circle>
       </svg>
       <figcaption>a delivery goes out signed · fails · comes back on the schedule · succeeds — or dead-letters and gets replayed with the <span class="sig">same key</span></figcaption>
@@ -213,6 +249,16 @@
         <rect class="d-box" x="60" y="56" width="90" height="28"/>
         <rect class="d-box" x="210" y="56" width="80" height="28"/>
         <rect class="d-lime-box" x="350" y="56" width="90" height="28"/>
+        <rect class="d-box" x="560" y="8" width="98" height="76"/>
+        <!-- glows timed to dot travel x=70→600 (6s) -->
+        <rect class="glow anim" x="60" y="56" width="90" height="28" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.075;0.151;0.5;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="210" y="56" width="80" height="28" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.264;0.34;0.415;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="350" y="56" width="90" height="28" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.24;0;0" keyTimes="0;0.528;0.61;0.698;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="560" y="8" width="98" height="76" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.925;0.965;0.999;1" dur="6s" repeatCount="indefinite"/></rect>
         <text class="d-label" x="105" y="74" text-anchor="middle">agent</text>
         <text class="d-label" x="250" y="74" text-anchor="middle">SDK</text>
         <text class="d-lime-text" x="395" y="74" text-anchor="middle">/api/v1</text>
@@ -220,11 +266,10 @@
         <line class="d-edge" x1="290" y1="70" x2="344" y2="70" marker-end="url(#a)"/>
         <line class="d-edge" x1="440" y1="70" x2="554" y2="70" marker-end="url(#al)"/>
         <text class="d-lime-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
-        <rect class="d-box" x="560" y="8" width="98" height="76"/>
         <text class="d-label" x="609" y="50" text-anchor="middle">database</text>
         <circle class="anim" r="3" fill="#C8FF4D">
-          <animateMotion dur="3.8s" repeatCount="indefinite" path="M 70 70 H 600"/>
-          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.9;1" dur="3.8s" repeatCount="indefinite"/>
+          <animateMotion dur="6s" repeatCount="indefinite" path="M 70 70 H 600"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.95;1" dur="6s" repeatCount="indefinite"/>
         </circle>
       </svg>
     </figure>
@@ -272,20 +317,3 @@
     terraform crib: <code>docs/defense-week6-terraform-map.md</code>
   </footer>
 </div>
-
-<script>
-  (function () {
-    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var els = document.querySelectorAll('.reveal');
-    if (reduced || !('IntersectionObserver' in window)) {
-      els.forEach(function (el) { el.classList.add('in'); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-      });
-    }, { threshold: 0.15 });
-    els.forEach(function (el) { io.observe(el); });
-  })();
-</script>
