@@ -1,0 +1,175 @@
+<title>Week 6 Defense — PlugForge in 5 Minutes</title>
+<style>
+  :root {
+    --paper: #FBFAF7; --ink: #1C2530; --muted: #5B6672; --line: #E3E1D9;
+    --accent: #177245; --slate: #3D5A78; --danger: #A63D2F;
+    --chip-bg: #EEF3EE; --box-bg: #F4F3EE; --mono-bg: #EFEEE8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #141A21; --ink: #E8E6E0; --muted: #9AA4AE; --line: #2A343F;
+      --accent: #4CAF7D; --slate: #8FB0CE; --danger: #D07A6B;
+      --chip-bg: #1B2B22; --box-bg: #1A222B; --mono-bg: #1E2833; }
+  }
+  :root[data-theme="dark"] { --paper: #141A21; --ink: #E8E6E0; --muted: #9AA4AE; --line: #2A343F;
+    --accent: #4CAF7D; --slate: #8FB0CE; --danger: #D07A6B;
+    --chip-bg: #1B2B22; --box-bg: #1A222B; --mono-bg: #1E2833; }
+  :root[data-theme="light"] { --paper: #FBFAF7; --ink: #1C2530; --muted: #5B6672; --line: #E3E1D9;
+    --accent: #177245; --slate: #3D5A78; --danger: #A63D2F;
+    --chip-bg: #EEF3EE; --box-bg: #F4F3EE; --mono-bg: #EFEEE8; }
+
+  html { background: var(--paper); }
+  body { color: var(--ink); font: 15px/1.5 "Segoe UI", -apple-system, system-ui, sans-serif;
+    margin: 0; padding: 2.2rem 1.2rem 3rem; }
+  .sheet { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.15rem; }
+  h1, h2 { font-family: Charter, Georgia, "Times New Roman", serif; text-wrap: balance; margin: 0; }
+  h1 { font-size: 1.9rem; line-height: 1.15; }
+  .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .72rem; color: var(--muted); margin-bottom: .35rem; }
+  .thesis { color: var(--muted); max-width: 62ch; margin-top: .4rem; }
+  .thesis strong { color: var(--ink); }
+  code, .mono { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: .86em;
+    background: var(--mono-bg); padding: .08em .35em; border-radius: 3px; }
+
+  .beat { display: grid; grid-template-columns: 2.4rem 1fr auto; gap: .35rem .85rem;
+    border-top: 1px solid var(--line); padding-top: .85rem; }
+  .beat-n { font-family: Charter, Georgia, serif; font-size: 1.5rem; color: var(--accent);
+    line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .beat h2 { font-size: 1.12rem; grid-column: 2; }
+  .beat .time { grid-column: 3; color: var(--muted); font-size: .78rem;
+    font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: .25rem; }
+  .beat .body { grid-column: 2 / 4; display: flex; flex-direction: column; gap: .3rem; }
+  .why { color: var(--slate); }
+  .why b { font-weight: 600; }
+  .receipt { font-size: .82rem; color: var(--muted); }
+  .receipt code { font-size: .95em; }
+
+  .tfbox { background: var(--box-bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: .9rem 1rem; display: flex; flex-direction: column; gap: .5rem; }
+  .tfbox .label { text-transform: uppercase; letter-spacing: .12em; font-size: .7rem; color: var(--danger); font-weight: 600; }
+  .spine { overflow-x: auto; }
+  .spine code { display: inline-block; background: none; padding: 0; white-space: nowrap; }
+  .tfbox ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .22rem; }
+  .tfbox li { font-size: .86rem; }
+  .tfbox li b { color: var(--danger); font-weight: 600; }
+  .legend { font-size: .8rem; color: var(--muted); }
+
+  .cuts { border-top: 1px solid var(--line); padding-top: .8rem; font-size: .85rem; color: var(--muted); }
+  .cuts b { color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+  .chip { background: var(--chip-bg); border-radius: 999px; padding: .18em .7em; font-size: .78rem; color: var(--ink); }
+</style>
+
+<div class="sheet">
+  <header>
+    <div class="kicker">Architecture Defense · Monday Aug 11, 1:00 PM CT · James Merithew</div>
+    <h1>PlugForge: Ship stops being an app and becomes a platform</h1>
+    <p class="thesis">The grade is one loop: a stranger goes from <code>pnpm install @ship/sdk</code>
+    to a <strong>verified signed webhook in their terminal</strong> in under 30 minutes — scripted in CI
+    in under 60 seconds. Every choice below exists to make that loop short and provable.</p>
+  </header>
+
+  <section class="beat">
+    <div class="beat-n">1</div>
+    <h2>One gate, one shape, one spec — the contract can't drift</h2>
+    <div class="time">0:00–1:15</div>
+    <div class="body">
+      <p>OAuth 2.0 hand-rolled — Auth Code + PKCE for the browser, Device Grant for the CLI — on the
+      token patterns this repo already trusts. OAuth tokens flow through the <em>same</em> bearer
+      validator that guards the API today: one gate, one revocation path. Every public failure is one
+      <code>ApiError</code> shape; the OpenAPI 3.1 spec is <em>generated from route metadata</em>, and the
+      SDK is parity-diffed against it in CI.</p>
+      <p class="why"><b>Why hand-rolled?</b> No library implements the Device Grant — the hard part was
+      ours either way — and the easy part (PKCE S256) is five lines of crypto. <b>Why generated?</b>
+      A hand-written spec lies within a week; a generated one structurally can't.</p>
+      <p class="receipt">Receipts: <code>api/src/middleware/auth.ts</code> (existing bearer path) ·
+      <code>oauth-state.ts</code> (proven one-time-consume) · fitness test enumerates every v1 route</p>
+    </div>
+  </section>
+
+  <section class="beat">
+    <div class="beat-n">2</div>
+    <h2>Webhooks: one Postgres table is queue, retries, DLQ, and log</h2>
+    <div class="time">1:15–2:15</div>
+    <div class="body">
+      <p>Stripe-style <code>t=,v1=</code> HMAC signatures. Retry ladder 1s→30m with jitter, 4xx
+      dead-letters, replay keeps the original <code>Idempotency-Key</code>. All of it is rows in
+      <code>webhook_deliveries</code> — the required retry schedule forces persistence anyway, so the
+      persistence <em>is</em> the queue.</p>
+      <p class="why"><b>Why no Redis/broker?</b> Single-instance deploy makes in-process delivery
+      correct, not just cheap — and the queue-backed deliverer stays a drop-in behind the same
+      interface (that's the Liskov requirement, satisfied honestly). <b>Why does
+      <code>webhooks tail</code> work on a laptop?</b> Same trust model as <code>stripe listen</code>:
+      the server relays the raw signed payload; the CLI verifies the HMAC locally — the key never
+      leaves the client.</p>
+    </div>
+  </section>
+
+  <section class="beat">
+    <div class="beat-n">3</div>
+    <h2>The agent walks in the front door</h2>
+    <div class="time">2:15–3:15</div>
+    <div class="body">
+      <p>FleetGraph (Week 5) trades its private DB pool for the public SDK, behind a feature flag —
+      authenticating as an OAuth app (Client Credentials, first-party machine-to-machine). Same scopes,
+      same rate limits, same audit trail as any stranger.</p>
+      <p class="why"><b>Why?</b> The audit rows are the proof of the whole platform: if our own agent
+      can live on the public API, a third party can. Cost shape unchanged — the platform makes
+      <em>zero</em> LLM calls; one call per agent turn, exactly as graded last week.</p>
+      <p class="receipt">Proof: Part-2 test suite passes flag-on and flag-off · agent's
+      <code>client_id</code> visible in the public audit log · LangSmith before/after shows identical token volume</p>
+    </div>
+  </section>
+
+  <section class="beat">
+    <div class="beat-n">4</div>
+    <h2>Infrastructure is the code — Terraform describes the deployment</h2>
+    <div class="time">3:15–4:15</div>
+    <div class="body">
+      <p>Terraform is the recipe; Render is the kitchen. <code>terraform/render/</code> declares the
+      entire deployment — three resources — and <code>terraform apply</code> from a clean machine IS the
+      deploy. Destroy-and-redeploy was proven and graded in Week 5. IAM least-privilege runs the real
+      production secrets code path (<code>loadProductionSecrets()</code> → SSM) against a
+      terraform-managed scratch — admin policy locked down to one <code>ssm:GetParameter</code> ARN,
+      allow proven, deny proven, zero contact with the graded deployment.</p>
+      <p class="why"><b>Why Render, not an ECS stack?</b> We defend the deployment that actually serves
+      you, not a theater stack built for vocabulary compliance — and the gap to the brief's ECS wording
+      is mapped openly, line by line.</p>
+    </div>
+  </section>
+
+  <section class="tfbox">
+    <div class="label">Blast-radius crib — the three resources</div>
+    <div class="spine"><code>render_project.ship ─▶ render_postgres.ship ─(DSN)─▶ render_web_service.api</code></div>
+    <ul>
+      <li><b>Project env replaced</b> → both children replaced → database destroyed (free tier, no backups) → repopulation runbook.</li>
+      <li><b>Postgres region/version</b> → replacement → data loss; region must match the service or the private-network DSN stops resolving.</li>
+      <li><b>Service env vars</b> → in-place, but triggers a deploy; <code>DATABASE_URL</code> is derived — it changes because Postgres changed.</li>
+      <li><b>Service replaced</b> → <code>SESSION_SECRET</code> regenerates → every user logged out.</li>
+      <li><b>starter→free</b> → looks harmless (<code>~</code>) → idling kills cron + webhook poller silently.</li>
+    </ul>
+    <div class="legend">Read order: summary line → any <code>-/+</code>? name the forcing attribute → walk the spine downstream → name the risky ops → state the rollback. <code>~</code> in-place · <code>-/+</code> replace · <code>(known after apply)</code> computed, cascades.</div>
+  </section>
+
+  <section class="beat">
+    <div class="beat-n">5</div>
+    <h2>What we deliberately didn't build</h2>
+    <div class="time">4:15–5:00</div>
+    <div class="body">
+      <p class="why">Scope was chosen, not defaulted into — each cut has a one-line defense and a
+      preserved seam for the day it's needed.</p>
+      <div class="chips">
+        <span class="chip">Message broker — interface preserves the swap</span>
+        <span class="chip">Service-layer refactor — week-eating, zero grader value</span>
+        <span class="chip">OAuth libraries — they skip the part we must build</span>
+        <span class="chip">ECS side-stack — theater deployment</span>
+        <span class="chip">Platform-layer AI — the brief itself calls it scope creep</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cuts">
+    <b>If pushed on risk:</b> de-scope ladder is pre-committed — PKCE-only with loopback CLI login,
+    then existing API tokens driving the drill. The drill is the rubric; everything upstream of it
+    ships first. Full ledger: <code>docs/week6-requirements.md</code> · decisions with rejected
+    alternatives: <code>DECISIONS.md</code>.
+  </footer>
+</div>
