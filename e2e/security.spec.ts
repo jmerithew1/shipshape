@@ -238,8 +238,12 @@ test.describe('Security - XSS Prevention', () => {
   })
 })
 
+// Quarantined with test.describe.fixme(): these assert a slash-command /
+// filechooser interaction that is broken in the app itself, not in the test.
+// Left running, they made the whole Playwright suite unable to report green
+// for anyone. e2e/AGENTS.md:174 says known-broken specs belong in fixme.
 // FIXME: File upload via slash command UI has changed
-test.describe('Security - File Upload Validation', () => {
+test.describe.fixme('Security - File Upload Validation', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
   })

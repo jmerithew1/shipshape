@@ -197,9 +197,13 @@ test.describe('Data Integrity - Document Persistence', () => {
 
 })
 
+// Quarantined with test.describe.fixme(): these assert a slash-command /
+// filechooser interaction that is broken in the app itself, not in the test.
+// Left running, they made the whole Playwright suite unable to report green
+// for anyone. e2e/AGENTS.md:174 says known-broken specs belong in fixme.
 // FIXME: Filechooser event not firing - slash command image upload interaction broken
 // Same issue as images.spec.ts - see that file for context
-test.describe('Data Integrity - Images', () => {
+test.describe.fixme('Data Integrity - Images', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
   })

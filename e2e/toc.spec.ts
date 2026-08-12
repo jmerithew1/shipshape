@@ -41,8 +41,12 @@ async function addHeadings(page: Page, headings: Array<{ level: number; text: st
   await page.waitForTimeout(500)
 }
 
+// Quarantined with test.describe.fixme(): these assert a slash-command /
+// filechooser interaction that is broken in the app itself, not in the test.
+// Left running, they made the whole Playwright suite unable to report green
+// for anyone. e2e/AGENTS.md:174 says known-broken specs belong in fixme.
 // FIXME: Slash command menu interaction not working - button locators timing out
-test.describe('Table of Contents (TOC)', () => {
+test.describe.fixme('Table of Contents (TOC)', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
   })

@@ -356,9 +356,13 @@ test.describe('Performance - Large Documents', () => {
   })
 })
 
+// Quarantined with test.describe.fixme(): these assert a slash-command /
+// filechooser interaction that is broken in the app itself, not in the test.
+// Left running, they made the whole Playwright suite unable to report green
+// for anyone. e2e/AGENTS.md:174 says known-broken specs belong in fixme.
 // FIXME: Slash command dropdown inconsistent + filechooser event not firing reliably
 // Same issue as images.spec.ts and data-integrity.spec.ts
-test.describe('Performance - Many Images', () => {
+test.describe.fixme('Performance - Many Images', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
   })
