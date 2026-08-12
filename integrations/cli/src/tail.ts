@@ -33,6 +33,25 @@ export interface DeliveryLister {
   deliveries(params?: DeliveryListParams): Promise<Page<ShipWebhookDelivery>>;
 }
 
+/**
+ * The delivery-log filter, sent under both names.
+ *
+ * The SDK declares `webhook_id`; the public route validates `subscription_id`.
+ * Sending both is correct under either contract — the SDK's query builder drops
+ * nothing and the route's schema ignores what it does not declare — and it
+ * costs one query parameter. The alternative is a tail that silently ignores
+ * `--webhook` and streams every app's deliveries, which is worse than a
+ * redundant parameter. Remove the extra key once the two agree.
+ */
+export function deliveryFilter(webhookId: string | undefined, limit: number): DeliveryListParams {
+  const params = { limit } as DeliveryListParams & { subscription_id?: string };
+  if (webhookId !== undefined) {
+    params.webhook_id = webhookId;
+    params.subscription_id = webhookId;
+  }
+  return params;
+}
+
 export interface TailOptions {
   webhooks: DeliveryLister;
   write: (line: string) => void;
@@ -111,9 +130,7 @@ export async function runTail(options: TailOptions): Promise<void> {
 
     let page: Page<ShipWebhookDelivery>;
     try {
-      const params: DeliveryListParams = { limit };
-      if (webhookId !== undefined) params.webhook_id = webhookId;
-      page = await webhooks.deliveries(params);
+      page = await webhooks.deliveries(deliveryFilter(webhookId, limit));
       backoffMs = intervalMs;
     } catch (error) {
       // A tail that dies on one 429 is a tail nobody leaves running. Transient

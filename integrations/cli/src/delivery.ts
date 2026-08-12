@@ -36,6 +36,30 @@ export interface DeliveryRecord extends Partial<ShipWebhookDelivery> {
   signature?: unknown;
   signature_header?: unknown;
   headers?: unknown;
+  // The public webhook routes name three fields differently from the SDK's
+  // declared `ShipWebhookDelivery` (`event_type`/`subscription_id`/
+  // `attempt_number` against `event`/`webhook_id`/`attempt`). That is a
+  // contract mismatch for the SDK and the API to settle between them; until
+  // they do, the CLI reads BOTH rather than printing "unknown.event" over a
+  // perfectly good delivery. Reading tolerantly is cheap; writing tolerantly
+  // would be the CLI quietly forking the contract, so it does not.
+  event_type?: unknown;
+  subscription_id?: unknown;
+  attempt_number?: unknown;
+}
+
+/** The event type, under either name. */
+export function deliveryEvent(delivery: DeliveryRecord): string | undefined {
+  if (typeof delivery.event === 'string') return delivery.event;
+  if (typeof delivery.event_type === 'string') return delivery.event_type;
+  return undefined;
+}
+
+/** The attempt counter, under either name. */
+export function deliveryAttempt(delivery: DeliveryRecord): number | undefined {
+  if (typeof delivery.attempt === 'number') return delivery.attempt;
+  if (typeof delivery.attempt_number === 'number') return delivery.attempt_number;
+  return undefined;
 }
 
 export interface SignatureMaterial {

@@ -61,6 +61,33 @@ describe('delivery header', () => {
   it('degrades rather than throws on a record missing everything', () => {
     expect(formatDeliveryHeader({})).toContain('unknown.event');
   });
+
+  // The public route returns event_type/attempt_number where the SDK type
+  // declares event/attempt. Until those agree, a tail that reads only the
+  // SDK's names would print "unknown.event" over every real delivery.
+  it('reads the API’s field names as well as the SDK’s', () => {
+    const line = formatDeliveryHeader({
+      id: 'del_1',
+      event_type: 'document.created',
+      attempt_number: 3,
+      status: 'succeeded',
+    });
+    expect(line.startsWith('document.created')).toBe(true);
+    expect(line).toContain('attempt 3');
+  });
+
+  it('prefers the SDK’s names when a record somehow carries both', () => {
+    const line = formatDeliveryHeader({
+      id: 'del_1',
+      event: 'document.created',
+      event_type: 'wrong.event',
+      attempt: 1,
+      attempt_number: 9,
+    });
+    expect(line).toContain('document.created');
+    expect(line).not.toContain('wrong.event');
+    expect(line).toContain('attempt 1');
+  });
 });
 
 describe('document formatting', () => {

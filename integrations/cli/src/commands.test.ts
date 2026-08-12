@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { ShipClient, ShipDocument, Page, ShipWebhook } from '@ship/sdk';
 import { docsCreate, docsGet, docsList } from './commands/docs.js';
 import { absoluteVerifyUrl, loginCommand } from './commands/login.js';
-import { webhooksCreate, webhooksList } from './commands/webhooks.js';
+import { signingSecretOf, webhooksCreate, webhooksList } from './commands/webhooks.js';
 
 function doc(id: string, title: string): ShipDocument {
   return {
@@ -163,6 +163,43 @@ describe('webhooks', () => {
     expect(output).toContain('whsec_abc123');
     expect(output).toContain('only time');
     expect(output).toContain('ship webhooks tail');
+  });
+
+  it('reads the signing secret under either contract’s field name', () => {
+    const base = {
+      id: 's',
+      event: 'document.created',
+      target_url: 'u',
+      created_at: 'now',
+    } as unknown as ShipWebhook;
+    expect(signingSecretOf({ ...base, secret: 'whsec_sdk' })).toBe('whsec_sdk');
+    expect(signingSecretOf({ ...base, signing_secret: 'whsec_api' } as ShipWebhook)).toBe(
+      'whsec_api'
+    );
+    expect(signingSecretOf(base)).toBeUndefined();
+  });
+
+  it('warns loudly rather than silently when no secret comes back', async () => {
+    const lines: string[] = [];
+    const client = {
+      webhooks: {
+        async create(): Promise<ShipWebhook> {
+          return {
+            id: 'sub_1',
+            event: 'document.created',
+            target_url: 'https://example.com/hook',
+            created_at: '2026-08-12T00:00:00.000Z',
+          };
+        },
+      },
+    } as unknown as Pick<ShipClient, 'webhooks'>;
+
+    await webhooksCreate(
+      client,
+      { event: 'document.created', url: 'https://example.com/hook' },
+      { write: (line) => lines.push(line) }
+    );
+    expect(lines.join('\n')).toContain('WARNING');
   });
 
   it('says so when there are no subscriptions', async () => {

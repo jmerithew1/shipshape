@@ -35,6 +35,8 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { ShipClient, ShipWebhook, ShipWebhookDelivery } from '@ship/sdk';
 import { DEFAULT_BASE_URL, DEFAULT_CLIENT_ID } from '../src/config.js';
+import { signingSecretOf } from '../src/commands/webhooks.js';
+import { deliveryFilter } from '../src/tail.js';
 import { formatTimingTable, Stopwatch } from './timing.js';
 import { pollUntil } from './poll.js';
 
@@ -160,31 +162,31 @@ function startReceiver(port: number, onDelivery: (captured: Captured) => void): 
 async function ensureSubscription(
   client: ShipClient,
   targetUrl: string
-): Promise<ShipWebhook & { secret: string }> {
+): Promise<{ hook: ShipWebhook; secret: string }> {
   const create = async (): Promise<ShipWebhook> =>
     client.webhooks.create({ event: EVENT_TYPE, target_url: targetUrl });
 
   let hook: ShipWebhook;
   try {
     hook = await create();
-  } catch {
-    // Almost certainly the (app, event, target) uniqueness constraint. Clear
-    // the old row and take a fresh secret.
+  } catch (first) {
+    // Most likely the (app, event, target) uniqueness constraint. Clear the
+    // old row and take a fresh secret. If there is nothing stale to clear, the
+    // original failure is the real one and is worth re-throwing verbatim.
     const existing = await client.webhooks.list({ limit: 100 });
-    const stale = existing.data.find(
-      (h) => h.event === EVENT_TYPE && h.target_url === targetUrl
-    );
-    if (stale === undefined) throw new Error('Could not create a webhook subscription');
+    const stale = existing.data.find((h) => h.target_url === targetUrl);
+    if (stale === undefined) throw first;
     await client.webhooks.delete(stale.id);
     hook = await create();
   }
 
-  if (typeof hook.secret !== 'string' || hook.secret.length === 0) {
+  const secret = signingSecretOf(hook);
+  if (secret === undefined) {
     throw new Error(
       'The subscription was created but carried no signing secret. Without it the signature cannot be verified locally, which is the whole point of this drill.'
     );
   }
-  return hook as ShipWebhook & { secret: string };
+  return { hook, secret };
 }
 
 export async function runTtfe(
@@ -262,7 +264,7 @@ export async function runTtfe(
       ? `${config.baseUrl.replace(/\/+$/, '')}/api/v1/_ttfe_sink`
       : `http://127.0.0.1:${config.listenPort}/ttfe`);
 
-  let subscription: (ShipWebhook & { secret: string }) | undefined;
+  let subscription: { hook: ShipWebhook; secret: string } | undefined;
   let documentId = '';
   let deliveryId: string | undefined;
 
@@ -297,10 +299,9 @@ export async function runTtfe(
 
       const found = await pollUntil<ShipWebhookDelivery>({
         attempt: async () => {
-          const page = await client.webhooks.deliveries({
-            webhook_id: subscription?.id ?? '',
-            limit: 25,
-          });
+          const page = await client.webhooks.deliveries(
+            deliveryFilter(subscription?.hook.id, 25)
+          );
           return (
             page.data.find((d) => helpers.payloadText(d).includes(documentId)) ?? null
           );
@@ -345,7 +346,7 @@ export async function runTtfe(
       // Cleanup is outside the timed stages on purpose: it is the drill's own
       // housekeeping, not part of a developer's time to first event.
       try {
-        await client.webhooks.delete(subscription.id);
+        await client.webhooks.delete(subscription.hook.id);
       } catch {
         // A leaked subscription is noise, not a failure of the measurement.
       }

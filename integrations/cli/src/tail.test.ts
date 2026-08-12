@@ -11,7 +11,7 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { ShipError, type DeliveryListParams, type Page, type ShipWebhookDelivery } from '@ship/sdk';
-import { runTail, verdictFor, type DeliveryLister } from './tail.js';
+import { deliveryFilter, runTail, verdictFor, type DeliveryLister } from './tail.js';
 import { LISTENING_LINE } from './output.js';
 
 const SECRET = 'whsec_test_2f6a1c9e';
@@ -182,6 +182,21 @@ describe('runTail — verification verdicts', () => {
       signature: sign(rawBody, SECRET, Math.floor(Date.now() / 1000) - 10_000),
     };
     expect(verdictFor(stale, SECRET, 300)).toEqual({ status: 'invalid' });
+  });
+});
+
+describe('deliveryFilter', () => {
+  it('sends the subscription filter under both contracts’ names', () => {
+    const params = deliveryFilter('sub_1', 25) as Record<string, unknown>;
+    expect(params['webhook_id']).toBe('sub_1');
+    expect(params['subscription_id']).toBe('sub_1');
+    expect(params['limit']).toBe(25);
+  });
+
+  it('omits the filter entirely when tailing everything', () => {
+    const params = deliveryFilter(undefined, 10) as Record<string, unknown>;
+    expect(params).not.toHaveProperty('webhook_id');
+    expect(params).not.toHaveProperty('subscription_id');
   });
 });
 

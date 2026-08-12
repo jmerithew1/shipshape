@@ -7,7 +7,7 @@
  * without a network, a terminal, or a subprocess.
  */
 import type { ShipDocument } from '@ship/sdk';
-import type { DeliveryRecord } from './delivery.js';
+import { deliveryAttempt, deliveryEvent, type DeliveryRecord } from './delivery.js';
 
 /**
  * Printed the instant `tail` starts, BEFORE the first poll.
@@ -53,10 +53,11 @@ function short(id: unknown, width = 8): string {
 /** `document.created  delivery 3f2a1b9c…  attempt 1  status succeeded` */
 export function formatDeliveryHeader(delivery: DeliveryRecord): string {
   const parts = [
-    String(delivery.event ?? 'unknown.event').padEnd(20),
+    (deliveryEvent(delivery) ?? 'unknown.event').padEnd(20),
     `delivery ${short(delivery.id)}`,
   ];
-  if (typeof delivery.attempt === 'number') parts.push(`attempt ${delivery.attempt}`);
+  const attempt = deliveryAttempt(delivery);
+  if (attempt !== undefined) parts.push(`attempt ${attempt}`);
   if (typeof delivery.status === 'string') parts.push(`status ${delivery.status}`);
   if (typeof delivery.response_status === 'number') parts.push(`→ ${delivery.response_status}`);
   return parts.join('  ');
