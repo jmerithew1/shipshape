@@ -102,11 +102,20 @@ export async function tokenGate(req: Request, _res: Response, next: NextFunction
       await pool.query('UPDATE api_tokens SET last_used_at = NOW() WHERE id = $1', [row.id]);
     }
 
+    // Super-admin is an identity property, NOT a delegable one. If a
+    // super-admin authorizes a third-party app, that app's token must not
+    // inherit admin power — every internal authorization middleware
+    // (superAdminMiddleware, workspaceAdminMiddleware, workspaceAccessMiddleware)
+    // short-circuits on this flag, so inheriting it would silently hand full
+    // admin to an app that was granted `documents:read`. Found by the security
+    // audit before any v1 route depended on it.
+    const isSuperAdmin = row.oauth_app_id ? false : row.is_super_admin;
+
     req.platform = {
       tokenId: row.id,
       userId: row.user_id,
       workspaceId: row.workspace_id,
-      isSuperAdmin: row.is_super_admin,
+      isSuperAdmin,
       clientId: row.client_id ?? null,
       oauthAppId: row.oauth_app_id ?? null,
       grantedScopes,
@@ -115,7 +124,7 @@ export async function tokenGate(req: Request, _res: Response, next: NextFunction
     // Mirror onto the request fields the rest of the codebase reads.
     req.userId = row.user_id;
     req.workspaceId = row.workspace_id;
-    req.isSuperAdmin = row.is_super_admin;
+    req.isSuperAdmin = isSuperAdmin;
 
     next();
   } catch (err) {

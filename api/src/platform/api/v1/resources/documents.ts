@@ -76,8 +76,18 @@ function toSprint(row: DocumentRow) {
   };
 }
 
-/** Shared list machinery: builds a workspace-scoped, keyset-paginated query.
- * Ordering is (updated_at DESC, id DESC) — the same pair the cursor carries. */
+/**
+ * Shared list machinery: workspace-scoped, keyset-paginated.
+ *
+ * Ordering is (created_at DESC, id DESC) — the same pair the cursor carries,
+ * and BOTH ARE IMMUTABLE. That is load-bearing, not incidental: keyset
+ * pagination is only stable if the sort key cannot change under the cursor.
+ * Sorting by `updated_at` looked more useful ("newest activity first") but was
+ * silently lossy — editing a not-yet-returned row moves it ABOVE the cursor,
+ * so a client walking every page never receives it. Found by the contract
+ * audit. `updated_before` remains available as a FILTER, which is what the
+ * agent's detectors need; it is just not the sort key.
+ */
 async function listDocuments(
   req: Request,
   opts: {
@@ -108,7 +118,7 @@ async function listDocuments(
   if (q.cursor) {
     const cursor = decodeCursor(q.cursor);
     if (!cursor) throw ApiError.validation('Invalid cursor', { cursor: 'not a cursor issued by this API' });
-    const clause = keysetClause(cursor, { tsCol: 'd.updated_at', idCol: 'd.id', paramOffset: params.length + 1 });
+    const clause = keysetClause(cursor, { tsCol: 'd.created_at', idCol: 'd.id', paramOffset: params.length + 1 });
     where.push(clause.sql);
     params.push(...clause.params);
   }
@@ -120,14 +130,14 @@ async function listDocuments(
             d.parent_id, d.created_at, d.updated_at
        FROM documents d
       WHERE ${where.join(' AND ')}
-      ORDER BY d.updated_at DESC, d.id DESC
+      ORDER BY d.created_at DESC, d.id DESC
       LIMIT $${params.length}`,
     params
   );
   return { rows: result.rows, pageSize };
 }
 
-const cursorOf = (d: { updated_at: string; id: string }) => ({ ts: d.updated_at, id: d.id });
+const cursorOf = (d: { created_at: string; id: string }) => ({ ts: d.created_at, id: d.id });
 
 export const handleListDocuments: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { rows, pageSize } = await listDocuments(req, { allowTypeFilter: true });

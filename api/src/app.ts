@@ -93,6 +93,29 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Please slow down.' },
+  // The limiter is mounted on '/api/' — ABOVE the /api/v1 router — and
+  // express-rate-limit writes its `message` straight to the response instead
+  // of calling next(). Without this branch a 429 on a public route shipped
+  // `{error}` while the generated OpenAPI spec promised the ApiError envelope
+  // with code `rate_limited`: the published contract lied, and the shape was
+  // unreachable by the fitness test because the test environment raises `max`
+  // to 10000 so a 429 can never be provoked. Found by the contract audit.
+  handler: (req, res, _next, options) => {
+    if (!req.path.startsWith('/v1')) {
+      res.status(options.statusCode).json(options.message);
+      return;
+    }
+    const requestId = randomUUID();
+    const retryAfterSeconds = Math.ceil(options.windowMs / 1000);
+    res.setHeader('X-Request-Id', requestId);
+    res.setHeader('Retry-After', String(retryAfterSeconds));
+    res.status(429).json({
+      code: 'rate_limited',
+      message: 'Rate limit exceeded',
+      details: { retry_after_seconds: retryAfterSeconds },
+      request_id: requestId,
+    });
+  },
 });
 
 
@@ -239,9 +262,18 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   //   - /oauth/authorize/decision and /oauth/device/verify are submitted by a
   //     logged-in human's browser. A forged POST there is a SILENT CONSENT
   //     GRANT, so these keep full CSRF protection.
+  //
+  // The match MUST normalize exactly the way Express's router does. Express
+  // Routers default to `strict: false, caseSensitive: false`, so
+  // `/device/verify/` and `/device/VERIFY` both reach the handler. An exact
+  // string comparison therefore skipped CSRF while the route still ran —
+  // a forged POST to /oauth/device/verify/ would approve an attacker's device
+  // flow as the victim. Only SameSite=Strict cookies were preventing it, which
+  // is not the control this comment claimed. Found by the security audit.
+  const humanConsentPaths = new Set(['/authorize/decision', '/device/verify']);
   const oauthCsrf = (req: Request, res: Response, next: NextFunction) => {
-    const humanConsentPaths = ['/authorize/decision', '/device/verify'];
-    if (req.method === 'POST' && humanConsentPaths.includes(req.path)) {
+    const normalized = req.path.replace(/\/+$/, '').toLowerCase();
+    if (req.method === 'POST' && humanConsentPaths.has(normalized)) {
       return conditionalCsrf(req, res, next);
     }
     return next();

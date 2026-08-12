@@ -1,0 +1,1 @@
+{"path":"/api/auth/me","conns":10,"amount":300,"wall_s":0.25,"rps":1195,"codes":{"200":300},"kb_per_resp":0.4,"total":{"p50":8,"p95":12.2,"p99":13,"avg":8.3,"max":15.1},"ttfb":{"p50":8,"p95":12.1,"p99":12.9}}

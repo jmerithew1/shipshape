@@ -44,6 +44,44 @@ beforeAll(() => {
   spec = buildV1Spec() as unknown as Spec;
 });
 
+describe('the catalog is the whole router (audit finding — this is what makes the rest meaningful)', () => {
+  // Every other suite in this file iterates v1RouteCatalog, which only the
+  // route factory writes. That proves nothing about routes mounted directly
+  // on the router by hand — someone could add
+  //   router.get('/debug/config', (_req, res) => res.json({ db: process.env.DATABASE_URL }))
+  // and every catalog-driven assertion would still pass while an
+  // unauthenticated, unscoped, undocumented route leaked a secret.
+  // So: walk the ACTUAL Express stack and require it to equal the catalog
+  // plus an explicit, justified allowlist.
+  const ALLOWED_UNCATALOGUED = new Set([
+    'get /openapi.json', // public API docs, deliberately unauthenticated (serve-spec.ts)
+  ]);
+
+  it('has no route mounted on the v1 router that the catalog does not know about', () => {
+    const router = createV1Router(registerV1Routes) as unknown as {
+      stack: { route?: { path: string; methods: Record<string, boolean> } }[];
+    };
+
+    const mounted = router.stack
+      .filter((layer) => layer.route)
+      .flatMap((layer) =>
+        Object.keys(layer.route!.methods)
+          .filter((m) => m !== '_all')
+          .map((m) => `${m} ${layer.route!.path}`)
+      );
+
+    const catalogued = new Set(v1RouteCatalog.map((r) => `${r.method} ${r.path}`));
+    const unexplained = mounted.filter((k) => !catalogued.has(k) && !ALLOWED_UNCATALOGUED.has(k));
+
+    expect(
+      unexplained,
+      `these /api/v1 routes bypass the route factory, so they carry no token gate, no scope, ` +
+        `no spec entry, and no ApiError guarantee: ${unexplained.join(', ')}`
+    ).toEqual([]);
+    expect(mounted.length).toBeGreaterThan(0); // guard against a vacuous pass
+  });
+});
+
 describe('(a) every route has an OpenAPI entry', () => {
   it('registers at least the documents resource required by the MVP gate', () => {
     const ids = v1RouteCatalog.map((r) => r.operationId);

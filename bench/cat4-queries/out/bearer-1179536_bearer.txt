@@ -1,0 +1,31 @@
+QUERY COUNT: 43
+TOTAL DB TIME (parse+bind+exec): 20.39 ms
+
+--- all queries, slowest first (total ms | exec ms) ---
+    1.45 |     1.45 | SELECT COALESCE(last_used_at::text,'NULL') FROM api_tokens WHERE name='bench-bearer-1786559389'
+    1.43 |     1.43 | SELECT COALESCE(last_used_at::text,'NULL') FROM api_tokens WHERE name='bench-bearer-1786559389'
+    0.80 |     0.06 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.79 |     0.17 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.66 |     0.05 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.65 |     0.06 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.56 |     0.07 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.55 |     0.07 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.55 |     0.05 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.53 |     0.18 | SELECT w.id, w.name, wm.role FROM workspaces w LEFT JOIN workspace_memberships wm ON w.id = wm.workspace_id AND wm.user_id = $2 WHERE w.id = $1
+    0.53 |     0.07 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.52 |     0.06 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.50 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.50 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.50 |     0.07 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.49 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.49 |     0.08 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.49 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.47 |     0.05 | SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at, u.is_super_admin FROM api_tokens t JOIN users u ON t.user_id = u.id WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL
+    0.46 |     0.07 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.39 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w LEFT JOIN workspace_memberships wm ON w.id = wm.workspace_id AND wm.user_id = $2 WHERE w.id = $1
+    0.39 |     0.05 | SELECT w.id, w.name, wm.role FROM workspaces w LEFT JOIN workspace_memberships wm ON w.id = wm.workspace_id AND wm.user_id = $2 WHERE w.id = $1
+    0.38 |     0.15 | UPDATE api_tokens SET last_used_at = NOW() WHERE id = $1
+    0.37 |     0.04 | SELECT id, email, name, is_super_admin FROM users WHERE id = $1
+    0.36 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.35 |     0.05 | SELECT w.id, w.name, wm.role FROM workspaces w LEFT JOIN workspace_memberships wm ON w.id = wm.workspace_id AND wm.user_id = $2 WHERE w.id = $1
+    0.35 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 A
