@@ -5,6 +5,7 @@
  * All functions operate on the unified document model.
  */
 
+import { randomUUID } from 'node:crypto';
 import { pool } from '../db/client.js';
 
 // =============================================================================
@@ -59,6 +60,46 @@ export async function logDocumentChange(
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [documentId, field, oldValue, newValue, changedBy, automatedBy ?? null]
   );
+
+  // Webhook chokepoint (Week 6, Epic 3). Must sit BEFORE the FleetGraph guard
+  // below, because that guard early-returns — anything after it is dead code
+  // whenever FLEETGRAPH_ENABLED=false. Same kill-switch-before-any-query rule
+  // applies here for the same reason: four route suites mock pool.query with
+  // strict call sequences, and test setup sets WEBHOOKS_ENABLED=false.
+  if (process.env.WEBHOOKS_ENABLED !== 'false') {
+    void (async () => {
+      try {
+        const { rows } = await pool.query(
+          `SELECT workspace_id, document_type, title, parent_id, ticket_number
+             FROM documents WHERE id = $1`,
+          [documentId],
+        );
+        const doc = rows[0];
+        if (!doc) return;
+        const { buildEvent, publishEventSafely } = await import('../platform/webhooks/index.js');
+        const base = { id: randomUUID(), workspaceId: doc.workspace_id };
+        if (doc.document_type === 'issue' && field === 'state') {
+          publishEventSafely(buildEvent('issue.status_changed', {
+            ...base,
+            data: { issue_id: documentId, title: doc.title, ticket_number: doc.ticket_number,
+                    from_state: oldValue, to_state: newValue },
+          }));
+        } else if (doc.document_type === 'issue' && field === 'assignee_id') {
+          publishEventSafely(buildEvent('issue.assigned', {
+            ...base,
+            data: { issue_id: documentId, title: doc.title, ticket_number: doc.ticket_number,
+                    assignee_id: newValue, previous_assignee_id: oldValue },
+          }));
+        } else {
+          publishEventSafely(buildEvent('document.updated', {
+            ...base,
+            data: { document_id: documentId, document_type: doc.document_type,
+                    title: doc.title, parent_id: doc.parent_id, changed_fields: [field] },
+          }));
+        }
+      } catch { /* webhook publication is best-effort by design */ }
+    })();
+  }
 
   // FleetGraph chokepoint: every field change through this logger becomes an
   // agent trigger. Fire-and-forget — never blocks or fails the write path.

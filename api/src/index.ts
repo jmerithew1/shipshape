@@ -42,6 +42,11 @@ async function main() {
   const { pool } = await import('./db/client.js');
   initFleetGraph(pool);
 
+  // Week-6 webhooks: start the outbox poller and requeue any deliveries a
+  // crashed process abandoned mid-flight. No-ops when WEBHOOKS_ENABLED=false.
+  const { initWebhooks } = await import('./platform/webhooks/index.js');
+  initWebhooks();
+
   // Start server
   server.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);

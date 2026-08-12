@@ -13,6 +13,7 @@ import { createRouteFactory, listEnvelope, validate, type V1RouteDef } from '../
 import { v1Registry, v1RouteCatalog, buildV1Spec } from '../../../openapi/v1-registry.js';
 import { createSpecHandler } from '../../../openapi/serve-spec.js';
 import { tokenGate } from '../middleware/authn.js';
+import { rateLimit } from '../../../ratelimit/middleware.js';
 import { requireScope } from '../middleware/scope.js';
 import {
   ShipUserSchema,
@@ -35,6 +36,20 @@ import {
   handleListSprints,
   handleGetSprint,
 } from './documents.js';
+import {
+  WebhookSubscriptionSchema,
+  WebhookSubscriptionCreatedSchema,
+  WebhookDeliverySchema,
+  CreateWebhookSubscriptionSchema,
+  WebhookSubscriptionListQuerySchema,
+  WebhookDeliveryListQuerySchema,
+  WebhookIdParamSchema,
+  handleListWebhookSubscriptions,
+  handleCreateWebhookSubscription,
+  handleDeleteWebhookSubscription,
+  handleListWebhookDeliveries,
+  handleReplayWebhookDelivery,
+} from './webhooks.js';
 
 const defineRoute = createRouteFactory({
   registry: v1Registry,
@@ -53,6 +68,7 @@ const defineRoute = createRouteFactory({
  * — which is correct and worth keeping — would fire on the second createApp().
  */
 let specRegistered = false;
+const replayRateLimitGate = rateLimit();
 
 function route(router: Router, def: V1RouteDef): void {
   if (!specRegistered) {
@@ -63,6 +79,9 @@ function route(router: Router, def: V1RouteDef): void {
     def.path,
     tokenGate,
     requireScope(def.scope),
+    // Must mirror the factory's chain exactly — otherwise the second and later
+    // createApp() calls mount routes with no rate limiting.
+    replayRateLimitGate,
     ...(def.middleware ?? []),
     validate(def.request),
     def.handler
@@ -163,6 +182,65 @@ export function registerV1Routes(router: Router): void {
     request: { params: IdParamSchema },
     responses: { 200: { description: 'The sprint', schema: SprintSchema } },
     handler: handleGetSprint,
+  });
+
+  // Webhooks. The two /webhooks/deliveries* paths are registered FIRST so
+  // Express matches them before the more general /webhooks/:id.
+  route(router, {
+    method: 'get',
+    path: '/webhooks/deliveries',
+    operationId: 'listWebhookDeliveries',
+    summary: 'List webhook delivery attempts, newest first',
+    scope: 'webhooks:manage',
+    isList: true,
+    request: { query: WebhookDeliveryListQuerySchema },
+    responses: { 200: { description: 'A page of delivery attempts', schema: listEnvelope(WebhookDeliverySchema) } },
+    handler: handleListWebhookDeliveries,
+  });
+
+  route(router, {
+    method: 'post',
+    path: '/webhooks/deliveries/:id/replay',
+    operationId: 'replayWebhookDelivery',
+    summary: 'Re-enqueue a delivery, preserving its original idempotency key',
+    scope: 'webhooks:manage',
+    request: { params: WebhookIdParamSchema },
+    responses: { 202: { description: 'The newly enqueued delivery', schema: WebhookDeliverySchema } },
+    handler: handleReplayWebhookDelivery,
+  });
+
+  route(router, {
+    method: 'get',
+    path: '/webhooks',
+    operationId: 'listWebhooks',
+    summary: 'List this app’s webhook subscriptions',
+    scope: 'webhooks:manage',
+    isList: true,
+    request: { query: WebhookSubscriptionListQuerySchema },
+    responses: { 200: { description: 'A page of subscriptions', schema: listEnvelope(WebhookSubscriptionSchema) } },
+    handler: handleListWebhookSubscriptions,
+  });
+
+  route(router, {
+    method: 'post',
+    path: '/webhooks',
+    operationId: 'createWebhook',
+    summary: 'Create a webhook subscription; the signing secret is returned exactly once',
+    scope: 'webhooks:manage',
+    request: { body: CreateWebhookSubscriptionSchema },
+    responses: { 201: { description: 'The created subscription, including its one-time signing secret', schema: WebhookSubscriptionCreatedSchema } },
+    handler: handleCreateWebhookSubscription,
+  });
+
+  route(router, {
+    method: 'delete',
+    path: '/webhooks/:id',
+    operationId: 'deleteWebhook',
+    summary: 'Delete a webhook subscription',
+    scope: 'webhooks:manage',
+    request: { params: WebhookIdParamSchema },
+    responses: { 204: { description: 'Deleted' } },
+    handler: handleDeleteWebhookSubscription,
   });
 
   specRegistered = true;

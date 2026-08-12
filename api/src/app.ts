@@ -40,6 +40,8 @@ import { createV1Router } from './platform/api/v1/router.js';
 import { registerV1Routes } from './platform/api/v1/resources/routes.js';
 import oauthAppsRoutes from './routes/oauth-apps.js';
 import { createOAuthRouter } from './platform/oauth/routes.js';
+import { auditTrail } from './platform/audit/middleware.js';
+import { createAuditRouter } from './platform/audit/routes.js';
 import { authMiddleware } from './middleware/auth.js';
 
 // Validate SESSION_SECRET in production
@@ -290,7 +292,15 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   // (no cookie auth is accepted here), no shared middleware with the internal
   // /api routes below — the public/internal boundary is structural. Mounted
   // before the internal routes so nothing can shadow the /api/v1 prefix.
-  app.use('/api/v1', createV1Router(registerV1Routes));
+  app.use(
+    '/api/v1',
+    createV1Router((router) => {
+      // Records every public call on response finish. Mounted here rather than
+      // per-route so a route added tomorrow is audited by default.
+      router.use(auditTrail());
+      registerV1Routes(router);
+    })
+  );
 
   // Setup routes (CSRF protected - first-time setup only)
   app.use('/api/setup', conditionalCsrf, setupRoutes);
@@ -323,6 +333,9 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   // by design: registering your first app is the bootstrap step, so it cannot
   // itself require an OAuth token (see the file header for the full rationale).
   app.use('/api/oauth-apps', conditionalCsrf, oauthAppsRoutes);
+
+  // Developer-portal read surfaces (session-authed, like app registration).
+  app.use('/api/devportal', conditionalCsrf, createAuditRouter({ auth: authMiddleware }));
 
   // Claude context routes - read-only GET endpoints for Claude skills
   app.use('/api/claude', claudeRoutes);

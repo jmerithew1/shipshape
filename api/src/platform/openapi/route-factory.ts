@@ -25,6 +25,7 @@
 import type { RequestHandler, Router } from 'express';
 import type { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi';
 import { z, type AnyZodObject, type ZodTypeAny } from 'zod';
+import { rateLimit } from '../ratelimit/middleware.js';
 import { ApiError } from '../api/v1/errors.js';
 import { ApiErrorSchema } from './v1-registry.js';
 import { scopeRegistry } from '../scopes/registry.js';
@@ -145,6 +146,7 @@ export function createRouteFactory(
   deps: RouteFactoryDeps
 ): (router: Router, def: V1RouteDef) => void {
   const { registry, catalog, tokenGate, requireScope } = deps;
+  const rateLimitGate = rateLimit();
 
   return function defineRoute(router: Router, def: V1RouteDef): void {
     // ---- definition-time validation (boot-time failure, never a surprise in prod)
@@ -241,6 +243,10 @@ export function createRouteFactory(
       def.path,
       tokenGate,
       requireScope(def.scope),
+      // After authn/scope because it keys on req.platform (app id, else token
+      // id). Per-route call is safe: rateLimit() shares one process-wide
+      // limiter, and it self-disables under NODE_ENV=test.
+      rateLimitGate,
       ...(def.middleware ?? []),
       validate(def.request),
       def.handler

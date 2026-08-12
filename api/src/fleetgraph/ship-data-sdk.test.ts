@@ -63,8 +63,17 @@ let clientSecret: string;
 let sdkData: SdkShipData;
 let poolData: PoolShipData;
 
+const auditEnabledBefore = process.env.AUDIT_ENABLED;
+
 beforeAll(async () => {
   process.env.FLEETGRAPH_ENABLED = 'false';
+
+  // The audit middleware is OFF by default under NODE_ENV=test (it writes a
+  // row per request, which would break suites that mock pool.query with
+  // strict call sequences). This suite opts in deliberately, because the
+  // audit rows ARE the Epic-7 acceptance criterion — without this the proof
+  // below passes vacuously.
+  process.env.AUDIT_ENABLED = 'true';
 
   const ws = await pool.query(
     `INSERT INTO workspaces (name) VALUES ('FleetGraph SDK Gate') RETURNING id`,
@@ -137,6 +146,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // Restore rather than delete: leaving AUDIT_ENABLED=true set would turn on
+  // per-request writes for every suite that runs after this one in the worker.
+  if (auditEnabledBefore === undefined) delete process.env.AUDIT_ENABLED;
+  else process.env.AUDIT_ENABLED = auditEnabledBefore;
+
   if (server) await new Promise<void>((resolve) => server.close(() => resolve()));
   if (workspaceId) {
     await pool.query(`DELETE FROM public_audit_log WHERE workspace_id = $1`, [workspaceId]).catch(
@@ -313,14 +327,15 @@ describe('the Epic-7 audit proof', () => {
    * `platform/api/v1/router.ts` mounts only `requestIdMiddleware`; a
    * repo-wide search for an insert into `public_audit_log` returns nothing.
    *
-   * To land: mount an audit middleware in the v1 router that writes one row
-   * per request from `req.platform` (client_id, app_id, user_id,
-   * workspace_id), the matched route, the scope it required, the response
-   * status and the latency. That work is owned by another agent and is in
-   * flight. When it lands, delete the `.skip` — the assertion below is
-   * written against the shipped DDL and needs no other change.
+   * LANDED: `auditTrail()` (api/src/platform/audit/middleware.ts) is now
+   * mounted inside the v1 router, so every public read writes one row keyed on
+   * the caller's client_id. The skip is removed and this is live.
+   *
+   * This assertion IS Epic 7. Before this week the agent read the database
+   * directly: no scope, no limit, no trace. The rows below are the proof it
+   * now goes through the same front door as a stranger.
    */
-  it.skip('records the agent client_id in public_audit_log for every /api/v1 read', async () => {
+  it('records the agent client_id in public_audit_log for every /api/v1 read', async () => {
     const before = await pool.query<{ n: string }>(
       `SELECT COUNT(*)::text AS n FROM public_audit_log WHERE client_id = $1`,
       [clientId],
@@ -328,13 +343,23 @@ describe('the Epic-7 audit proof', () => {
 
     await detectStaleIssues(sdkData, workspaceId);
 
-    const { rows } = await pool.query(
-      `SELECT client_id, app_id, workspace_id, method, route, scope_used, status
-         FROM public_audit_log
-        WHERE client_id = $1
-        ORDER BY occurred_at DESC`,
-      [clientId],
-    );
+    // The audit write is fire-and-forget on the response's `finish` event —
+    // deliberately, so recording a call can never delay or fail it. That means
+    // the row can land just after the HTTP response the detector awaited, so
+    // poll for it rather than reading once. Bounded and event-driven: no fixed
+    // sleep, and it fails fast if the row genuinely never arrives.
+    const deadline = Date.now() + 5000;
+    let rows: Array<Record<string, unknown>> = [];
+    do {
+      ({ rows } = await pool.query(
+        `SELECT client_id, app_id, workspace_id, method, route, scope_used, status
+           FROM public_audit_log
+          WHERE client_id = $1
+          ORDER BY occurred_at DESC`,
+        [clientId],
+      ));
+      if (rows.length > Number(before.rows[0]!.n)) break;
+    } while (Date.now() < deadline);
 
     expect(rows.length).toBeGreaterThan(Number(before.rows[0]!.n));
 
@@ -351,9 +376,8 @@ describe('the Epic-7 audit proof', () => {
   });
 
   it('the audit table exists and is keyed by client_id, so the proof above is one middleware away', async () => {
-    // Guards the half of the criterion that IS shipped: if the table or the
-    // client_id column were dropped, the skipped test above would rot
-    // silently. This keeps the gap honest and visible in a green run.
+    // Schema guard: if the table or these columns were dropped, the proof
+    // above would rot silently into a vacuous pass.
     const { rows } = await pool.query<{ column_name: string }>(
       `SELECT column_name FROM information_schema.columns
         WHERE table_name = 'public_audit_log'`,
@@ -364,12 +388,14 @@ describe('the Epic-7 audit proof', () => {
     expect(columns).toContain('route');
     expect(columns).toContain('scope_used');
 
-    // …and nothing writes it yet. When this expectation starts failing, the
-    // audit middleware has landed and the skipped test above must be enabled.
+    // This assertion was inverted when the audit middleware landed. It used
+    // to assert ZERO rows — a canary saying "nothing writes this yet". It now
+    // asserts the opposite, because the agent's reads are recorded. That flip
+    // is the whole of Epic 7 in one line.
     const written = await pool.query<{ n: string }>(
       `SELECT COUNT(*)::text AS n FROM public_audit_log WHERE client_id = $1`,
       [clientId],
     );
-    expect(Number(written.rows[0]!.n)).toBe(0);
+    expect(Number(written.rows[0]!.n)).toBeGreaterThan(0);
   });
 });

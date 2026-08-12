@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { buildEvent, publishEventSafely } from '../platform/webhooks/index.js';
 import { Router, Request, Response } from 'express';
 import { pool } from '../db/client.js';
 import { z } from 'zod';
@@ -649,6 +651,25 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
       projectId: belongs_to.find(bt => bt.type === 'project')?.id ?? null,
       eventType: 'created',
     });
+
+    // Webhook chokepoint (Week 6, Epic 3). Post-COMMIT beside the FleetGraph
+    // trigger: the row is durable, so the event is true. publishEventSafely
+    // checks WEBHOOKS_ENABLED before issuing any query and never throws — a
+    // webhook must never fail a user's write.
+    publishEventSafely(
+      buildEvent('issue.created', {
+        id: randomUUID(),
+        workspaceId: req.workspaceId!,
+        data: {
+          issue_id: newIssueId,
+          title,
+          ticket_number: ticketNumber,
+          state: properties.state,
+          priority: properties.priority,
+          assignee_id: properties.assignee_id,
+        },
+      })
+    );
 
     // Auto-complete sprint_issues accountability when first issue is created in a sprint
     const sprintAssociations = belongs_to.filter(bt => bt.type === 'sprint');

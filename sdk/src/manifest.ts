@@ -12,6 +12,12 @@
  * are usually bought for. `operationId` is the join key and must match the
  * spec's operationId exactly.
  *
+ * The gate lives at api/src/platform/api/v1/sdk-parity.test.ts. That location
+ * matters: this comment described the gate for a while before one existed, and
+ * in the meantime the two sides drifted (spec `createWebhookSubscription` vs
+ * SDK `createWebhook`). The test now also compares method and path, because
+ * matching ids over disagreeing URLs is the subtler failure.
+ *
  * The table is not documentation *about* the resource clients — it is the
  * source they build their URLs from (resources.ts imports SDK_ROUTES), so a
  * method cannot call a path that is absent here. `{id}` is the OpenAPI-style
