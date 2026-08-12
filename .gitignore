@@ -137,6 +137,6 @@ coverage/
 # bench transients: cookie jars (contain session tokens), pg log snapshots,
 # counter scratch, sourcemap build output
 bench/**/j_*.txt
-bench/**/pglog.txt
+bench/**/pglog*.txt
 bench/cat1-types/raw.json
 web/dist-sourcemap-tmp/
