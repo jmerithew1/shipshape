@@ -250,6 +250,73 @@ CREATE TABLE IF NOT EXISTS document_snapshots (
   created_by UUID REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- ── Week 6 (039): PlugForge OAuth server substrate ──────────────────────────
+-- Mirrored from migrations/039_platform_oauth.sql (schema.sql is the
+-- fresh-install snapshot; migrations are deltas). Must precede api_tokens,
+-- which references oauth_apps.
+
+CREATE TABLE IF NOT EXISTS oauth_apps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  owner_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  client_id TEXT NOT NULL UNIQUE,
+  client_secret_hash TEXT NOT NULL,    -- SHA-256; raw secret shown exactly once
+  client_secret_prefix TEXT NOT NULL,  -- first 8 chars for identification
+  redirect_uris TEXT[] NOT NULL DEFAULT '{}',
+  requested_scopes TEXT[] NOT NULL DEFAULT '{}',
+  is_first_party BOOLEAN NOT NULL DEFAULT false,
+  active BOOLEAN NOT NULL DEFAULT true,
+  orphaned BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  secret_rotated_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS oauth_authorization_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code_hash TEXT NOT NULL UNIQUE,
+  app_id UUID NOT NULL REFERENCES oauth_apps(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  redirect_uri TEXT NOT NULL,
+  scopes TEXT[] NOT NULL DEFAULT '{}',
+  code_challenge TEXT NOT NULL,
+  code_challenge_method TEXT NOT NULL DEFAULT 'S256'
+    CHECK (code_challenge_method IN ('S256')),
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS oauth_device_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  device_code_hash TEXT NOT NULL UNIQUE,
+  user_code TEXT NOT NULL UNIQUE,
+  app_id UUID NOT NULL REFERENCES oauth_apps(id) ON DELETE CASCADE,
+  scopes TEXT[] NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'approved', 'denied', 'expired', 'consumed')),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  poll_interval_seconds INT NOT NULL DEFAULT 5,
+  last_polled_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS oauth_refresh_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  token_hash TEXT NOT NULL UNIQUE,
+  family_id UUID NOT NULL,
+  app_id UUID NOT NULL REFERENCES oauth_apps(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  scopes TEXT[] NOT NULL DEFAULT '{}',
+  consumed_at TIMESTAMPTZ,
+  revoked_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- API tokens for CLI/external tool authentication
 CREATE TABLE IF NOT EXISTS api_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -262,9 +329,23 @@ CREATE TABLE IF NOT EXISTS api_tokens (
   expires_at TIMESTAMPTZ,     -- NULL = never expires
   revoked_at TIMESTAMPTZ,     -- NULL = active, timestamp = revoked
   created_at TIMESTAMPTZ DEFAULT now(),
+  -- Week 6 (039): OAuth-issued access tokens ride this table. oauth_app_id
+  -- set => public-surface-only token (internal authMiddleware refuses it).
+  oauth_app_id UUID REFERENCES oauth_apps(id) ON DELETE CASCADE,
+  scopes TEXT[],              -- NULL = legacy PAT (unscoped)
+  refresh_family_id UUID,
 
   UNIQUE(user_id, workspace_id, name)
 );
+
+-- Existing databases: schema.sql runs BEFORE numbered migrations
+-- (migrate.ts Step 1), so the api_tokens columns above must also exist as
+-- idempotent ALTERs — the CREATE TABLE IF NOT EXISTS skips on existing
+-- installs, and the Week-6 partial index below would otherwise reference a
+-- column that doesn't exist yet and abort the whole schema pass.
+ALTER TABLE api_tokens ADD COLUMN IF NOT EXISTS oauth_app_id UUID REFERENCES oauth_apps(id) ON DELETE CASCADE;
+ALTER TABLE api_tokens ADD COLUMN IF NOT EXISTS scopes TEXT[];
+ALTER TABLE api_tokens ADD COLUMN IF NOT EXISTS refresh_family_id UUID;
 
 -- Sprint iterations (tracking work progress per sprint)
 CREATE TABLE IF NOT EXISTS sprint_iterations (
@@ -404,6 +485,13 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_api_tokens_user_id ON api_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_api_tokens_workspace_id ON api_tokens(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_api_tokens_token_prefix ON api_tokens(token_prefix);
+-- Week 6 (039) platform indexes
+CREATE INDEX IF NOT EXISTS idx_oauth_apps_client_id ON oauth_apps(client_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_apps_workspace ON oauth_apps(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_refresh_family ON oauth_refresh_tokens(family_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_refresh_user ON oauth_refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_device_user_code ON oauth_device_codes(user_code);
+CREATE INDEX IF NOT EXISTS idx_api_tokens_oauth_app ON api_tokens(oauth_app_id) WHERE oauth_app_id IS NOT NULL;
 
 -- Sprint iterations indexes
 CREATE INDEX IF NOT EXISTS idx_sprint_iterations_sprint_id ON sprint_iterations(sprint_id);

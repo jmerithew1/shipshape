@@ -36,6 +36,11 @@ import weeklyPlansRoutes, { weeklyRetrosRouter } from './routes/weekly-plans.js'
 import { documentCommentsRouter, commentsRouter } from './routes/comments.js';
 import { setupSwagger } from './swagger.js';
 import { initializeCAIA } from './services/caia.js';
+import { createV1Router } from './platform/api/v1/router.js';
+import { registerV1Routes } from './platform/api/v1/resources/routes.js';
+import oauthAppsRoutes from './routes/oauth-apps.js';
+import { createOAuthRouter } from './platform/oauth/routes.js';
+import { authMiddleware } from './middleware/auth.js';
 
 // Validate SESSION_SECRET in production
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -51,6 +56,7 @@ const { csrfSynchronisedProtection, generateToken } = csrfSync({
 
 // Conditional CSRF middleware - skip for API token auth (Bearer tokens are not vulnerable to CSRF)
 import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'node:crypto';
 import path, { join } from 'node:path';
 import { existsSync } from 'node:fs';
 const conditionalCsrf = (req: Request, res: Response, next: NextFunction) => {
@@ -87,6 +93,29 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Please slow down.' },
+  // The limiter is mounted on '/api/' — ABOVE the /api/v1 router — and
+  // express-rate-limit writes its `message` straight to the response instead
+  // of calling next(). Without this branch a 429 on a public route shipped
+  // `{error}` while the generated OpenAPI spec promised the ApiError envelope
+  // with code `rate_limited`: the published contract lied, and the shape was
+  // unreachable by the fitness test because the test environment raises `max`
+  // to 10000 so a 429 can never be provoked. Found by the contract audit.
+  handler: (req, res, _next, options) => {
+    if (!req.path.startsWith('/v1')) {
+      res.status(options.statusCode).json(options.message);
+      return;
+    }
+    const requestId = randomUUID();
+    const retryAfterSeconds = Math.ceil(options.windowMs / 1000);
+    res.setHeader('X-Request-Id', requestId);
+    res.setHeader('Retry-After', String(retryAfterSeconds));
+    res.status(429).json({
+      code: 'rate_limited',
+      message: 'Rate limit exceeded',
+      details: { retry_after_seconds: retryAfterSeconds },
+      request_id: requestId,
+    });
+  },
 });
 
 
@@ -144,6 +173,34 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   }));
   app.use(express.json({ limit: '10mb' }));  // Large wiki documents can be several MB
   app.use(express.urlencoded({ extended: true, limit: '10mb' })); // For HTML form submissions
+
+  // Body-parser failures (malformed JSON, oversized payload) are raised by
+  // middleware mounted ABOVE the /api/v1 router, so the public error handler
+  // inside that router never sees them — Express's default handler would ship
+  // an HTML error page, breaking the contract that EVERY public failure
+  // returns the ApiError envelope. Caught here, while the request is still
+  // identifiable by path. Found by the contract audit, not by a unit test.
+  app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+    const parseFailure =
+      err instanceof SyntaxError ||
+      (typeof err === 'object' && err !== null && 'type' in err &&
+        ['entity.parse.failed', 'entity.too.large'].includes(String((err as { type: unknown }).type)));
+
+    if (!parseFailure) return next(err);
+    if (!req.path.startsWith('/api/v1')) return next(err);
+
+    const tooLarge =
+      typeof err === 'object' && err !== null && 'type' in err &&
+      String((err as { type: unknown }).type) === 'entity.too.large';
+    const requestId = randomUUID();
+    res.setHeader('X-Request-Id', requestId);
+    res.status(tooLarge ? 413 : 400).json({
+      code: 'validation_failed',
+      message: tooLarge ? 'Request body is too large' : 'Request body is not valid JSON',
+      request_id: requestId,
+    });
+  });
+
   app.use(cookieParser(sessionSecret));
 
   // Session middleware for CSRF token storage
@@ -179,7 +236,12 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
       await pool.query(`SELECT 1 FROM agent_findings LIMIT 0`);
       await pool.query(`SELECT 1 FROM agent_runs LIMIT 0`);
       await pool.query(`SELECT 1 FROM agent_credibility LIMIT 0`);
-      res.json({ status: 'ready', agent_tables: true });
+      // Week 6 platform tables (migration 039) — same silent-migration guard.
+      await pool.query(`SELECT 1 FROM oauth_apps LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_authorization_codes LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_device_codes LIMIT 0`);
+      await pool.query(`SELECT 1 FROM oauth_refresh_tokens LIMIT 0`);
+      res.json({ status: 'ready', agent_tables: true, platform_tables: true });
     } catch (err) {
       res.status(503).json({
         status: 'not_ready',
@@ -190,6 +252,39 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
 
   // API documentation (no auth needed)
   setupSwagger(app);
+
+  // OAuth 2.0 authorization server (Week 6).
+  //
+  // CSRF is applied SELECTIVELY here, and the split matters:
+  //   - /oauth/token and /oauth/device/code are called by CLIs, servers and
+  //     SDKs that hold no session and no CSRF token. Requiring one would make
+  //     the grants unusable by every standard OAuth client.
+  //   - /oauth/authorize/decision and /oauth/device/verify are submitted by a
+  //     logged-in human's browser. A forged POST there is a SILENT CONSENT
+  //     GRANT, so these keep full CSRF protection.
+  //
+  // The match MUST normalize exactly the way Express's router does. Express
+  // Routers default to `strict: false, caseSensitive: false`, so
+  // `/device/verify/` and `/device/VERIFY` both reach the handler. An exact
+  // string comparison therefore skipped CSRF while the route still ran —
+  // a forged POST to /oauth/device/verify/ would approve an attacker's device
+  // flow as the victim. Only SameSite=Strict cookies were preventing it, which
+  // is not the control this comment claimed. Found by the security audit.
+  const humanConsentPaths = new Set(['/authorize/decision', '/device/verify']);
+  const oauthCsrf = (req: Request, res: Response, next: NextFunction) => {
+    const normalized = req.path.replace(/\/+$/, '').toLowerCase();
+    if (req.method === 'POST' && humanConsentPaths.has(normalized)) {
+      return conditionalCsrf(req, res, next);
+    }
+    return next();
+  };
+  app.use('/oauth', oauthCsrf, createOAuthRouter({ auth: authMiddleware }));
+
+  // Public platform API (Week 6). Bearer-token-only surface: no CSRF wrapper
+  // (no cookie auth is accepted here), no shared middleware with the internal
+  // /api routes below — the public/internal boundary is structural. Mounted
+  // before the internal routes so nothing can shadow the /api/v1 prefix.
+  app.use('/api/v1', createV1Router(registerV1Routes));
 
   // Setup routes (CSRF protected - first-time setup only)
   app.use('/api/setup', conditionalCsrf, setupRoutes);
@@ -217,6 +312,11 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   app.use('/api/admin', conditionalCsrf, adminRoutes);
   app.use('/api/invites', conditionalCsrf, invitesRoutes);
   app.use('/api/api-tokens', conditionalCsrf, apiTokensRoutes);
+
+  // OAuth app management for the developer portal (Week 6). Session-authed
+  // by design: registering your first app is the bootstrap step, so it cannot
+  // itself require an OAuth token (see the file header for the full rationale).
+  app.use('/api/oauth-apps', conditionalCsrf, oauthAppsRoutes);
 
   // Claude context routes - read-only GET endpoints for Claude skills
   app.use('/api/claude', claudeRoutes);

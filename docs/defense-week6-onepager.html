@@ -1,0 +1,331 @@
+<title>Week 6 Defense — PlugForge in 5 Minutes</title>
+<style>
+  /* Stark black-and-white × electric lime × technical editorial. Single-theme
+     by design. Lime = signal. Blue = technical annotation. Motion = the
+     mechanism running, never decoration. */
+  :root, :root[data-theme="dark"], :root[data-theme="light"] {
+    --bg:#0A0A0B; --surface:#101012; --ink:#FAFAFA; --muted:#8A8F98;
+    --line:#232326; --lime:#C8FF4D; --blue:#6AA6FF;
+  }
+  html, body { background: var(--bg); }
+  body { color: var(--ink); margin: 0; padding: 3.5rem 1.5rem 4rem;
+    font: 15px/1.55 -apple-system, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  .sheet { max-width: 780px; margin: 0 auto; }
+
+  .micro { font-family: Consolas, "Cascadia Code", monospace; font-size: .68rem;
+    text-transform: uppercase; letter-spacing: .18em; color: var(--muted); }
+  .micro b { color: var(--lime); font-weight: 400; }
+
+  .hero { padding-bottom: 2rem; }
+  h1 { margin: .9rem 0 .6rem; font-weight: 800; letter-spacing: -0.03em;
+    font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.02; text-wrap: balance;
+    animation: rise .6s ease-out both; }
+  h1 .arrow { color: var(--lime); font-weight: 800; display: inline-block;
+    animation: arrowIn .7s cubic-bezier(.2,.8,.2,1) .25s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes arrowIn { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+  .thesis { color: var(--muted); max-width: 56ch; margin: 0 0 1.2rem;
+    animation: rise .6s ease-out .15s both; }
+  .thesis b { color: var(--ink); font-weight: 600; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.1rem 0 0; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: .32em .85em;
+    font-family: Consolas, monospace; font-size: .72rem; color: var(--muted);
+    letter-spacing: .04em; white-space: nowrap; animation: rise .5s ease-out both; }
+  .pill:nth-child(2) { animation-delay: .35s } .pill:nth-child(3) { animation-delay: .45s }
+  .pill:nth-child(4) { animation-delay: .55s } .pill:nth-child(5) { animation-delay: .65s }
+  .pill:nth-child(6) { animation-delay: .75s }
+  .pill b { color: var(--lime); font-weight: 400; }
+
+  section, footer { border-top: 1px solid var(--line); padding: 1.6rem 0; }
+  /* Entrance cascade. (The artifact viewer sizes the page full-height, so the
+     document itself never scrolls — scroll-triggered reveals can't fire there.
+     A timed cascade always plays.) */
+  .reveal { animation: rise .65s ease-out both; }
+  section:nth-of-type(1) { animation-delay: .55s }
+  section:nth-of-type(2) { animation-delay: .75s }
+  section:nth-of-type(3) { animation-delay: .95s }
+  section:nth-of-type(4) { animation-delay: 1.15s }
+  section:nth-of-type(5) { animation-delay: 1.35s }
+  footer.reveal { animation-delay: 1.5s; padding-bottom: 0; }
+
+  .sec-head { display: flex; align-items: baseline; gap: .9rem; margin-bottom: .45rem; }
+  .n { font-family: Consolas, monospace; font-size: .72rem; color: var(--lime); letter-spacing: .1em; }
+  h2 { font-size: 1.14rem; margin: 0; font-weight: 700; letter-spacing: -0.015em; }
+  p { margin: 0; }
+  .line { color: var(--muted); max-width: 62ch; }
+  .line b { color: var(--ink); font-weight: 600; }
+  code { font-family: Consolas, "Cascadia Code", monospace; font-size: .85em; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: .06em .35em; }
+  .line .sig { color: var(--lime); font-weight: 600; }
+
+  figure { margin: 1.15rem 0 0; }
+  svg { max-width: 100%; height: auto; display: block; color: var(--ink); }
+  figcaption { margin-top: .5rem; font-family: Consolas, monospace; font-size: .7rem;
+    color: var(--muted); letter-spacing: .03em; }
+  figcaption .sig { color: var(--lime); }
+  .d-label { font: 11px Consolas, monospace; fill: var(--ink); }
+  .d-mut   { font: 10px Consolas, monospace; fill: var(--muted); }
+  .d-blue  { font: 10px Consolas, monospace; fill: var(--blue); }
+  .d-box   { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+  .d-edge  { stroke: #4A4A50; stroke-width: 1; fill: none; }
+  .d-dash  { stroke: #4A4A50; stroke-width: 1; fill: none; stroke-dasharray: 4 3; }
+  .d-lime-box  { fill: rgba(200,255,77,.08); stroke: var(--lime); stroke-width: 1; }
+  .d-lime-text { font: 11px Consolas, monospace; fill: var(--lime); }
+  .d-lime-mut  { font: 10px Consolas, monospace; fill: var(--lime); }
+  .glow { fill: #C8FF4D; pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    h1, h1 .arrow, .thesis, .pill, .reveal { animation: none; }
+    .anim { display: none; }
+  }
+
+  ul.tight { margin: .7rem 0 0; padding-left: 1.05rem; color: var(--muted); }
+  ul.tight li { margin: .22rem 0; }
+  ul.tight b { color: var(--ink); font-weight: 600; }
+  ul.tight .sig { color: var(--lime); font-family: Consolas, monospace; font-size: .9em; }
+
+  footer { color: var(--muted); font-size: .82rem; border-bottom: none; }
+  footer code { font-size: .78rem; }
+</style>
+
+<div class="sheet">
+  <header class="hero">
+    <div class="micro">Architecture plan · defense Mon Aug 11 · build week Aug 10–16 · <b>James Merithew</b></div>
+    <h1>SHIP <span class="arrow">→</span> PLATFORM</h1>
+    <p class="thesis">A stranger installs the SDK, logs in, creates a document, and gets a
+      <b>verified notification back</b> — docs only, under 30 minutes. CI runs the same loop on
+      every change.</p>
+    <figure>
+      <svg viewBox="0 0 660 60" role="img" aria-label="The Time-to-First-Event loop: install, login, subscribe, create, verified webhook">
+        <defs>
+          <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="#4A4A50"/></marker>
+          <marker id="al" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="#C8FF4D"/></marker>
+        </defs>
+        <rect class="d-box" x="2"   y="14" width="92" height="30"/>
+        <rect class="d-box" x="140" y="14" width="92" height="30"/>
+        <rect class="d-box" x="278" y="14" width="92" height="30"/>
+        <rect class="d-box" x="416" y="14" width="92" height="30"/>
+        <rect class="d-lime-box" x="554" y="14" width="104" height="30"/>
+        <!-- box glows, timed to the dot's linear travel from x=20 to x=606 (7s) -->
+        <rect class="glow anim" x="2" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.16;0.16;0;0;0" keyTimes="0;0.06;0.13;0.5;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="140" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.205;0.284;0.362;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="278" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.44;0.519;0.597;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="416" y="14" width="92" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.16;0;0" keyTimes="0;0.676;0.755;0.833;1" dur="7s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="554" y="14" width="104" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.28;0;0" keyTimes="0;0.911;0.955;0.999;1" dur="7s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="48"  y="33" text-anchor="middle">install</text>
+        <text class="d-label" x="186" y="33" text-anchor="middle">login</text>
+        <text class="d-label" x="324" y="33" text-anchor="middle">subscribe</text>
+        <text class="d-label" x="462" y="33" text-anchor="middle">create</text>
+        <text class="d-lime-text" x="606" y="33" text-anchor="middle">verified ✓</text>
+        <line class="d-edge" x1="94"  y1="29" x2="134" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="232" y1="29" x2="272" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="370" y1="29" x2="410" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="508" y1="29" x2="548" y2="29" marker-end="url(#al)"/>
+        <circle class="anim" r="3.2" fill="#C8FF4D">
+          <animateMotion dur="7s" repeatCount="indefinite" path="M 20 29 H 606"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.96;1" dur="7s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </figure>
+    <div class="pills">
+      <span class="micro" style="align-self:center">TARGETS</span>
+      <span class="pill">TTFE CI <b>&lt;60s</b></span>
+      <span class="pill">HUMAN <b>≤30min</b></span>
+      <span class="pill">FLAKE <b>0%</b> / 20 runs</span>
+      <span class="pill">SPEC PARITY <b>100%</b></span>
+      <span class="pill">PLATFORM LLM CALLS <b>0</b></span>
+    </div>
+  </header>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="n">01</span><h2>One gate, one shape, one spec</h2></div>
+    <p class="line"><b>One place decides who's allowed.</b> One error format everywhere.
+      Docs <span class="sig">generated from the code</span> — the SDK is checked against them in CI.</p>
+    <figure>
+      <svg viewBox="0 0 660 58" role="img" aria-label="Every public request crosses five middleware in order: auth, scope, rate, handler, audit">
+        <text class="d-blue" x="2" y="9">/api/v1 — EVERY REQUEST, SAME ORDER, EACH CHECK ITS OWN FILE</text>
+        <rect class="d-box" x="2"   y="18" width="100" height="30"/>
+        <rect class="d-box" x="142" y="18" width="80" height="30"/>
+        <rect class="d-box" x="262" y="18" width="80" height="30"/>
+        <rect class="d-box" x="382" y="18" width="90" height="30"/>
+        <rect class="d-box" x="512" y="18" width="80" height="30"/>
+        <!-- glows timed to dot travel x=10→592 (6s) -->
+        <rect class="glow anim" x="2" y="18" width="100" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.079;0.158;0.5;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="142" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.227;0.287;0.347;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="262" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.433;0.502;0.57;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="382" y="18" width="90" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.639;0.717;0.794;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="512" y="18" width="80" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.863;0.93;0.999;1" dur="6s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="52"  y="37" text-anchor="middle">auth 401</text>
+        <text class="d-label" x="182" y="37" text-anchor="middle">scope 403</text>
+        <text class="d-label" x="302" y="37" text-anchor="middle">rate 429</text>
+        <text class="d-label" x="427" y="37" text-anchor="middle">handler</text>
+        <text class="d-label" x="552" y="37" text-anchor="middle">audit</text>
+        <line class="d-edge" x1="102" y1="33" x2="136" y2="33" marker-end="url(#a)"/>
+        <line class="d-edge" x1="222" y1="33" x2="256" y2="33" marker-end="url(#a)"/>
+        <line class="d-edge" x1="342" y1="33" x2="376" y2="33" marker-end="url(#a)"/>
+        <line class="d-edge" x1="472" y1="33" x2="506" y2="33" marker-end="url(#a)"/>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="6s" repeatCount="indefinite" path="M 10 33 H 592"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.95;1" dur="6s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </figure>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="n">02</span><h2>One Postgres table is the whole webhook system</h2></div>
+    <p class="line">A delivery is a row — status, attempts, next retry. <b>The table is the
+      queue.</b> Every delivery is <span class="sig">signed</span>.</p>
+    <figure>
+      <svg viewBox="0 0 660 110" role="img" aria-label="Domain write publishes to the outbox table, deliverer signs and posts to the subscriber, a failure loops back through the retry schedule, then succeeds">
+        <rect class="d-box"  x="2"   y="14" width="86"  height="30"/>
+        <rect class="d-box"  x="148" y="14" width="120" height="30"/>
+        <rect class="d-box"  x="328" y="14" width="110" height="30"/>
+        <rect class="d-box"  x="548" y="14" width="110" height="30"/>
+        <!-- glows timed to the 9s out → fail → retry → out again cycle -->
+        <rect class="glow anim" x="2" y="14" width="86" height="30" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.024;0.047;0.5;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="148" y="14" width="120" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.14;0;0" keyTimes="0;0.089;0.13;0.172;0.70;0.715;0.73;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="328" y="14" width="110" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.14;0;0" keyTimes="0;0.214;0.25;0.29;0.811;0.85;0.888;1" dur="9s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="548" y="14" width="110" height="30" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0;0.28;0;0" keyTimes="0;0.366;0.385;0.402;0.964;0.985;0.999;1" dur="9s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="45"  y="33" text-anchor="middle">write</text>
+        <text class="d-label" x="208" y="33" text-anchor="middle">outbox table</text>
+        <text class="d-label" x="383" y="33" text-anchor="middle">sign t=,v1=</text>
+        <text class="d-label" x="603" y="33" text-anchor="middle">subscriber</text>
+        <line class="d-edge" x1="88"  y1="29" x2="142" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="268" y1="29" x2="322" y2="29" marker-end="url(#a)"/>
+        <line class="d-edge" x1="438" y1="29" x2="542" y2="29" marker-end="url(#a)"/>
+        <text class="d-blue" x="112" y="24" text-anchor="middle">publishes</text>
+        <text class="d-blue" x="490" y="24" text-anchor="middle">POST</text>
+        <path class="d-dash" d="M 603 44 L 603 66 L 208 66 L 208 44" marker-end="url(#a)"/>
+        <text class="d-blue" x="405" y="62" text-anchor="middle">5xx → retry 1s·4s·16s·1m·5m·30m + jitter</text>
+        <rect class="d-box" x="148" y="78" width="120" height="26"/>
+        <text class="d-label" x="208" y="95" text-anchor="middle">DLQ</text>
+        <path class="d-edge" d="M 148 91 L 60 91 L 60 46" marker-end="url(#a)" opacity=".5"/>
+        <path class="d-edge" d="M 268 91 L 640 91 L 640 46" marker-end="url(#a)"/>
+        <text class="d-lime-mut" x="104" y="87" text-anchor="middle">6 fails / 4xx</text>
+        <text class="d-blue" x="454" y="87" text-anchor="middle">replay — same Idempotency-Key</text>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="9s" repeatCount="indefinite"
+            path="M 20 29 H 600 L 603 44 L 603 66 H 208 L 208 44 L 208 29 H 600"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.97;1" dur="9s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <figcaption>a delivery goes out signed · fails · comes back on the schedule · succeeds — or dead-letters and gets replayed with the <span class="sig">same key</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="n">03</span><h2>The agent walks in the front door</h2></div>
+    <p class="line">The agent loses its database shortcut — it logs in like any developer:
+      <span class="sig">scoped, rate-limited, audited</span>. My own agent tests the platform.</p>
+    <figure>
+      <svg viewBox="0 0 660 96" role="img" aria-label="Before: the agent queried the database directly. After: the agent goes through the SDK and public API into the same database">
+        <text class="d-mut" x="2" y="24">before</text>
+        <g opacity=".45">
+          <rect class="d-box" x="60" y="8" width="90" height="28"/>
+          <text class="d-label" x="105" y="26" text-anchor="middle">agent</text>
+          <path class="d-dash" d="M 150 22 L 560 22" marker-end="url(#a)"/>
+          <text class="d-mut" x="350" y="17" text-anchor="middle">raw SQL — invisible, unlimited</text>
+        </g>
+        <text class="d-mut" x="2" y="72">after</text>
+        <rect class="d-box" x="60" y="56" width="90" height="28"/>
+        <rect class="d-box" x="210" y="56" width="80" height="28"/>
+        <rect class="d-lime-box" x="350" y="56" width="90" height="28"/>
+        <rect class="d-box" x="560" y="8" width="98" height="76"/>
+        <!-- glows timed to dot travel x=70→600 (6s) -->
+        <rect class="glow anim" x="60" y="56" width="90" height="28" opacity="0">
+          <animate attributeName="opacity" values="0.14;0.14;0;0;0" keyTimes="0;0.075;0.151;0.5;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="210" y="56" width="80" height="28" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.264;0.34;0.415;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="350" y="56" width="90" height="28" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.24;0;0" keyTimes="0;0.528;0.61;0.698;1" dur="6s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="560" y="8" width="98" height="76" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.14;0;0" keyTimes="0;0.925;0.965;0.999;1" dur="6s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="105" y="74" text-anchor="middle">agent</text>
+        <text class="d-label" x="250" y="74" text-anchor="middle">SDK</text>
+        <text class="d-lime-text" x="395" y="74" text-anchor="middle">/api/v1</text>
+        <line class="d-edge" x1="150" y1="70" x2="204" y2="70" marker-end="url(#a)"/>
+        <line class="d-edge" x1="290" y1="70" x2="344" y2="70" marker-end="url(#a)"/>
+        <line class="d-edge" x1="440" y1="70" x2="554" y2="70" marker-end="url(#al)"/>
+        <text class="d-lime-mut" x="497" y="65" text-anchor="middle">scoped · limited · audited</text>
+        <text class="d-label" x="609" y="50" text-anchor="middle">database</text>
+        <circle class="anim" r="3" fill="#C8FF4D">
+          <animateMotion dur="6s" repeatCount="indefinite" path="M 70 70 H 600"/>
+          <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.95;1" dur="6s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </figure>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="n">04</span><h2>Terraform is the recipe; Render is the kitchen</h2></div>
+    <p class="line">Three resources, one <code>terraform apply</code> — destroy-and-rebuild already
+      proven. Least-privilege on the secrets path: <span class="sig">prove allow, prove deny</span>,
+      never touching the live deploy.</p>
+    <figure>
+      <svg viewBox="0 0 660 128" role="img" aria-label="Terraform structure: the project contains postgres and the web service; the DSN is the one reference between them. Animation cycles three change scenarios, lighting up only what each one destroys.">
+        <!-- structure: containment, not flow. project is the environment the
+             other two live INSIDE; the only edge is the DSN reference. -->
+        <rect class="d-box" x="2" y="26" width="656" height="98" rx="2"/>
+        <text class="d-mut" x="16" y="44">project</text>
+        <rect class="d-box" x="40"  y="62" width="160" height="38"/>
+        <rect class="d-box" x="400" y="62" width="218" height="38"/>
+        <!-- scenario glows -->
+        <rect class="glow anim" x="400" y="62" width="218" height="38" opacity="0">
+          <animate attributeName="opacity" values="0;0.14;0.14;0;0;0.14;0.14;0;0" keyTimes="0;0.05;0.26;0.31;0.40;0.45;0.61;0.65;1" dur="12s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="40" y="62" width="160" height="38" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.22;0.22;0;0" keyTimes="0;0.38;0.43;0.61;0.65;1" dur="12s" repeatCount="indefinite"/></rect>
+        <rect class="glow anim" x="2" y="26" width="656" height="98" opacity="0">
+          <animate attributeName="opacity" values="0;0;0.12;0.12;0;0" keyTimes="0;0.71;0.76;0.94;0.98;1" dur="12s" repeatCount="indefinite"/></rect>
+        <text class="d-label" x="120" y="85" text-anchor="middle">postgres</text>
+        <text class="d-label" x="509" y="85" text-anchor="middle">web service</text>
+        <line class="d-edge" x1="200" y1="81" x2="394" y2="81" marker-end="url(#a)"/>
+        <text class="d-blue" x="297" y="76" text-anchor="middle">DSN</text>
+        <!-- scenario captions, one per phase -->
+        <text class="d-mut" x="2" y="12" opacity="0">SCENARIO 1 — ~ env var on the service: it redeploys. nothing else moves
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.03;0.28;0.33;1" dur="12s" repeatCount="indefinite"/></text>
+        <text class="d-lime-mut" x="2" y="12" opacity="0">SCENARIO 2 — -/+ postgres: data gone · DSN rotates → service redeploys too
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.41;0.63;0.68;1" dur="12s" repeatCount="indefinite"/></text>
+        <text class="d-lime-mut" x="2" y="12" opacity="0">SCENARIO 3 — -/+ project: everything inside is rebuilt
+          <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.74;0.96;0.99;1" dur="12s" repeatCount="indefinite"/></text>
+      </svg>
+      <figcaption>not a pipeline — a containment tree. damage spreads to whatever <span class="sig">contains or references</span> the thing you changed</figcaption>
+    </figure>
+    <ul class="tight">
+      <li><b><span class="sig">-/+</span> means replace.</b> Find the attribute that forces it, then walk right along the spine.</li>
+      <li><b><span class="sig">~</span> on env vars still deploys.</b> <code>DATABASE_URL</code> changes because postgres changed, not because someone typed it.</li>
+      <li><b>starter → free looks harmless.</b> Idling silently kills the cron and the webhook poller.</li>
+    </ul>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="n">05</span><h2>Deliberately not built</h2></div>
+    <p class="line">No queue service. No rewriting working code. No AI for AI's sake.
+      <b>Scope was chosen, not defaulted into.</b> If time runs short, the CLI login gets
+      simpler — the loop stays.</p>
+  </section>
+
+  <footer class="reveal">
+    <span class="micro">RECEIPTS</span> — requirement ledger: <code>docs/week6-requirements.md</code> ·
+    every decision with its rejected alternative: <code>DECISIONS.md</code> ·
+    terraform crib: <code>docs/defense-week6-terraform-map.md</code>
+  </footer>
+</div>

@@ -1,0 +1,29 @@
+QUERY COUNT: 32
+TOTAL DB TIME (parse+bind+exec): 15.02 ms
+
+--- all queries, slowest first (total ms | exec ms) ---
+    1.99 |     0.79 | SELECT d.id, d.title, d.properties, prog_da.related_id as program_id, d.archived_at, d.created_at, d.updated_at, d.converted_from_id, (d.properties->>'owner_id')::uuid as owner_id, u.name as owner_name, u.email as owner_
+    1.81 |     1.17 | SELECT d.id, d.title, d.properties, d.ticket_number, NULL as content, d.created_at, d.updated_at, d.created_by, d.started_at, d.completed_at, d.cancelled_at, d.reopened_at, d.converted_from_id, u.name as assignee_name, C
+    1.47 |     0.78 | SELECT da.document_id, da.related_id as id, da.relationship_type as type, d.title, d.properties->>'color' as color FROM document_associations da LEFT JOIN documents d ON da.related_id = d.id WHERE da.document_id = ANY($1
+    1.30 |     0.10 | SELECT DISTINCT proj.id as project_id, proj.title as project_title, prog.title as program_name FROM documents s JOIN documents proj ON (s.properties->>'project_id')::uuid = proj.id AND proj.document_type = 'project' LEFT
+    1.19 |     0.58 | SELECT d.id, d.title, d.properties, d.archived_at, d.created_at, d.updated_at, COALESCE((d.properties->>'owner_id')::uuid, d.created_by) as owner_id, u.name as owner_name, u.email as owner_email, (SELECT COUNT(*) FROM do
+    0.79 |     0.02 | SELECT id, title FROM documents WHERE workspace_id = $1 AND document_type = 'person' AND (properties->>'user_id') = $2 LIMIT 1
+    0.74 |     0.39 | SELECT id, workspace_id, document_type, title, parent_id, position, ticket_number, properties, created_at, updated_at, created_by, visibility FROM documents WHERE workspace_id = $1 AND archived_at IS NULL AND deleted_at 
+    0.47 |     0.07 | SELECT id, title, content, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_plan' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND ar
+    0.40 |     0.03 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.39 |     0.08 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.37 |     0.05 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.33 |     0.08 | SELECT d.id, d.properties->>'user_id' as user_id, d.title as name, COALESCE(d.properties->>'email', u.email) as email, CASE WHEN d.archived_at IS NOT NULL THEN true ELSE false END as "isArchived", CASE WHEN d.properties-
+    0.33 |     0.04 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.31 |     0.05 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.30 |     0.04 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.29 |     0.03 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.28 |     0.03 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.27 |     0.04 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.23 |     0.05 | SELECT id, title, content, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_retro' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND a
+    0.20 |     0.04 | SELECT id, title, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'standup' AND (properties->>'author_id') = $2 AND (properties->>'date') = ANY($3) AND deleted_at IS NULL ORD
+    0.20 |     0.03 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.20 |     0.05 | SELECT id, title, properties FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_retro' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND archived_at IS NULL AND deleted_at
+    0.16 |     0.03 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.13 |     0.02 | SELECT id, created_at, expires_at, last_activity FROM sessions WHERE id = $1
+    0.13 |     0.02 | SELECT w.id, w.name, wm.role FROM workspac

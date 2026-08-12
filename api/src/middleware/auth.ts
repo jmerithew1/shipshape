@@ -38,11 +38,16 @@ async function validateApiToken(token: string): Promise<{
 } | null> {
   const tokenHash = hashToken(token);
 
+  // oauth_app_id IS NULL is load-bearing (Week 6): OAuth-issued access tokens
+  // share this table but are PUBLIC-SURFACE-ONLY — they carry scopes the
+  // internal API does not enforce, so the internal bearer path must refuse
+  // them outright. The /api/v1 TokenGate is the only validator for them.
   const result = await pool.query(
-    `SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, u.is_super_admin
+    `SELECT t.id, t.user_id, t.workspace_id, t.expires_at, t.revoked_at, t.last_used_at,
+            u.is_super_admin
      FROM api_tokens t
      JOIN users u ON t.user_id = u.id
-     WHERE t.token_hash = $1`,
+     WHERE t.token_hash = $1 AND t.oauth_app_id IS NULL`,
     [tokenHash]
   );
 
@@ -56,11 +61,18 @@ async function validateApiToken(token: string): Promise<{
   // Check if expired
   if (tokenRow.expires_at && new Date(tokenRow.expires_at) < new Date()) return null;
 
-  // Update last_used_at
-  await pool.query(
-    'UPDATE api_tokens SET last_used_at = NOW() WHERE id = $1',
-    [tokenRow.id]
-  );
+  // Update last_used_at, throttled to 30s exactly like the session path's
+  // last_activity write below (Week 6): unconditional, this was one UPDATE per
+  // bearer request — the same "auth tax" hotspot the session path already
+  // fixed, and public-API traffic multiplies it.
+  const LAST_USED_WRITE_THRESHOLD_MS = 30 * 1000;
+  const lastUsedMs = tokenRow.last_used_at ? new Date(tokenRow.last_used_at).getTime() : 0;
+  if (Date.now() - lastUsedMs > LAST_USED_WRITE_THRESHOLD_MS) {
+    await pool.query(
+      'UPDATE api_tokens SET last_used_at = NOW() WHERE id = $1',
+      [tokenRow.id]
+    );
+  }
 
   return {
     userId: tokenRow.user_id,

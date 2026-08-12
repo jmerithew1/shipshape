@@ -1,0 +1,1 @@
+{"path":"/api/projects","conns":10,"amount":300,"wall_s":0.52,"rps":574,"codes":{"200":300},"kb_per_resp":31.8,"total":{"p50":17,"p95":21.9,"p99":24.5,"avg":17.2,"max":28.5},"ttfb":{"p50":17,"p95":21.9,"p99":24.5}}

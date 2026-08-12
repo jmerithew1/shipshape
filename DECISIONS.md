@@ -5,6 +5,106 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-10 — W6: Terraform topology = the live Render stack; IAM exercise on the real SSM identity
+
+The graded deployment is already IaC: `terraform/render/` (pinned provider,
+destroy-and-redeploy proven and graded in Week 5). The MVP text's ECS
+vocabulary ("app container, IAM task role and execution role") has no Render
+equivalent, so the IAM least-privilege exercise runs where real IAM actually
+exists in this system: the AWS identity prod Ship uses for SSM Parameter
+Store secrets. Correction while mapping the stack (2026-08-10 evening): the
+live Render deploy runs NODE_ENV=staging *specifically to skip* the SSM path
+(terraform/render/variables.tf documents this), so no AWS identity is in
+live use. The exercise therefore runs the REAL production code path
+(`loadProductionSecrets()`, api/src/config/ssm.ts:38-66) against a
+terraform-managed scratch: SSM parameters at /ship/prod/* + an IAM user,
+AdministratorAccess first, locked to minimal `ssm:GetParameter` on the
+/ship/prod/* ARN (+ kms decrypt for SecureString); "service still works" =
+the API boots and binds under the minimal policy with NODE_ENV=production;
+"denied action fails" = PutParameter / out-of-path GetParameter →
+AccessDenied. Zero blast radius — the live deployment is never touched, and
+no Thursday prod-swap window is needed. The vocabulary gap is presented
+openly in a mapping table at the defense.
+**Rejected:** a fresh minimal ECS Fargate side-stack (literal-compliant but a
+theater deployment serving no traffic; owner call); reviving the inherited
+~74-resource Elastic Beanstalk stack (wrong shape, maximizes the no-AI
+blast-radius drill surface, auto-fail risk).
+
+## 2026-08-10 — W6: OAuth server hand-rolled on existing token substrate; one bearer path
+
+All three grants (Auth Code + PKCE, Device, refresh rotation) are hand-built
+on patterns already load-bearing in this repo: sha256-hash-then-lookup
+bearer storage (`api_tokens`), one-time-consume TTL rows
+(`oauth-state.ts`'s `DELETE … RETURNING`). OAuth access tokens resolve
+through the SAME validator as existing `ship_` tokens — one gate, one
+revocation path. The bearer path's per-request `last_used` UPDATE gets the
+session path's 30 s throttle before any benchmark runs.
+**Rejected:** `@node-oauth/oauth2-server` / Hydra / Auth0 (none implement the
+Device Grant we must build anyway; model-callback abstractions fight the
+SQL-in-handler codebase; the assignment's stated intent is learning the
+flows); a parallel OAuth-only validator (two revocation paths, double auth
+tax, drift).
+
+## 2026-08-10 — W6: Postgres outbox table is the webhook queue, retry scheduler, DLQ, and delivery log
+
+The required retry ladder (1s→30m, jitter) forces persistence regardless, so
+the persistence IS the queue: `webhook_deliveries` rows with
+status/attempt/next_attempt_at + an in-process poller (injected clock; no
+setTimeout in tests). DLQ = a status value; replay = re-enqueue carrying the
+original Idempotency-Key; the per-app delivery log = the same table. The
+queue-backed deliverer stays a Liskov drop-in behind `IWebhookDeliverer`.
+Single-instance Render Starter makes in-process delivery correct, not just
+cheap.
+**Rejected:** Redis/BullMQ/SQS this week (new infrastructure to deploy,
+secure, and defend at the terraform drill, discharging zero additional
+requirements).
+
+## 2026-08-10 — W6: FleetBus is disqualified as the webhook IEventBus; a second bus runs beside it
+
+FleetBus debounces per-workspace and drops intermediate events by design —
+correct for agent triggering, disqualifying for webhooks (a webhook system
+that loses events is broken), and its raw timers can't host the required
+deterministic-clock tests. ShipBus publishes at the same two domain
+chokepoints (`logDocumentChange`, issue-create), kill-switch-checked before
+any query (`WEBHOOKS_ENABLED`, mirroring `FLEETGRAPH_ENABLED`) so the four
+strict pool.query-mock suites stay green. FleetBus is untouched; its
+behavior is pinned by Week-5 tests.
+**Rejected:** reusing/extending FleetBus (event loss + timer coupling);
+publishing from the route layer (doc explicitly requires domain-layer
+publish, and routes don't hold the change context `logDocumentChange` has).
+
+## 2026-08-10 — W6: thin v1 handlers with their own SQL; no service-layer extraction
+
+`documents.ts`/`issues.ts` are 1.5k+ line route files with ~60 query sites
+each and no service layer. Extracting one mid-week risks Part-1/2
+regressions for zero grader-visible value. Public v1 handlers are thin,
+write their own scoped SQL against the same tables, and the public/internal
+boundary is enforced structurally: separate router, separate middleware
+chain, ESLint rule (added before any cross-import exists) failing the build
+on v1→internal-handler or integrations→api/src imports. v1 documents-list
+query params are designed from `fleetgraph/detectors.ts` needs
+(type/state/updated_before + association expansion) so the Epic-7 rewire can
+express every detector read.
+**Rejected:** service-layer extraction (week-eating refactor); v1 routes
+delegating to internal route handlers (the exact coupling the lint rule and
+the assignment's one-way-door warning exist to prevent).
+
+## 2026-08-10 — W6: `ship webhooks tail` uses a Stripe-CLI-style relay; SDK installs from a packed tarball
+
+A grader's laptop is not publicly reachable, so tail cannot receive real
+webhook POSTs directly. The deliverer signs and POSTs the raw payload to a
+Ship-hosted relay; the CLI streams headers+body verbatim and verifies the
+HMAC locally with the subscription signing secret — the verification key
+never leaves the client, which is the same trust model as `stripe listen`.
+Clean-machine install: the built SDK is `npm pack`-ed and the quickstart
+installs the committed tarball (npm publish documented, not required — per
+the assignment's own stack table).
+**Rejected:** requiring a tunnel (ngrok) in the graded path (third-party
+dependency, setup time inside the 30-min budget); CLI polling the
+delivery-log API and "verifying" a signature fetched over the same
+authenticated channel (signature theater — an RFC-literate interviewer would
+be right to call it out).
+
 ## 2026-08-07 — Detection speed: grace-expiry recheck on the event bus (reviewer feedback)
 
 Early graded 100/100 with one flag: 4 m 55 s detection is too close to the

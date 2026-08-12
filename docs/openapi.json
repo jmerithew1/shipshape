@@ -1,0 +1,1146 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ship Public API",
+    "version": "1.0.0",
+    "description": "The Ship public API. Every endpoint is OAuth 2.0 bearer-authenticated and\nscope-gated; the required scope for an operation is published as the\n`x-required-scope` extension on that operation.\n\nFailures always use one envelope: `{ code, message, details?, request_id }`\n(see the `ApiError` schema). `request_id` correlates the response with the\naudit log and webhook delivery log.\n\nList endpoints are cursor-paginated: they return `{ data, next_cursor }`,\nwhere a null `next_cursor` means the last page.\n\nThis document is generated from route metadata at build time — it is never\nhand-written and cannot drift from the mounted router."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "OAuth 2.0 access token issued by Ship, sent as `Authorization: Bearer <token>`. Every operation additionally declares the scope it requires in `x-required-scope`."
+      }
+    },
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "unauthorized",
+              "token_expired",
+              "forbidden",
+              "not_found",
+              "validation_failed",
+              "rate_limited",
+              "server_error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "request_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "client_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The OAuth app this token belongs to, or null for a personal access token."
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "workspace_id",
+          "client_id",
+          "scopes"
+        ]
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "document_type": {
+            "type": "string"
+          },
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Issue workflow state, when applicable."
+          },
+          "ticket_number": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "document_type",
+          "state",
+          "ticket_number",
+          "parent_id",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "wiki",
+              "issue",
+              "sprint"
+            ],
+            "default": "wiki"
+          },
+          "parent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content_text": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Plain-text body. Stored as a TipTap paragraph document."
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "Issue": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Document"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "assignee_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid"
+              },
+              "priority": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "assignee_id",
+              "priority"
+            ]
+          }
+        ]
+      },
+      "Sprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Document"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "start_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "end_date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "start_date",
+              "end_date"
+            ]
+          }
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Get the authenticated user and the scopes this token carries",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "documents:read",
+        "responses": {
+          "200": {
+            "description": "The authenticated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents": {
+      "get": {
+        "operationId": "listDocuments",
+        "summary": "List documents, newest activity first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "documents:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Opaque cursor from a previous response."
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "updated_before",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "wiki",
+                "issue",
+                "sprint"
+              ]
+            },
+            "required": false,
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "state",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "parent_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/Document"
+                            }
+                          },
+                          "next_cursor": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Opaque cursor for the next page; null on the last page."
+                          }
+                        },
+                        "required": [
+                          "data",
+                          "next_cursor"
+                        ]
+                      }
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page; null on the last page."
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "next_cursor"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDocument",
+        "summary": "Create a document",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "documents:write",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}": {
+      "get": {
+        "operationId": "getDocument",
+        "summary": "Get a single document by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "documents:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such resource, or it is outside the token’s workspace (code: not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/issues": {
+      "get": {
+        "operationId": "listIssues",
+        "summary": "List issues, newest activity first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "issues:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Opaque cursor from a previous response."
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "updated_before",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "state",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "assignee_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of issues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/Issue"
+                            }
+                          },
+                          "next_cursor": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Opaque cursor for the next page; null on the last page."
+                          }
+                        },
+                        "required": [
+                          "data",
+                          "next_cursor"
+                        ]
+                      }
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page; null on the last page."
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "next_cursor"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/issues/{id}": {
+      "get": {
+        "operationId": "getIssue",
+        "summary": "Get a single issue by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "issues:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The issue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such resource, or it is outside the token’s workspace (code: not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sprints": {
+      "get": {
+        "operationId": "listSprints",
+        "summary": "List sprints, newest activity first",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "sprints:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Opaque cursor from a previous response."
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "updated_before",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of sprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/Sprint"
+                            }
+                          },
+                          "next_cursor": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Opaque cursor for the next page; null on the last page."
+                          }
+                        },
+                        "required": [
+                          "data",
+                          "next_cursor"
+                        ]
+                      }
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page; null on the last page."
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "next_cursor"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sprints/{id}": {
+      "get": {
+        "operationId": "getSprint",
+        "summary": "Get a single sprint by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-scope": "sprints:read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The sprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sprint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation (code: validation_failed); `details.issues` lists the failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or expired access token (code: unauthorized | token_expired).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this operation requires (code: forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such resource, or it is outside the token’s workspace (code: not_found).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (code: rate_limited); see the Retry-After header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error (code: server_error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
