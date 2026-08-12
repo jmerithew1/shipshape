@@ -39,8 +39,36 @@ A pre-registered OAuth app with **read-only** scopes (`documents:read`, `issues:
 rotates it on re-run, so the value published here is always the working one.
 
 <!-- GRADER_CREDENTIALS_START -->
-> **Pending deploy.** The credentials table lands here when the seed script runs against the
-> deployed instance. To mint your own locally: `pnpm --filter @ship/api seed:grader-app`
+| | |
+| --- | --- |
+| `client_id` | `ship_app_e46d52564bc1f690` |
+| `client_secret` | `ship_sec_bd48273402dbb7560d7a8f47d7cea4c95b0836743e108117ca9ef6adf88f9e80` |
+| scopes | `documents:read` `issues:read` `sprints:read` (read-only) |
+| redirect URIs | `http://localhost:8976/callback`, `http://127.0.0.1:8976/callback` |
+| demo account for the approval step | `demo@ship.local` / `demo1234` |
+
+**Device flow, end to end** (this is exactly what `ship login` automates, and it
+is verified working against the deployed instance):
+
+```bash
+BASE=https://ship-api-r1om.onrender.com
+CLIENT=ship_app_e46d52564bc1f690
+
+# 1. ask for a device code
+curl -s -X POST $BASE/oauth/device/code -H 'Content-Type: application/json'   -d "{\"client_id\":\"$CLIENT\",\"scope\":\"documents:read issues:read\"}"
+
+# 2. approve the printed user_code while signed in as the demo account,
+#    then exchange the device_code for a token
+curl -s -X POST $BASE/oauth/token   -d grant_type=urn:ietf:params:oauth:grant-type:device_code   -d device_code=<device_code> -d client_id=$CLIENT
+
+# 3. use it
+curl -s $BASE/api/v1/me -H "Authorization: Bearer <access_token>"
+```
+
+Polling before approval returns `authorization_pending`; polling again inside
+the interval returns `slow_down`. Requesting a scope the app was not granted
+returns `403` naming the missing scope, e.g. `GET /api/v1/sprints` →
+`{"code":"forbidden","message":"Insufficient scope: this request requires 'sprints:read'","details":{"missing_scope":"sprints:read"}}`.
 <!-- GRADER_CREDENTIALS_END -->
 
 ### One-command setup against the deployed instance
