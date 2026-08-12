@@ -349,17 +349,21 @@ describe('the Epic-7 audit proof', () => {
     // poll for it rather than reading once. Bounded and event-driven: no fixed
     // sleep, and it fails fast if the row genuinely never arrives.
     const deadline = Date.now() + 5000;
-    let rows: Array<Record<string, unknown>> = [];
-    do {
-      ({ rows } = await pool.query(
-        `SELECT client_id, app_id, workspace_id, method, route, scope_used, status
-           FROM public_audit_log
-          WHERE client_id = $1
-          ORDER BY occurred_at DESC`,
-        [clientId],
-      ));
-      if (rows.length > Number(before.rows[0]!.n)) break;
-    } while (Date.now() < deadline);
+    const readAuditRows = async () =>
+      (
+        await pool.query(
+          `SELECT client_id, app_id, workspace_id, method, route, scope_used, status
+             FROM public_audit_log
+            WHERE client_id = $1
+            ORDER BY occurred_at DESC`,
+          [clientId],
+        )
+      ).rows;
+
+    let rows = await readAuditRows();
+    while (rows.length <= Number(before.rows[0]!.n) && Date.now() < deadline) {
+      rows = await readAuditRows();
+    }
 
     expect(rows.length).toBeGreaterThan(Number(before.rows[0]!.n));
 
