@@ -11,12 +11,19 @@ import type { Pool } from 'pg';
 import { buildFleetGraph } from './graph.js';
 import { buildRealModels, llmConfigured, type FleetModels } from './models.js';
 import { fleetBus } from './events.js';
+import type { ShipData } from './ship-data.js';
+import { PoolShipData } from './ship-data-pool.js';
+import { SdkShipData } from './ship-data-sdk.js';
 import type { FleetTrigger, RunPath } from './types.js';
 
 export interface FleetRuntime {
   runTrigger: (trigger: FleetTrigger) => Promise<{ path: RunPath; chatResponse: string | null }>;
   enabled: boolean;
+  /** Which `ShipData` implementation the detector stage is reading through. */
+  dataSource: FleetDataSource;
 }
+
+export type FleetDataSource = 'pool' | 'sdk' | 'injected';
 
 let runtime: FleetRuntime | null = null;
 
@@ -24,9 +31,61 @@ export function getFleetRuntime(): FleetRuntime | null {
   return runtime;
 }
 
-export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetRuntime {
+/**
+ * Epic-7 feature flag. OFF (default) is the Week-5 path, unchanged; ON routes
+ * the detector stage through Ship's public API as a first-party OAuth app.
+ */
+export function viaSdkEnabled(): boolean {
+  return process.env.FLEETGRAPH_VIA_SDK === 'true';
+}
+
+/**
+ * Resolve the port implementation for this process.
+ *
+ * The flag states an intent; credentials decide whether it can be honoured.
+ * With the flag on but `SHIP_AGENT_CLIENT_ID` / `SHIP_AGENT_CLIENT_SECRET`
+ * unset there is no OAuth identity to authenticate as, so this degrades to
+ * the pool and says so loudly — the same shape as the LLM seam, which runs
+ * rule-based when `ANTHROPIC_API_KEY` is missing rather than dying. Silently
+ * reading nothing would look exactly like "no problems found", which is the
+ * one failure mode a monitoring agent must never have.
+ */
+export function resolveShipData(pool: Pool): { data: ShipData; source: 'pool' | 'sdk' } {
+  const fallback = new PoolShipData(pool);
+  if (!viaSdkEnabled()) return { data: fallback, source: 'pool' };
+
+  const clientId = process.env.SHIP_AGENT_CLIENT_ID;
+  const clientSecret = process.env.SHIP_AGENT_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    console.warn(
+      '[fleetgraph] FLEETGRAPH_VIA_SDK=true but SHIP_AGENT_CLIENT_ID/SECRET are unset — ' +
+        'falling back to direct database reads. Run `pnpm --filter @ship/api seed:agent-app`.',
+    );
+    return { data: fallback, source: 'pool' };
+  }
+
+  return {
+    data: new SdkShipData({
+      baseUrl: process.env.SHIP_AGENT_API_BASE_URL ?? `http://127.0.0.1:${process.env.PORT ?? 3000}`,
+      clientId,
+      clientSecret,
+      fallback,
+    }),
+    source: 'sdk',
+  };
+}
+
+export function initFleetGraph(
+  pool: Pool,
+  modelsOverride?: FleetModels,
+  /** Test seam, mirroring `modelsOverride`: inject a `ShipData` directly. */
+  shipDataOverride?: ShipData,
+): FleetRuntime {
   const enabled = process.env.FLEETGRAPH_ENABLED !== 'false';
   const models = modelsOverride ?? (llmConfigured() ? buildRealModels() : null);
+  const resolved = resolveShipData(pool);
+  const shipData: ShipData = shipDataOverride ?? resolved.data;
+  const dataSource: FleetDataSource = shipDataOverride ? 'injected' : resolved.source;
 
   const runTrigger = async (
     trigger: FleetTrigger,
@@ -48,12 +107,12 @@ export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetR
         } = await import('./detectors.js');
         await autoResolveCleared(pool, trigger.workspaceId);
         const detected = await Promise.all([
-          detectOrphanIntake(pool, trigger.workspaceId),
-          detectStaleIssues(pool, trigger.workspaceId),
-          detectStuckReview(pool, trigger.workspaceId),
-          detectUrgentIdle(pool, trigger.workspaceId),
-          detectDueSoonIdle(pool, trigger.workspaceId),
-          detectWeekSlip(pool, trigger.workspaceId),
+          detectOrphanIntake(shipData, trigger.workspaceId),
+          detectStaleIssues(shipData, trigger.workspaceId),
+          detectStuckReview(shipData, trigger.workspaceId),
+          detectUrgentIdle(shipData, trigger.workspaceId),
+          detectDueSoonIdle(shipData, trigger.workspaceId),
+          detectWeekSlip(shipData, trigger.workspaceId),
         ]);
         const all = detected.flat();
         for (const f of all) {
@@ -84,7 +143,7 @@ export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetR
         return { path, chatResponse: null };
       }
 
-      const graph = buildFleetGraph({ pool, models });
+      const graph = buildFleetGraph({ pool, models, shipData });
       const result = await graph.invoke({ trigger });
       const path = (result.path ?? 'error') as RunPath;
       await logRun(
@@ -120,11 +179,11 @@ export function initFleetGraph(pool: Pool, modelsOverride?: FleetModels): FleetR
       }
     });
     console.log(
-      `[fleetgraph] enabled — sweep every ${intervalMin}m, LLM ${models ? 'configured' : 'NOT configured (rule-based only)'}`,
+      `[fleetgraph] enabled — sweep every ${intervalMin}m, LLM ${models ? 'configured' : 'NOT configured (rule-based only)'}, reads via ${dataSource}`,
     );
   }
 
-  runtime = { runTrigger, enabled };
+  runtime = { runTrigger, enabled, dataSource };
   return runtime;
 }
 

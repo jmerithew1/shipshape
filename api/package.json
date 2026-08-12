@@ -20,6 +20,7 @@
     "openapi:generate": "tsx src/scripts/generate-openapi.ts",
     "openapi:v1": "tsx src/scripts/generate-v1-openapi.ts",
     "seed:grader-app": "tsx src/scripts/seed-grader-app.ts",
+    "seed:agent-app": "tsx src/scripts/seed-agent-app.ts",
     "mcp": "tsx src/mcp/server.ts"
   },
   "dependencies": {

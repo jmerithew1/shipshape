@@ -18,6 +18,16 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { ChatResult } from '@langchain/core/outputs';
 import type { FleetModels } from './models.js';
 import { CircuitBreaker } from './resilience.js';
+import type {
+  ShipActiveWeekRow,
+  ShipData,
+  ShipDueSoonRow,
+  ShipIssueRow,
+  ShipMemberLoad,
+  ShipOrphanRow,
+  ShipUrgentIdleRow,
+  ShipWeekIssueRow,
+} from './ship-data.js';
 
 /** Marker prefix proving the (fake) LLM ran — asserted on finding titles. */
 export const FAKE_TRIAGE_PREFIX = 'FAKE-TRIAGE:';
@@ -120,6 +130,73 @@ export const fakeChatModel = (): FakeListChatModel =>
       `${FAKE_CHAT_PREFIX} canned reply grounded in the provided document context.`,
     ],
   });
+
+/**
+ * In-memory `ShipData` (Week 6, Epic 7) — the same house rule as the model
+ * fakes above: keyed by INTENT, never by request hash.
+ *
+ * It is seeded with the ROWS a detector should see and records which port
+ * methods were called, so a flag-ON test can prove the detector read through
+ * the port — with no live server, no OAuth grant and no database — while the
+ * live SDK gate (`ship-data-sdk.test.ts`) separately proves the port's SDK
+ * implementation agrees with a real server. Between them: fast tests that
+ * cannot silently stop exercising the seam, plus one slow test that cannot
+ * lie about the wire.
+ */
+export class FakeShipData implements ShipData {
+  /** Every port method invoked, in order — the wiring assertion. */
+  readonly calls: string[] = [];
+
+  constructor(
+    private readonly seed: {
+      orphans?: ShipOrphanRow[];
+      lightestMember?: ShipMemberLoad | null;
+      stale?: ShipIssueRow[];
+      stuckReviews?: ShipIssueRow[];
+      urgentIdle?: ShipUrgentIdleRow[];
+      dueSoon?: ShipDueSoonRow[];
+      activeWeeks?: ShipActiveWeekRow[];
+      weekIssues?: Record<string, ShipWeekIssueRow[]>;
+    } = {},
+  ) {}
+
+  private record<T>(method: string, value: T): Promise<T> {
+    this.calls.push(method);
+    return Promise.resolve(value);
+  }
+
+  findOrphanCandidates(): Promise<ShipOrphanRow[]> {
+    return this.record('findOrphanCandidates', this.seed.orphans ?? []);
+  }
+
+  findLightestLoadedMember(): Promise<ShipMemberLoad | null> {
+    return this.record('findLightestLoadedMember', this.seed.lightestMember ?? null);
+  }
+
+  findStaleIssues(): Promise<ShipIssueRow[]> {
+    return this.record('findStaleIssues', this.seed.stale ?? []);
+  }
+
+  findStuckReviews(): Promise<ShipIssueRow[]> {
+    return this.record('findStuckReviews', this.seed.stuckReviews ?? []);
+  }
+
+  findUrgentIdleIssues(): Promise<ShipUrgentIdleRow[]> {
+    return this.record('findUrgentIdleIssues', this.seed.urgentIdle ?? []);
+  }
+
+  findDueSoonIdleIssues(): Promise<ShipDueSoonRow[]> {
+    return this.record('findDueSoonIdleIssues', this.seed.dueSoon ?? []);
+  }
+
+  findActiveWeeks(): Promise<ShipActiveWeekRow[]> {
+    return this.record('findActiveWeeks', this.seed.activeWeeks ?? []);
+  }
+
+  findNotStartedWeekIssues(weekId: string): Promise<ShipWeekIssueRow[]> {
+    return this.record('findNotStartedWeekIssues', this.seed.weekIssues?.[weekId] ?? []);
+  }
+}
 
 /**
  * Build a FleetModels bundle for tests.

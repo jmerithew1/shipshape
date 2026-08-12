@@ -1,6 +1,6 @@
 /**
- * Deterministic detectors — plain SQL, no LLM. These gate the model: a sweep
- * over a healthy project ends here with zero candidates and zero tokens.
+ * Deterministic detectors — no LLM. These gate the model: a sweep over a
+ * healthy project ends here with zero candidates and zero tokens.
  *
  * Detector family: orphan_intake (the grader-provokable anchor),
  * stale_issue, stuck_review, urgent_idle, due_soon_idle (K3), week_slip —
@@ -8,68 +8,45 @@
  *
  * Recipient resolution is deterministic (FLEETGRAPH.md §Who it notifies):
  * assignee first, then project owner_id via RACI properties.
+ *
+ * Week 6 (Epic 7): the SQL these rules used to inline now lives behind the
+ * `ShipData` port (`ship-data.ts`), so the same rules run either against the
+ * database (`PoolShipData`, unchanged Week-5 behaviour) or against Ship's own
+ * public API as a first-party OAuth app (`SdkShipData`). The detectors
+ * themselves are pure rule logic and no longer know which.
+ *
+ * Every entry point still accepts a raw `pg.Pool` and adapts it via
+ * `asShipData`: the Week-5 detector tests call these functions with the pool
+ * directly and are the frozen behavioural contract for this change.
  */
 import type { Pool } from 'pg';
 import type { CandidateFinding } from './types.js';
+import { asShipData, type ShipData } from './ship-data.js';
 
 /** Ship births every issue "Untitled" and empty — fire only after quiet. */
 export const ORPHAN_GRACE_SECONDS = 90;
 export const STALE_IDLE_DAYS = 3;
 
 export async function detectOrphanIntake(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id
-       FROM documents d
-       LEFT JOIN document_associations wk
-              ON wk.document_id = d.id AND wk.relationship_type = 'sprint'
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'issue'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND COALESCE(d.properties->>'is_system_generated', 'false') <> 'true'
-        AND (d.properties->>'assignee_id') IS NULL
-        AND wk.document_id IS NULL
-        AND d.properties->>'state' IN ('triage', 'backlog', 'todo')
-        AND d.created_at < NOW() - make_interval(secs => $2)
-        AND d.updated_at < NOW() - make_interval(secs => $2)`,
-    [workspaceId, ORPHAN_GRACE_SECONDS],
-  );
+  const data = asShipData(source);
+  const rows = await data.findOrphanCandidates(workspaceId, ORPHAN_GRACE_SECONDS);
 
   if (rows.length === 0) return [];
 
   // Propose an assignee deterministically: the workspace member with the
   // lightest active load (fewest open in_progress/in_review issues). The
   // model never picks people; it only phrases the card.
-  const load = await pool.query(
-    `SELECT u.id,
-            COUNT(d.id) FILTER (
-              WHERE d.properties->>'state' IN ('in_progress', 'in_review')
-                AND d.deleted_at IS NULL AND d.archived_at IS NULL
-            ) AS active_load
-       FROM users u
-       JOIN workspace_memberships wm ON wm.user_id = u.id AND wm.workspace_id = $1
-       LEFT JOIN documents d ON d.workspace_id = $1
-              AND d.document_type = 'issue'
-              AND d.properties->>'assignee_id' = u.id::text
-      GROUP BY u.id
-      ORDER BY active_load ASC, u.id
-      LIMIT 1`,
-    [workspaceId],
-  );
-  const proposedAssignee: string | null = load.rows[0]?.id ?? null;
+  const load = await data.findLightestLoadedMember(workspaceId);
+  const proposedAssignee: string | null = load?.userId ?? null;
 
   return rows.map((r) => ({
     detector: 'orphan_intake' as const,
     dedupKey: `orphan_intake:${r.id}`,
-    workspaceId: r.workspace_id,
-    projectId: r.project_id ?? null,
+    workspaceId: r.workspaceId,
+    projectId: r.projectId,
     documentId: r.id,
     documentTitle: r.title,
     severity: 'medium' as const,
@@ -77,9 +54,9 @@ export async function detectOrphanIntake(
       graceSeconds: ORPHAN_GRACE_SECONDS,
       hasAssignee: false,
       hasWeek: false,
-      proposedAssigneeLoad: Number(load.rows[0]?.active_load ?? 0),
+      proposedAssigneeLoad: load?.activeLoad ?? 0,
     },
-    notifyUserIds: r.project_owner_id ? [r.project_owner_id] : [],
+    notifyUserIds: r.projectOwnerId ? [r.projectOwnerId] : [],
     ...(proposedAssignee
       ? {
           proposedAction: {
@@ -94,39 +71,24 @@ export async function detectOrphanIntake(
 }
 
 export async function detectStaleIssues(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id, d.updated_at,
-            d.properties->>'assignee_id' AS assignee_id,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id
-       FROM documents d
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'issue'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND d.properties->>'state' = 'in_progress'
-        AND d.updated_at < NOW() - make_interval(days => $2)`,
-    [workspaceId, STALE_IDLE_DAYS],
-  );
+  const rows = await asShipData(source).findStaleIssues(workspaceId, STALE_IDLE_DAYS);
 
   return rows.map((r) => ({
     detector: 'stale_issue' as const,
-    dedupKey: `stale_issue:${r.id}:${new Date(r.updated_at).toISOString().slice(0, 10)}`,
-    workspaceId: r.workspace_id,
-    projectId: r.project_id ?? null,
+    dedupKey: `stale_issue:${r.id}:${r.updatedAt.toISOString().slice(0, 10)}`,
+    workspaceId: r.workspaceId,
+    projectId: r.projectId,
     documentId: r.id,
     documentTitle: r.title,
     severity: 'medium' as const,
     evidence: {
       idleDays: STALE_IDLE_DAYS,
-      lastActivityAt: r.updated_at,
+      lastActivityAt: r.updatedAt,
     },
-    notifyUserIds: [r.assignee_id, r.project_owner_id].filter(Boolean) as string[],
+    notifyUserIds: [r.assigneeId, r.projectOwnerId].filter(Boolean) as string[],
   }));
 }
 
@@ -145,41 +107,25 @@ export const SLIP_GAP = 0.3;
  * days, v1.
  */
 export async function detectStuckReview(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id, d.updated_at,
-            d.properties->>'assignee_id' AS assignee_id,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id
-       FROM documents d
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'issue'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND COALESCE(d.properties->>'is_system_generated', 'false') <> 'true'
-        AND d.properties->>'state' = 'in_review'
-        AND d.updated_at < NOW() - make_interval(days => $2)`,
-    [workspaceId, STUCK_REVIEW_DAYS],
-  );
+  const rows = await asShipData(source).findStuckReviews(workspaceId, STUCK_REVIEW_DAYS);
 
   return rows.map((r) => ({
     detector: 'stuck_review' as const,
-    dedupKey: `stuck_review:${r.id}:${new Date(r.updated_at).toISOString().slice(0, 10)}`,
-    workspaceId: r.workspace_id,
-    projectId: r.project_id ?? null,
+    dedupKey: `stuck_review:${r.id}:${r.updatedAt.toISOString().slice(0, 10)}`,
+    workspaceId: r.workspaceId,
+    projectId: r.projectId,
     documentId: r.id,
     documentTitle: r.title,
     severity: 'medium' as const,
     evidence: {
       idleDays: STUCK_REVIEW_DAYS,
-      lastActivityAt: r.updated_at,
+      lastActivityAt: r.updatedAt,
       state: 'in_review',
     },
-    notifyUserIds: [r.assignee_id, r.project_owner_id].filter(Boolean) as string[],
+    notifyUserIds: [r.assigneeId, r.projectOwnerId].filter(Boolean) as string[],
   }));
 }
 
@@ -189,34 +135,16 @@ export async function detectStuckReview(
  * proxies (DECISIONS.md 2026-08-03).
  */
 export async function detectUrgentIdle(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id, d.updated_at,
-            d.properties->>'state' AS state,
-            d.properties->>'assignee_id' AS assignee_id,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id
-       FROM documents d
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'issue'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND COALESCE(d.properties->>'is_system_generated', 'false') <> 'true'
-        AND d.properties->>'priority' = 'urgent'
-        AND d.properties->>'state' NOT IN ('in_progress', 'in_review', 'done', 'cancelled')
-        AND d.updated_at < NOW() - make_interval(days => $2)`,
-    [workspaceId, URGENT_IDLE_DAYS],
-  );
+  const rows = await asShipData(source).findUrgentIdleIssues(workspaceId, URGENT_IDLE_DAYS);
 
   return rows.map((r) => ({
     detector: 'urgent_idle' as const,
-    dedupKey: `urgent_idle:${r.id}:${new Date(r.updated_at).toISOString().slice(0, 10)}`,
-    workspaceId: r.workspace_id,
-    projectId: r.project_id ?? null,
+    dedupKey: `urgent_idle:${r.id}:${r.updatedAt.toISOString().slice(0, 10)}`,
+    workspaceId: r.workspaceId,
+    projectId: r.projectId,
     documentId: r.id,
     documentTitle: r.title,
     severity: 'high' as const,
@@ -224,9 +152,9 @@ export async function detectUrgentIdle(
       idleDays: URGENT_IDLE_DAYS,
       state: r.state,
       priority: 'urgent',
-      lastActivityAt: r.updated_at,
+      lastActivityAt: r.updatedAt,
     },
-    notifyUserIds: [r.assignee_id, r.project_owner_id].filter(Boolean) as string[],
+    notifyUserIds: [r.assigneeId, r.projectOwnerId].filter(Boolean) as string[],
   }));
 }
 
@@ -235,45 +163,29 @@ export async function detectUrgentIdle(
  * inside 48h, no recent activity, not in a terminal state.
  */
 export async function detectDueSoonIdle(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id, d.updated_at,
-            d.properties->>'due_date' AS due_date,
-            d.properties->>'assignee_id' AS assignee_id,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id
-       FROM documents d
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'issue'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND COALESCE(d.properties->>'is_system_generated', 'false') <> 'true'
-        AND d.properties->>'due_date' IS NOT NULL
-        AND (d.properties->>'due_date')::date <= CURRENT_DATE + make_interval(hours => $2)::interval
-        AND (d.properties->>'due_date')::date >= CURRENT_DATE
-        AND d.properties->>'state' NOT IN ('done', 'cancelled')
-        AND d.updated_at < NOW() - make_interval(days => $3)`,
-    [workspaceId, DUE_SOON_HOURS, DUE_SOON_IDLE_DAYS],
+  const rows = await asShipData(source).findDueSoonIdleIssues(
+    workspaceId,
+    DUE_SOON_HOURS,
+    DUE_SOON_IDLE_DAYS,
   );
 
   return rows.map((r) => ({
     detector: 'due_soon_idle' as const,
-    dedupKey: `due_soon_idle:${r.id}:${r.due_date}`,
-    workspaceId: r.workspace_id,
-    projectId: r.project_id ?? null,
+    dedupKey: `due_soon_idle:${r.id}:${r.dueDate}`,
+    workspaceId: r.workspaceId,
+    projectId: r.projectId,
     documentId: r.id,
     documentTitle: r.title,
     severity: 'high' as const,
     evidence: {
-      dueDate: r.due_date,
+      dueDate: r.dueDate,
       idleDays: DUE_SOON_IDLE_DAYS,
-      lastActivityAt: r.updated_at,
+      lastActivityAt: r.updatedAt,
     },
-    notifyUserIds: [r.assignee_id, r.project_owner_id].filter(Boolean) as string[],
+    notifyUserIds: [r.assigneeId, r.projectOwnerId].filter(Boolean) as string[],
   }));
 }
 
@@ -284,71 +196,36 @@ export async function detectDueSoonIdle(
  * Proposal carries the not-started issues (lowest priority first) as items
  * for the per-item checkbox card (B1: card copy is loss-framed by triage).
  */
+/** Cap on scope-cut checkbox items offered on a single slip card. */
+export const SLIP_PROPOSAL_LIMIT = 10;
+
 export async function detectWeekSlip(
-  pool: Pool,
+  source: ShipData | Pool,
   workspaceId: string,
 ): Promise<CandidateFinding[]> {
-  const { rows } = await pool.query(
-    `SELECT d.id, d.title, d.workspace_id,
-            (d.properties->>'sprint_number')::int AS sprint_number,
-            w.sprint_start_date,
-            proj.related_id AS project_id,
-            proj_doc.properties->>'owner_id' AS project_owner_id,
-            d.properties->>'owner_id' AS week_owner_id,
-            (SELECT COUNT(*) FROM document_associations da
-              JOIN documents i ON i.id = da.document_id
-             WHERE da.related_id = d.id AND da.relationship_type = 'sprint'
-               AND i.deleted_at IS NULL AND i.archived_at IS NULL) AS issue_count,
-            (SELECT COUNT(*) FROM document_associations da
-              JOIN documents i ON i.id = da.document_id
-             WHERE da.related_id = d.id AND da.relationship_type = 'sprint'
-               AND i.deleted_at IS NULL AND i.archived_at IS NULL
-               AND i.properties->>'state' = 'done') AS completed_count
-       FROM documents d
-       JOIN workspaces w ON w.id = d.workspace_id
-       LEFT JOIN document_associations proj
-              ON proj.document_id = d.id AND proj.relationship_type = 'project'
-       LEFT JOIN documents proj_doc ON proj_doc.id = proj.related_id
-      WHERE d.workspace_id = $1
-        AND d.document_type = 'sprint'
-        AND d.deleted_at IS NULL AND d.archived_at IS NULL
-        AND (d.properties->>'sprint_number')::int =
-            FLOOR((CURRENT_DATE - w.sprint_start_date) / 7) + 1`,
-    [workspaceId],
-  );
+  const data = asShipData(source);
+  const rows = await data.findActiveWeeks(workspaceId);
 
   const findings: CandidateFinding[] = [];
   for (const r of rows) {
-    const issueCount = Number(r.issue_count);
+    const issueCount = r.issueCount;
     if (issueCount === 0) continue;
 
     // Elapsed fraction of the 7-day window, UTC (weeks.ts date convention).
-    const start = new Date(r.sprint_start_date);
-    const weekStart = new Date(start.getTime() + (r.sprint_number - 1) * 7 * 86_400_000);
+    const weekStart = new Date(
+      r.sprintStartDate.getTime() + (r.sprintNumber - 1) * 7 * 86_400_000,
+    );
     const elapsed = Math.min(1, Math.max(0, (Date.now() - weekStart.getTime()) / (7 * 86_400_000)));
-    const doneRate = Number(r.completed_count) / issueCount;
+    const doneRate = r.completedCount / issueCount;
     if (elapsed < SLIP_MIN_ELAPSED || doneRate >= elapsed - SLIP_GAP) continue;
 
-    const notStarted = await pool.query(
-      `SELECT i.id, i.title, i.properties->>'state' AS state,
-              i.properties->>'priority' AS priority
-         FROM document_associations da
-         JOIN documents i ON i.id = da.document_id
-        WHERE da.related_id = $1 AND da.relationship_type = 'sprint'
-          AND i.deleted_at IS NULL AND i.archived_at IS NULL
-          AND i.properties->>'state' IN ('triage', 'backlog', 'todo')
-        ORDER BY CASE i.properties->>'priority'
-                   WHEN 'low' THEN 0 WHEN 'medium' THEN 1
-                   WHEN 'high' THEN 2 WHEN 'urgent' THEN 3 ELSE 0 END ASC
-        LIMIT 10`,
-      [r.id],
-    );
+    const notStarted = await data.findNotStartedWeekIssues(r.id, SLIP_PROPOSAL_LIMIT);
 
     findings.push({
       detector: 'week_slip' as const,
       dedupKey: `week_slip:${r.id}:${new Date().toISOString().slice(0, 10)}`,
-      workspaceId: r.workspace_id,
-      projectId: r.project_id ?? null,
+      workspaceId: r.workspaceId,
+      projectId: r.projectId,
       documentId: r.id,
       documentTitle: r.title,
       severity: 'high' as const,
@@ -356,19 +233,19 @@ export async function detectWeekSlip(
         elapsedPct: Math.round(elapsed * 100),
         donePct: Math.round(doneRate * 100),
         issueCount,
-        completedCount: Number(r.completed_count),
-        notStartedCount: notStarted.rows.length,
+        completedCount: r.completedCount,
+        notStartedCount: notStarted.length,
       },
-      notifyUserIds: [r.week_owner_id, r.project_owner_id].filter(Boolean) as string[],
-      ...(notStarted.rows.length > 0
+      notifyUserIds: [r.weekOwnerId, r.projectOwnerId].filter(Boolean) as string[],
+      ...(notStarted.length > 0
         ? {
             proposedAction: {
               type: 'move_issues_out_of_week' as const,
               weekId: r.id,
-              items: notStarted.rows.map((i) => ({
+              items: notStarted.map((i) => ({
                 issueId: i.id,
                 title: i.title,
-                state: i.state,
+                state: i.state ?? '',
                 priority: i.priority ?? 'none',
               })),
               reason: 'not started with the week materially behind; lowest priority first',
@@ -384,6 +261,14 @@ export async function detectWeekSlip(
  * Auto-resolve: close active findings whose condition has cleared (the card
  * disappears instead of going stale — FLEETGRAPH.md anti-noise policy).
  * Returns number of findings resolved.
+ *
+ * Deliberately NOT behind the `ShipData` port: this is a single correlated
+ * UPDATE over `agent_findings`, the agent's own private memory. That table is
+ * not a Ship resource and has no place in the public API — exposing an
+ * agent's dedup state through `/api/v1` would be a category error, not a step
+ * toward platform citizenship. It reads `documents` only inside EXISTS
+ * subqueries of that UPDATE, which no set of REST reads can express
+ * atomically.
  */
 export async function autoResolveCleared(pool: Pool, workspaceId: string): Promise<number> {
   const { rowCount } = await pool.query(

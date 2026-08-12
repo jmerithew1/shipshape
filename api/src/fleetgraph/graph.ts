@@ -27,6 +27,7 @@ import {
   detectWeekSlip,
 } from './detectors.js';
 import { applyDisclosureAndCredibility } from './attention.js';
+import type { ShipData } from './ship-data.js';
 import type { TriagedFinding } from './types.js';
 
 const TRIAGE_SYSTEM_PROMPT = `You are FleetGraph, Ship's project-intelligence agent, writing notification cards.
@@ -65,9 +66,25 @@ export interface FleetGraphDeps {
   models: FleetModels;
   /** Injectable RNG for the E1 Thompson-sampling gate (seeded in tests). */
   rng?: () => number;
+  /**
+   * The agent's read boundary onto Ship (Week 6, Epic 7). Defaults to the
+   * pool, which `asShipData` adapts into `PoolShipData` — byte-identical to
+   * Week 5. `initFleetGraph` supplies `SdkShipData` when `FLEETGRAPH_VIA_SDK`
+   * is on, so the detector stage reads through `/api/v1` as a first-party
+   * OAuth app instead of straight off the database.
+   *
+   * Scope note: only the DETECTOR stage crosses this boundary. The three
+   * parallel fetch nodes below and the `respond` node load chat context —
+   * association-expanded issue rows, week rows, `document_history` activity
+   * and document content — none of which `/api/v1` publishes today (GAP-1..5
+   * plus the absence of any activity endpoint, see `ship-data-sdk.ts`). They
+   * stay on the pool, and that is stated rather than hidden.
+   */
+  shipData?: ShipData;
 }
 
-export function buildFleetGraph({ pool, models, rng = Math.random }: FleetGraphDeps) {
+export function buildFleetGraph({ pool, models, rng = Math.random, shipData }: FleetGraphDeps) {
+  const data: ShipData | Pool = shipData ?? pool;
   const graph = new StateGraph(FleetState)
     .addNode('ingestTrigger', async (s: FleetStateType) => ({
       mode: s.trigger.kind === 'chat' ? ('on_demand' as const) : ('proactive' as const),
@@ -141,12 +158,12 @@ export function buildFleetGraph({ pool, models, rng = Math.random }: FleetGraphD
       await autoResolveCleared(pool, s.workspaceId);
 
       const detected = await Promise.all([
-        detectOrphanIntake(pool, s.workspaceId),
-        detectStaleIssues(pool, s.workspaceId),
-        detectStuckReview(pool, s.workspaceId),
-        detectUrgentIdle(pool, s.workspaceId),
-        detectDueSoonIdle(pool, s.workspaceId),
-        detectWeekSlip(pool, s.workspaceId),
+        detectOrphanIntake(data, s.workspaceId),
+        detectStaleIssues(data, s.workspaceId),
+        detectStuckReview(data, s.workspaceId),
+        detectUrgentIdle(data, s.workspaceId),
+        detectDueSoonIdle(data, s.workspaceId),
+        detectWeekSlip(data, s.workspaceId),
       ]);
       const candidates = detected.flat();
 
