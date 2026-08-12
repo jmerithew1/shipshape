@@ -219,6 +219,8 @@ describe('POST /api/v1/webhooks', () => {
     // And the list endpoint cannot produce it again.
     const list = await request(app()).get('/api/v1/webhooks').set('Authorization', `Bearer ${manageToken}`);
     expect(list.status).toBe(200);
+    // The uniform list envelope, even though this collection never paginates.
+    expect(list.body.next_cursor).toBeNull();
     expect(list.body.data[0].id).toBe(res.body.id);
     expect(list.body.data[0]).not.toHaveProperty('signing_secret');
     expect(JSON.stringify(list.body)).not.toContain(res.body.signing_secret);

@@ -190,11 +190,15 @@ export const handleListWebhookSubscriptions: RequestHandler = asyncHandler(
     const subscriptions = await mapErrors(() =>
       listSubscriptions({ appId, eventType: q.event_type })
     );
-    // Not a keyset list: subscriptions per app are bounded by the event
-    // catalog times a handful of URLs. Paginating eight rows would be
-    // ceremony, and the fitness test only demands pagination for `isList`
-    // routes — this one is declared without it, deliberately.
-    res.json({ data: subscriptions });
+    // The list envelope, with `next_cursor` permanently null. "Every public
+    // list endpoint paginates, no exemptions" is the rule that lets the
+    // fitness test enforce pagination mechanically, and an endpoint that
+    // returns a bare array is exactly the exemption that erodes it. A
+    // subscription set is bounded by the event catalog times a handful of
+    // URLs, so there is genuinely never a second page — but the SHAPE is
+    // uniform, which means the SDK's iterator works here unchanged and a
+    // future paginated implementation is not a breaking change.
+    res.json({ data: subscriptions, next_cursor: null });
   }
 );
 
