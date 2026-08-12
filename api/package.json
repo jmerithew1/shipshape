@@ -18,6 +18,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:orphan-check": "tsx src/db/scripts/orphan-diagnostic.ts",
     "openapi:generate": "tsx src/scripts/generate-openapi.ts",
+    "openapi:v1": "tsx src/scripts/generate-v1-openapi.ts",
+    "seed:grader-app": "tsx src/scripts/seed-grader-app.ts",
     "mcp": "tsx src/mcp/server.ts"
   },
   "dependencies": {
