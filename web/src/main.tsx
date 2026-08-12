@@ -38,6 +38,7 @@ import { MyWeekPage } from '@/pages/MyWeekPage';
 import { AdminDashboardPage } from '@/pages/AdminDashboard';
 import { AdminWorkspaceDetailPage } from '@/pages/AdminWorkspaceDetail';
 import { WorkspaceSettingsPage } from '@/pages/WorkspaceSettings';
+import { DevPortalPage } from '@/pages/devportal/DevPortal';
 import { ConvertedDocumentsPage } from '@/pages/ConvertedDocuments';
 const UnifiedDocumentPage = React.lazy(() =>
   import('@/pages/UnifiedDocumentPage').then((m) => ({ default: m.UnifiedDocumentPage }))
@@ -263,6 +264,7 @@ function AppRoutes() {
           }
         />
         <Route path="feedback/:id" element={<FeedbackEditorPage />} />
+        <Route path="devportal" element={<DevPortalPage />} />
         <Route path="settings" element={<WorkspaceSettingsPage />} />
         <Route path="settings/conversions" element={<ConvertedDocumentsPage />} />
       </Route>
