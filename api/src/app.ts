@@ -56,6 +56,7 @@ const { csrfSynchronisedProtection, generateToken } = csrfSync({
 
 // Conditional CSRF middleware - skip for API token auth (Bearer tokens are not vulnerable to CSRF)
 import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'node:crypto';
 import path, { join } from 'node:path';
 import { existsSync } from 'node:fs';
 const conditionalCsrf = (req: Request, res: Response, next: NextFunction) => {
@@ -149,6 +150,34 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   }));
   app.use(express.json({ limit: '10mb' }));  // Large wiki documents can be several MB
   app.use(express.urlencoded({ extended: true, limit: '10mb' })); // For HTML form submissions
+
+  // Body-parser failures (malformed JSON, oversized payload) are raised by
+  // middleware mounted ABOVE the /api/v1 router, so the public error handler
+  // inside that router never sees them — Express's default handler would ship
+  // an HTML error page, breaking the contract that EVERY public failure
+  // returns the ApiError envelope. Caught here, while the request is still
+  // identifiable by path. Found by the contract audit, not by a unit test.
+  app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+    const parseFailure =
+      err instanceof SyntaxError ||
+      (typeof err === 'object' && err !== null && 'type' in err &&
+        ['entity.parse.failed', 'entity.too.large'].includes(String((err as { type: unknown }).type)));
+
+    if (!parseFailure) return next(err);
+    if (!req.path.startsWith('/api/v1')) return next(err);
+
+    const tooLarge =
+      typeof err === 'object' && err !== null && 'type' in err &&
+      String((err as { type: unknown }).type) === 'entity.too.large';
+    const requestId = randomUUID();
+    res.setHeader('X-Request-Id', requestId);
+    res.status(tooLarge ? 413 : 400).json({
+      code: 'validation_failed',
+      message: tooLarge ? 'Request body is too large' : 'Request body is not valid JSON',
+      request_id: requestId,
+    });
+  });
+
   app.use(cookieParser(sessionSecret));
 
   // Session middleware for CSRF token storage
