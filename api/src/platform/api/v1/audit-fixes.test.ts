@@ -150,3 +150,26 @@ describe('contract audit #3 — cursor stability against REAL SQL, not a simulat
     }
   });
 });
+
+describe('security audit #10 — undeclared query params cannot reach SQL', () => {
+  it('ignores a filter the route does not declare instead of 500ing', async () => {
+    // /sprints declares only cursor/limit/updated_before. parent_id is not in
+    // its schema; previously it was applied anyway and a non-uuid produced a
+    // Postgres 22P02 -> 500 on well-formed client input.
+    const res = await request(app)
+      .get('/api/v1/sprints?parent_id=definitely-not-a-uuid')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body).toHaveProperty('next_cursor');
+  });
+
+  it('still honours filters the route DOES declare', async () => {
+    const res = await request(app)
+      .get('/api/v1/documents?type=issue')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.every((d: { document_type: string }) => d.document_type === 'issue')).toBe(true);
+  });
+});

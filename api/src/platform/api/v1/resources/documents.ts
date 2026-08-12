@@ -96,7 +96,14 @@ async function listDocuments(
     extraFilters?: (push: (sql: string, value: unknown) => void) => void;
   }
 ): Promise<{ rows: DocumentRow[]; pageSize: number }> {
-  const q = req.query as Record<string, string | undefined>;
+  // Read the VALIDATED query, not the raw one. `validate()` parses req.query
+  // against the route's declared schema; Zod strips unknown keys rather than
+  // rejecting them, so reading req.query directly let undeclared params reach
+  // SQL unvalidated — GET /api/v1/sprints?parent_id=notauuid produced a
+  // Postgres 22P02 and a 500 on well-formed client input. Reading the parsed
+  // object means a route only ever filters on what its schema publishes.
+  // Found by the security audit.
+  const q = (req.validated?.query ?? {}) as Record<string, string | undefined>;
   const pageSize = clampPageSize(q.limit);
 
   const where: string[] = ['d.workspace_id = $1', 'd.deleted_at IS NULL', 'd.archived_at IS NULL'];
