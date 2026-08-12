@@ -22,14 +22,17 @@
 | Queries — main page (cold) | 57 | 32 | **−43.9%** | +10% | **PASS** |
 | API vitest suite | — | 649 / 649 passed | — | all green | **PASS** |
 | Web vitest suite | — | 160 / 160 passed | — | all green | **PASS** |
-| **Playwright regression suite** | — | **816 passed, 8 failed, 45 did not run** | — | all green | **NOT GREEN — see §6** |
+| **Playwright regression suite** | — | **816 passed, 8 failed, 45 did not run**; **6 fail reproducibly** on serial re-run | — | all green | **FAIL — see §6** |
 
 **The +10% budget holds on bundle size, P95 latency and query counts.** Nothing Week 6 changed
 regressed any of them.
 
-**The Playwright clause of the gate is not satisfied as run in this environment.** 8 tests failed and
-45 never ran because worker processes crashed. §6 gives the failure list and the attribution
-evidence; none of the failures touch Week-6 code, but the gate says "passes", and it did not.
+**The Playwright clause of the gate is NOT satisfied.** The parallel run gave 8 failures and 45 tests
+that never ran (worker crashes); a serial re-run cleared 2 as flakiness but left **6 reproducible
+failures**. All 6 are TipTap editor tests, and this branch changes no `web/` source at all — one of
+them is even inside a `describe` block the repo itself flags as broken. The evidence points to
+pre-existing breakage, but proving that needs a run on `main`, which the task forbids. §6.1 has the
+detail. **This is a genuine red, and it is reported as one.**
 
 Read §3.1 and §9 before quoting any latency number: measurements on this machine varied up to **4×**
 depending on concurrent load, and one measurement pass put two routes *over* budget.
@@ -346,30 +349,62 @@ the same contention that produced the 4× latency swing in §3.1. Timing-sensiti
 are the first thing to fail under that load, and 8 further tests were already classified *flaky*
 (passed on retry) in the same run.
 
-**A serial re-run of exactly these 8 spec files (`--workers=1`) was executed to separate genuine
-failures from load-induced flakiness; its outcome is recorded in §6.1.**
+A serial re-run of these 8 spec files was executed to separate genuine failures from load-induced
+flakiness. **It did not exonerate them — see §6.1.**
 
-**Regardless of cause, the gate's wording — "Existing Playwright regression suite passes" — is NOT
-demonstrated green in this environment, and this report does not claim it is.** Establishing it
-requires a re-run on a quiet machine, ideally in CI.
+**The gate's wording — "Existing Playwright regression suite passes" — is NOT satisfied, and this
+report does not claim it is.**
 
-#### 6.1 Serial re-run of the 8 failing specs
+#### 6.1 Serial re-run of the 8 failing specs — 6 failures are reproducible
 
-The serial re-run did not complete inside this session's window. The honest
-position stands: **the Playwright clause of gate A9 is not demonstrated green
-here.** Two contributing facts, both independent of this branch:
+```
+npx playwright test e2e/backlinks.spec.ts e2e/drag-handle.spec.ts e2e/edge-cases.spec.ts \
+  e2e/inline-code.spec.ts e2e/inline-comments.spec.ts e2e/program-mode-week-ux.spec.ts \
+  e2e/tables.spec.ts e2e/toc.spec.ts --workers=1 --reporter=line
+```
 
-1. Five e2e specs carry `// FIXME:` comments naming broken interactions and are
-   still mounted as live `test.describe` blocks (`e2e/images.spec.ts:89`,
-   `data-integrity.spec.ts:200`, `performance.spec.ts:359`, `security.spec.ts:241`,
-   `toc.spec.ts:44`). The repo's own guidance (`e2e/AGENTS.md:174`) says these
-   should be `test.fixme()`. Until they are, the suite cannot report green for
-   anyone.
-2. `git diff main...feat/w6-foundation -- web/` is empty — this branch changes no
-   frontend code, so it cannot have broken a TipTap keyboard shortcut.
+Result across the 142 tests in those files: **135 passed · 6 failed · 1 flaky · 13.8 min**, with no
+worker crashes at `--workers=1`.
 
-What this branch DOES have green: `e2e/oauth-pkce.spec.ts` (8/8), which is the
-Playwright evidence MVP item 2 actually requires.
+| Spec | Test | Serial result |
+| --- | --- | :-- |
+| `e2e/backlinks.spec.ts:110` | removing mention removes backlink | **FAILS** |
+| `e2e/edge-cases.spec.ts:346` | handles simultaneous formatting operations | **FAILS** |
+| `e2e/inline-code.spec.ts:69` | should toggle inline code with Cmd/Ctrl+E | **FAILS** |
+| `e2e/inline-comments.spec.ts:97` | create a comment via Cmd+Shift+M | **FAILS** |
+| `e2e/tables.spec.ts:375` | should delete entire table | **FAILS** |
+| `e2e/toc.spec.ts:189` | TOC updates when heading renamed | **FAILS** |
+| `e2e/drag-handle.spec.ts:300` | drag preserves full paragraph content | passes serially |
+| `e2e/program-mode-week-ux.spec.ts:406` | double-click completed sprint card → SprintView | passes serially |
+
+So **2 of the 8 were parallel-load flakiness; 6 are reproducible failures** that a quiet machine does
+not fix. Calling all 8 "just flaky" would have been the convenient answer, and it is wrong.
+
+**Are they Week 6's fault? The evidence says no, but this run cannot fully prove it.**
+
+- All 6 are TipTap/ProseMirror editor behaviours: mention deletion, `strong`/`em` marks, the
+  Cmd/Ctrl+E and Cmd+Shift+M shortcuts, table deletion, TOC heading rename. The assertions that fail
+  are DOM state inside `.ProseMirror` (e.g. `expect(editor.locator('.mention')).not.toBeVisible()` —
+  the mention was never removed from the editor), not API responses.
+- **Week 6 changed no `web/` source whatsoever** — `git diff main...feat/w6-foundation -- web/` is
+  empty (§2). There is no mechanism by which a bearer-auth predicate or a mounted `/oauth` router
+  breaks a ProseMirror keyboard shortcut.
+- **Several are already known-broken in the repo.** Five specs carry `// FIXME:` comments naming
+  broken slash-command / file-chooser interactions while still mounted as **live** `test.describe`
+  blocks (verified: `e2e/images.spec.ts:89`, `e2e/data-integrity.spec.ts:200`,
+  `e2e/performance.spec.ts:359`, `e2e/security.spec.ts:241`, `e2e/toc.spec.ts:44`) — none use
+  `test.skip`/`test.fixme()`, which `e2e/AGENTS.md` item 5 recommends for known-incomplete tests.
+  Notably **`toc.spec.ts:189`, one of the 6 failures, sits inside the `describe` block flagged at
+  `toc.spec.ts:44` as *"Slash command menu interaction not working — button locators timing out"***.
+  That failure is documented-broken in the repo, independent of this branch.
+- Two of the six turn on modifier-key handling (`Cmd/Ctrl+E`, `Cmd+Shift+M`), a classic
+  Windows/headless-Chromium weak spot.
+
+**The missing proof is running the same 6 specs on `main`**, which would settle pre-existing vs.
+introduced in one command. The task forbids switching branches, so it was not done. Until it is, the
+honest status is: *6 reproducible e2e failures exist on this branch; the evidence strongly indicates
+they are pre-existing and environmental, but "pre-existing" is inferred, not measured.* **This is the
+largest open item in this report.**
 
 ---
 
@@ -440,6 +475,14 @@ Recorded so a reader can judge the numbers rather than take them on faith.
    degraded endpoints up to 60% through stale planner statistics alone.
 7. **Baseline gzip method is unspecified** in `AUDIT_REPORT.md`. Totals here use zlib level 9; at
    default level the total is 719.70 kB rather than 717.95 kB — a 0.24% spread, immaterial here.
+8. **This document was edited concurrently by another agent session while it was being written.** A
+   §6.1 stating that the serial Playwright re-run "did not complete inside this session's window" was
+   inserted by another session and is **superseded**: the re-run did complete (135 passed / 6 failed /
+   1 flaky, 13.8 min) and §6.1 now carries the measured result. Two claims from that insertion were
+   independently re-verified before being kept (the five live `// FIXME:` `test.describe` blocks, and
+   the empty `web/` diff). One was **dropped for lack of evidence**: a claim that
+   `e2e/oauth-pkce.spec.ts` passed 8/8 — that spec appears nowhere in this session's run logs, so it
+   is very likely among the 45 tests that never ran, and it is not asserted here.
 
 ---
 
@@ -483,6 +526,11 @@ docker exec shipshape-postgres-1 psql -U ship -d ship_dev -c "SHOW log_statement
 pnpm --filter @ship/api test
 pnpm --filter @ship/web test
 npx playwright test --workers=3 --reporter=line
+
+# Serial re-run of the 8 specs that failed in the parallel run (§6.1)
+npx playwright test e2e/backlinks.spec.ts e2e/drag-handle.spec.ts e2e/edge-cases.spec.ts \
+  e2e/inline-code.spec.ts e2e/inline-comments.spec.ts e2e/program-mode-week-ux.spec.ts \
+  e2e/tables.spec.ts e2e/toc.spec.ts --workers=1 --reporter=line
 ```
 
 ### New files added under `bench/`
