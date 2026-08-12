@@ -8,18 +8,22 @@ Updated at the end of every slice. This ledger is the anchor of the week's devia
 
 ## A. MVP hard gate (all required to pass — Tue Aug 12, 11:59 PM CT)
 
+Evidence updated 2026-08-11 after the build push. Test totals at that point:
+**API 637 passing (42 files) · SDK 81 passing (7 files)**, zero regressions in the
+pre-existing suites.
+
 | # | Requirement (verbatim condensed) | Status | Evidence |
 |---|---|---|---|
-| A1 | OAuth app registration endpoint: admin creates app, receives client_id; client_secret hashed in DB; raw secret shown exactly once on creation | PLANNED (Sun night/Mon) | — |
-| A2 | Authorization Code + PKCE completes end-to-end via Playwright: /oauth/authorize → consent → /oauth/token → usable access token | PLANNED (Mon) | — |
-| A3 | Bearer middleware validates every /api/v1/* route; invalid 401, missing 401, expired 401 with distinct error code | PLANNED (Mon) | — |
-| A4 | Documents resource: GET list, GET by id, POST; each route declares scope via require(scope) middleware factory | PLANNED (Mon) | — |
-| A5 | Consistent ApiError {code, message, details?, request_id} on every public failure, asserted by fitness test over all /api/v1 routes | PLANNED (Sun night skeleton) | — |
-| A6 | ScopeRegistry scopes-as-data; insufficient scope → 403 naming the missing scope explicitly | PLANNED (Mon) | — |
-| A7 | OpenAPI 3.1 spec at /api/v1/openapi.json, generated from route metadata (never hand-written), validated against OpenAPI schema in a unit test | PLANNED (Mon) | — |
-| A8 | SDK skeleton in pnpm workspace; `new ShipClient({token}).me()` returns typed authenticated user against running server | PLANNED (Tue) | — |
-| A9 | Existing Playwright regression suite passes on main; P95 latency, bundle size, per-route query counts within +10% of Part 1 baseline | PLANNED (Tue bench re-run) | Baselines: AUDIT_REPORT.md:413-419, :290-296, :510-516 |
-| A10 | Deployed + publicly accessible: deployed Ship + published OpenAPI spec URL + ≥1 OAuth app pre-registered with read-only scopes for graders | PLANNED (Tue) | Live base: https://ship-api-r1om.onrender.com |
+| A1 | OAuth app registration endpoint: admin creates app, receives client_id; client_secret hashed in DB; raw secret shown exactly once on creation | **MET** | `api/src/routes/oauth-apps.ts` (POST `/api/oauth-apps`, `no-store`, one-time secret) · service `api/src/platform/oauth/service.ts:221` `registerApp` · 9 tests `api/src/routes/oauth-apps.test.ts` incl. "stores only the hash" and rotation invalidating the old secret |
+| A2 | Authorization Code + PKCE completes end-to-end via Playwright: /oauth/authorize → consent → /oauth/token → usable access token | **PARTIAL** — flow implemented + covered by 57 integration tests (`api/src/platform/oauth/routes.test.ts`, `service.test.ts`) incl. the RFC 7636 Appendix-B vector and wrong-verifier→`invalid_grant`; the **Playwright** spec the gate names is in progress | `api/src/platform/oauth/routes.ts:480-493` (invalid_grant paths) |
+| A3 | Bearer middleware validates every /api/v1/* route; invalid 401, missing 401, expired 401 with distinct error code | **MET** | `api/src/platform/api/v1/middleware/authn.ts` — distinct `token_expired` code at the expiry branch · tests `middleware/authn.test.ts` (missing / non-bearer / unknown / revoked / expired / inactive-app) |
+| A4 | Documents resource: GET list, GET by id, POST; each route declares scope via require(scope) middleware factory | **MET** | 8 routes declared in `api/src/platform/api/v1/resources/routes.ts`; handlers `resources/documents.ts`; scope factory `middleware/scope.ts` — the factory is mandatory in the route type, so a scope-less route cannot compile |
+| A5 | Consistent ApiError {code, message, details?, request_id} on every public failure, asserted by fitness test over all /api/v1 routes | **MET** | `api/src/platform/api/v1/errors.ts` · fitness test `contract.fitness.test.ts` walks every catalogued route with a live unauthenticated request and asserts the exact key set + `request_id === X-Request-Id` |
+| A6 | ScopeRegistry scopes-as-data; insufficient scope → 403 naming the missing scope explicitly | **MET** | `api/src/platform/scopes/registry.ts` (7 scopes as data) · `ApiError.insufficientScope` puts `{missing_scope}` in `details` and the scope name in the message · asserted in `authn.test.ts` and `resources.test.ts` |
+| A7 | OpenAPI 3.1 spec at /api/v1/openapi.json, generated from route metadata (never hand-written), validated against OpenAPI schema in a unit test | **MET** | Generated in-process by `api/src/platform/openapi/v1-registry.ts` via `OpenApiGeneratorV31`; the route factory registers spec + handler in ONE call (`openapi/route-factory.ts`), so drift is structurally impossible. Served at `/api/v1/openapi.json`. Validity test: `contract.fitness.test.ts` → "validates against the OpenAPI 3.1 structural schema" (version, required keys, per-operation shape, full `$ref` resolution). Static copy `docs/openapi.json` (3.1.0, 7 paths, 8 operations) |
+| A8 | SDK skeleton in pnpm workspace; `new ShipClient({token}).me()` returns typed authenticated user against running server | **PARTIAL** — package shipped (`sdk/`, in `pnpm-workspace.yaml`, zero runtime deps, **13.9 KB gzipped** = 5.6% of the 250 KB budget) with 81 tests; the live-server proof the gate names ("against a running server") is in progress | `sdk/src/client.ts`, `sdk/src/manifest.ts` (13 operationIds, zero drift vs the API catalog) |
+| A9 | Existing Playwright regression suite passes on main; P95 latency, bundle size, per-route query counts within +10% of Part 1 baseline | **IN PROGRESS** — measurement running; results land in `docs/week6-perf-regression.md` | Baselines: AUDIT_REPORT.md:413-419, :290-296, :510-516 |
+| A10 | Deployed + publicly accessible: deployed Ship + published OpenAPI spec URL + ≥1 OAuth app pre-registered with read-only scopes for graders | **PARTIAL** — seeding script ready (`api/src/scripts/seed-grader-app.ts`, read-only scopes, one-time secret, idempotent); deploy + README credentials pending | Live base: https://ship-api-r1om.onrender.com |
 | A11 | Terraform: terraform/ config describing deployment topology (app container, database, networking, IAM task role + execution role); provider versions pinned; annotated `terraform plan` output artifact; destroy-and-redeploy proof; read a modified plan at the Defense (blast radius) — inability = AUTO-FAIL | PARTIAL | Live stack terraform/render (provider pinned 1.9.1, destroy-redeploy proven Week 5: terraform/render/out/13-14). OWNER DECISION: Render topology stands; ECS-language gap ("app container", IAM task/execution roles) documented openly in defense mapping table; IAM exercise runs on real SSM identity (see D2). Residual risk stated in plan. |
 
 ## B. Core technical requirements
@@ -28,16 +32,16 @@ Updated at the end of every slice. This ledger is the anchor of the week's devia
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| B1 | oauth_apps table: id, client_id, hashed client_secret, redirect_uris, owner, requested_scopes; raw secret shown once on creation AND rotation, never recoverable | PLANNED | — |
-| B2 | PKCE: code_challenge + method recorded at /oauth/authorize; code_verifier required at /oauth/token; mismatch → 400 invalid_grant | PLANNED | — |
-| B3 | Device Grant: /oauth/device/code issues user_code + device_code; /oauth/device/verify accepts user_code; client polls /oauth/token; slow_down honored | PLANNED | — |
-| B4 | Scope Registry as data: documents:read/write, issues:read/write, sprints:read/write, webhooks:manage; new scopes register at module load, never edit middleware | PLANNED | — |
-| B5 | Token middleware populates request with app, user, granted scopes; invalid 401; insufficient scope 403 with missing scope named | PLANNED | — |
-| B6 | One-time-use refresh tokens with rotation; reuse of stolen refresh token invalidates the family | PLANNED (Tue) | — |
-| B7 | Public routes only at /api/v1/*; internal stays /api/; lint rule fails build if public route imports internal handler files | PLANNED (Sun night) | — |
-| B8 | ApiError shape on every public failure; error middleware guarantees; fitness test verifies | PLANNED (Sun night) | — |
-| B9 | Cursor pagination: opaque base64 over {id, timestamp}; lists always return {data, next_cursor}; cursors STABLE ACROSS REORDERING (fitness-tested) | PLANNED | — |
-| B10 | OpenAPI 3.1 generated in-process from route metadata; served; schema-validated in unit test; spec parity asserted by fitness test | PLANNED | — |
+| B1 | oauth_apps table: id, client_id, hashed client_secret, redirect_uris, owner, requested_scopes; raw secret shown once on creation AND rotation, never recoverable | **MET** | Migration `039_platform_oauth.sql` + `schema.sql` mirror; `oauth-apps.ts` returns the raw secret only from create and rotate-secret, and the list endpoint is asserted never to contain it |
+| B2 | PKCE: code_challenge + method recorded at /oauth/authorize; code_verifier required at /oauth/token; mismatch → 400 invalid_grant | **MET** | S256-only (CHECK constraint in 039); `service.ts verifyPkce`; `routes.ts:493` mismatch → `invalid_grant`; RFC 7636 Appendix-B vector asserted in `service.test.ts` |
+| B3 | Device Grant: /oauth/device/code issues user_code + device_code; /oauth/device/verify accepts user_code; client polls /oauth/token; slow_down honored | **MET** | `routes.ts` device endpoints; `slow_down` enforced by a single CTE `UPDATE … RETURNING` capturing the pre-update `last_polled_at` under one row lock; approval flips approved→consumed so a device code mints exactly one token set |
+| B4 | Scope Registry as data: documents:read/write, issues:read/write, sprints:read/write, webhooks:manage; new scopes register at module load, never edit middleware | **MET** | `scopes/registry.ts` — all 7 as data; middleware only queries the registry; `assertKnown` at factory time makes a typo'd scope a boot failure (test asserts this) |
+| B5 | Token middleware populates request with app, user, granted scopes; invalid 401; insufficient scope 403 with missing scope named | **MET** | `middleware/authn.ts` sets `req.platform` {tokenId,userId,workspaceId,clientId,oauthAppId,grantedScopes}; `middleware/scope.ts` |
+| B6 | One-time-use refresh tokens with rotation; reuse of stolen refresh token invalidates the family | **MET** | `service.ts rotateRefreshToken` — reuse revokes the whole family AND its access tokens (`service.ts:658`); `routes.ts:518-527` replay → `invalid_grant`; a test asserts a descendant token dies too |
+| B7 | Public routes only at /api/v1/*; internal stays /api/; lint rule fails build if public route imports internal handler files | **MET** | `eslint.config.mjs` `no-restricted-imports` (error): `api/src/platform/**` may not import `**/routes/*`, `integrations/**` may not import `api/src/**`; added before any cross-import existed |
+| B8 | ApiError shape on every public failure; error middleware guarantees; fitness test verifies | **MET** | `api/v1/router.ts` error handler + ApiError-shaped 404; `contract.fitness.test.ts` |
+| B9 | Cursor pagination: opaque base64 over {id, timestamp}; lists always return {data, next_cursor}; cursors STABLE ACROSS REORDERING (fitness-tested) | **MET** | `api/v1/pagination.ts` keyset (not offset) with row-value comparison for timestamp ties; `pagination.test.ts` proves stability under inserts ahead of the cursor; `resources.test.ts` walks 7 rows with no repeats/skips |
+| B10 | OpenAPI 3.1 generated in-process from route metadata; served; schema-validated in unit test; spec parity asserted by fitness test | **MET** | See A7. Parity is bidirectional: every catalogued route has a spec entry AND every spec operation has a serving route |
 
 ### B-Webhooks
 
