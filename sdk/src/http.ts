@@ -84,9 +84,13 @@ function headerNumber(headers: Headers, name: string): number | null {
 
 function readRateLimit(headers: Headers): RateLimitInfo {
   return {
-    limit: headerNumber(headers, 'x-ratelimit-limit'),
-    remaining: headerNumber(headers, 'x-ratelimit-remaining'),
-    reset: headerNumber(headers, 'x-ratelimit-reset'),
+    // Servers emit either the legacy `X-RateLimit-*` family or the draft-6
+    // `RateLimit-*` family (some, including Ship, send both). Reading only one
+    // silently yields null against the other.
+    limit: headerNumber(headers, 'x-ratelimit-limit') ?? headerNumber(headers, 'ratelimit-limit'),
+    remaining:
+      headerNumber(headers, 'x-ratelimit-remaining') ?? headerNumber(headers, 'ratelimit-remaining'),
+    reset: headerNumber(headers, 'x-ratelimit-reset') ?? headerNumber(headers, 'ratelimit-reset'),
     retryAfterSeconds: headerNumber(headers, 'retry-after'),
   };
 }

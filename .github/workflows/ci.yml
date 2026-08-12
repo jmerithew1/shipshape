@@ -68,6 +68,11 @@ jobs:
       - name: Test (web)
         run: pnpm --filter @ship/web test
 
+      # The SDK is a shipped package with its own suite; without this step its
+      # 81 tests never ran in CI, so a published client could regress silently.
+      - name: Test (sdk)
+        run: pnpm --filter @ship/sdk test
+
       - name: Coverage (api)
         run: pnpm --filter @ship/api run test:coverage
 

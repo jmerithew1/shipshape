@@ -47,8 +47,8 @@ rotates it on re-run, so the value published here is always the working one.
 | redirect URIs | `http://localhost:8976/callback`, `http://127.0.0.1:8976/callback` |
 | demo account for the approval step | `demo@ship.local` / `demo1234` |
 
-**Device flow, end to end** (this is exactly what `ship login` automates, and it
-is verified working against the deployed instance):
+**Device flow, end to end** (verified working against the deployed instance;
+the `ship login` CLI will automate exactly these calls once it ships):
 
 ```bash
 BASE=https://ship-api-r1om.onrender.com
@@ -71,17 +71,26 @@ returns `403` naming the missing scope, e.g. `GET /api/v1/sprints` →
 `{"code":"forbidden","message":"Insufficient scope: this request requires 'sprints:read'","details":{"missing_scope":"sprints:read"}}`.
 <!-- GRADER_CREDENTIALS_END -->
 
-### One-command setup against the deployed instance
+### Try it against the deployed instance
+
+The `@ship/sdk` package and the `ship` CLI are in the repo but **not yet
+published or packaged** — the CLI lands with the reference-integration slice.
+Until then this is the verified path, and it needs nothing but `curl`:
 
 ```bash
-pnpm add ./ship-sdk-0.1.0.tgz                          # SDK ships as a packed tarball
-ship login --host https://ship-api-r1om.onrender.com   # device flow: shows a code you approve in a browser
-```
+BASE=https://ship-api-r1om.onrender.com
 
-Or call it directly with any bearer token:
+# the public contract, no auth required
+curl -s $BASE/api/v1/openapi.json | head
 
-```bash
-curl -H "Authorization: Bearer $TOKEN" https://ship-api-r1om.onrender.com/api/v1/me
+# authenticate with the grader app (device flow — see the credentials above)
+curl -s -X POST $BASE/oauth/device/code -H 'Content-Type: application/json'   -d '{"client_id":"ship_app_e46d52564bc1f690","scope":"documents:read issues:read"}'
+
+# approve the printed user_code as demo@ship.local, then exchange it
+curl -s -X POST $BASE/oauth/token   -d grant_type=urn:ietf:params:oauth:grant-type:device_code   -d device_code=<device_code> -d client_id=ship_app_e46d52564bc1f690
+
+# use the token
+curl -s $BASE/api/v1/me -H "Authorization: Bearer <access_token>"
 ```
 
 Every public failure returns the same envelope — `{code, message, details?, request_id}` — and

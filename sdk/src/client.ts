@@ -91,6 +91,12 @@ export class ShipClient {
   readonly documents: DocumentsClient;
   readonly issues: IssuesClient;
   readonly sprints: SprintsClient;
+  /**
+   * PRE-RELEASE. The server routes these methods call (/api/v1/webhooks*) are
+   * not implemented yet — they ship with the webhooks slice. Calling them today
+   * returns 404. Kept on the client so the CLI and the TTFE drill can be built
+   * against the final shape, but do not treat it as available.
+   */
   readonly webhooks: WebhooksClient;
 
   /** Normalized origin (no trailing slash, no /api/v1). */

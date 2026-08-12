@@ -17,6 +17,10 @@ Test totals at time of writing: **api 660 · sdk 81 · Playwright e2e 8**.
 
 ## The eleven MVP items
 
+**10 of 11 fully met; item 9 is split** — its performance clause passes with
+measured numbers, its Playwright-regression clause is not yet demonstrated.
+Marked ◐ rather than ☑ for that reason.
+
 ### ☑ 1. OAuth app registration
 > "admin can create an app, receive a client_id, and a client_secret hashed in the database (raw secret shown exactly once on creation)"
 
@@ -111,7 +115,7 @@ does *after* bootstrap goes through `/api/v1`.
 | Typed | the result is annotated `const me: ShipUser`, so a shape regression breaks compilation |
 | Also proven live | create→get→list round-trip, async-iterator pagination over 7 rows with no cursor visible, the typed error union, and `request_id` byte-identical across the SDK boundary |
 
-### ☑ 9. Regression suite + performance within +10% of the Part-1 baseline
+### ◐ 9. Regression suite + performance within +10% of the Part-1 baseline
 > "P95 latency, bundle size, and per-route query counts within +10% of the Part 1 baseline"
 
 Measured, not asserted — `docs/week6-perf-regression.md`:
@@ -124,12 +128,25 @@ Measured, not asserted — `docs/week6-perf-regression.md`:
 | P95 `/api/projects` c=10 | 120.7 ms | 19.5 ms | **−83.8%** | PASS |
 | P95 `/api/auth/me` c=10 | 83.3 ms | 12.2 ms | **−85.4%** | PASS |
 | Main page cold queries | 57 | 32 | **−43.9%** | PASS |
-| api / web suites | — | 660 / 160 | — | all green |
+| api / web / sdk suites | — | 660 / 160 / 81 | — | all green |
 
-Latency *improved* because the bearer path's per-request `last_used_at` UPDATE
-is now throttled to 30 s — the same fix the session path already carried. The
-comparison is conservative: it was measured against **more** data than the
-baseline (626 documents vs 557, 61 sprints vs 35).
+**The performance clause passes. The regression-suite clause does not yet.**
+The full Playwright suite did not run green here: 8 specs failed under
+3-worker contention on a loaded machine, and five specs carry `// FIXME:`
+markers while still running unskipped (`e2e/AGENTS.md:174` says they belong in
+`test.fixme()`). This branch changes no frontend code — `git diff
+main...feat/w6-foundation -- web/` is empty — so it cannot have broken them,
+but "did not break it" is not the same as "demonstrated green," and this row
+stays ◐ until a quiet-machine or CI run says otherwise. The Playwright
+evidence that *is* green is `e2e/oauth-pkce.spec.ts`, 8/8, which is what MVP
+item 2 requires.
+
+On the numbers themselves: latency improved partly because the bearer path's
+per-request `last_used_at` UPDATE is now throttled to 30 s, but the perf
+document is explicit that **most** of the gain is not Week 6's doing —
+different hardware and post-audit work already on `main`. The comparison is
+otherwise conservative: measured against **more** data than the baseline
+(626 documents vs 557, 61 sprints vs 35).
 
 ### ☑ 10. Deployed and publicly accessible
 > "deployed Ship + published OpenAPI spec URL + at least one OAuth app pre-registered with read-only scopes for graders"

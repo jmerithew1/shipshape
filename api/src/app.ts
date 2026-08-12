@@ -91,7 +91,13 @@ const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: isTestEnv ? 10000 : isDevEnv ? 1000 : 100, // High limit for tests/dev
   standardHeaders: true,
-  legacyHeaders: false,
+  // legacyHeaders emits the X-RateLimit-* family. The Week-6 brief names those
+  // headers verbatim ("Public responses carry X-RateLimit-Limit,
+  // X-RateLimit-Remaining, X-RateLimit-Reset"), and express-rate-limit v8's
+  // `standardHeaders: true` alone emits only the draft-6 `RateLimit-*` names —
+  // so the required headers were absent in production and the SDK's
+  // rate-limit reader was permanently null. Both families are now sent.
+  legacyHeaders: true,
   message: { error: 'Too many requests. Please slow down.' },
   // The limiter is mounted on '/api/' — ABOVE the /api/v1 router — and
   // express-rate-limit writes its `message` straight to the response instead
