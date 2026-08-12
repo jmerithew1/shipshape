@@ -19,6 +19,49 @@
 
 ---
 
+## For graders — the Ship platform API
+
+Ship exposes a versioned public API, an OAuth 2.0 authorization server, and a typed SDK.
+
+| | |
+| --- | --- |
+| Deployed instance | `https://ship-api-r1om.onrender.com` |
+| OpenAPI 3.1 spec (live, generated from the routes) | `/api/v1/openapi.json` |
+| OpenAPI 3.1 spec (static copy) | [`docs/openapi.json`](docs/openapi.json) |
+| Requirement → evidence ledger | [`docs/week6-requirements.md`](docs/week6-requirements.md) |
+| Architecture + decisions | [`docs/defense-week6.md`](docs/defense-week6.md) · [`DECISIONS.md`](DECISIONS.md) |
+
+### Grader credentials
+
+A pre-registered OAuth app with **read-only** scopes (`documents:read`, `issues:read`,
+`sprints:read` — it cannot modify anything) is seeded on the deployed instance by
+`pnpm --filter @ship/api seed:grader-app`. That script prints the client secret exactly once and
+rotates it on re-run, so the value published here is always the working one.
+
+<!-- GRADER_CREDENTIALS_START -->
+> **Pending deploy.** The credentials table lands here when the seed script runs against the
+> deployed instance. To mint your own locally: `pnpm --filter @ship/api seed:grader-app`
+<!-- GRADER_CREDENTIALS_END -->
+
+### One-command setup against the deployed instance
+
+```bash
+pnpm add ./ship-sdk-0.1.0.tgz                          # SDK ships as a packed tarball
+ship login --host https://ship-api-r1om.onrender.com   # device flow: shows a code you approve in a browser
+```
+
+Or call it directly with any bearer token:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" https://ship-api-r1om.onrender.com/api/v1/me
+```
+
+Every public failure returns the same envelope — `{code, message, details?, request_id}` — and
+`request_id` matches the `X-Request-Id` header, so one id correlates a client-side error with the
+server's audit trail.
+
+---
+
 ## What is Ship?
 
 Ship is a project management tool that combines documentation, issue tracking, and plan-driven weekly workflows in one place. Instead of switching between a wiki, a task tracker, and a spreadsheet, everything lives together.
