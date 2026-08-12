@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Vite emits the JavaScript; tsc is only the type gate here.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // No @types/node: this package runs in a browser, and letting Node's
+    // globals into the program would let a `process.env` or a `Buffer` compile
+    // here and then fail at runtime in the one environment that matters.
+    "types": []
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

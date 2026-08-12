@@ -81,9 +81,18 @@ class DedupingSubscriber {
   readonly sideEffects: Array<{ key: string; eventId: string }> = [];
   private readonly processedKeys = new Set<string>();
   private server: http.Server | null = null;
+  /**
+   * Set once, after registration. The subscriber must be listening BEFORE the
+   * subscription can name its URL, and the secret only exists once the
+   * subscription has been created — so the two arrive in that order, which is
+   * exactly the order a real integrator experiences.
+   */
+  private rawSecret = '';
   url = '';
 
-  constructor(private readonly rawSecret: string) {}
+  useSecret(rawSecret: string): void {
+    this.rawSecret = rawSecret;
+  }
 
   get processedCount(): number {
     return this.sideEffects.length;
@@ -268,23 +277,20 @@ afterAll(async () => {
 
 describe('DRILL — a replayed delivery reaches the subscriber twice and runs once', () => {
   it('carries one idempotency key across two deliveries and produces one side effect', async () => {
+    const subscriber = new DedupingSubscriber();
+    await subscriber.start();
+
     const created = await createSubscription({
       appId,
       workspaceId,
       eventType: 'document.created',
-      targetUrl: 'http://127.0.0.1:1/placeholder', // rewritten below to the live port
+      targetUrl: subscriber.url,
       createdBy: userId,
     });
-
     // The subscriber holds the RAW secret; Ship stored only sha256(raw) and
-    // signs with that derived key. Standing the server up after createSubscription
-    // is what lets the subscriber own the secret it was handed, exactly once.
-    const subscriber = new DedupingSubscriber(created.rawSigningSecret);
-    await subscriber.start();
-    await pool.query(`UPDATE webhook_subscriptions SET target_url = $2 WHERE id = $1`, [
-      created.subscription.id,
-      subscriber.url,
-    ]);
+    // signs with that derived key. This is the one and only moment the raw
+    // value exists outside the caller's hands.
+    subscriber.useSecret(created.rawSigningSecret);
     step(`subscriber listening on ${subscriber.url} with its own signing secret`);
 
     try {
@@ -375,19 +381,16 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
   });
 
   it('keeps deduping across a replay-of-a-replay, and still runs the effect once', async () => {
+    const subscriber = new DedupingSubscriber();
+    await subscriber.start();
     const created = await createSubscription({
       appId,
       workspaceId,
       eventType: 'issue.created',
-      targetUrl: 'http://127.0.0.1:1/placeholder',
+      targetUrl: subscriber.url,
       createdBy: userId,
     });
-    const subscriber = new DedupingSubscriber(created.rawSigningSecret);
-    await subscriber.start();
-    await pool.query(`UPDATE webhook_subscriptions SET target_url = $2 WHERE id = $1`, [
-      created.subscription.id,
-      subscriber.url,
-    ]);
+    subscriber.useSecret(created.rawSigningSecret);
 
     try {
       const event = buildEvent('issue.created', {
@@ -440,14 +443,6 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
     // The control case. Same platform, same replay, same key — the only thing
     // removed is the subscriber's dedupe table. If this case did not double,
     // the passing cases above would be proving nothing about the subscriber.
-    const created = await createSubscription({
-      appId,
-      workspaceId,
-      eventType: 'sprint.started',
-      targetUrl: 'http://127.0.0.1:1/placeholder',
-      createdBy: userId,
-    });
-
     const naiveEffects: string[] = [];
     const server = http.createServer((req, res) => {
       const chunks: Buffer[] = [];
@@ -466,10 +461,13 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
 
     try {
       const port = (server.address() as AddressInfo).port;
-      await pool.query(`UPDATE webhook_subscriptions SET target_url = $2 WHERE id = $1`, [
-        created.subscription.id,
-        `http://127.0.0.1:${port}/hook`,
-      ]);
+      const created = await createSubscription({
+        appId,
+        workspaceId,
+        eventType: 'sprint.started',
+        targetUrl: `http://127.0.0.1:${port}/hook`,
+        createdBy: userId,
+      });
 
       const event = buildEvent('sprint.started', {
         id: crypto.randomUUID(),

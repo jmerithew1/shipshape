@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ship SDK — Authorization Code + PKCE demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #14181f;
+        --muted: #5b6472;
+        --line: #e2e6ec;
+        --bad: #b3261e;
+        --good: #17603a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 2.5rem 1.5rem 4rem;
+        font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: #fff;
+        max-width: 46rem;
+        margin-inline: auto;
+      }
+      h1 { font-size: 1.3rem; margin: 0 0 0.25rem; }
+      h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em;
+           color: var(--muted); margin: 2rem 0 0.6rem; font-weight: 600; }
+      p.lede { color: var(--muted); margin: 0 0 1.5rem; }
+      label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.2rem; }
+      input {
+        width: 100%; padding: 0.5rem 0.6rem; font: inherit; font-size: 0.9rem;
+        border: 1px solid var(--line); border-radius: 6px; background: #fff; color: inherit;
+      }
+      .row { display: grid; gap: 0.8rem; grid-template-columns: 1fr 1fr; }
+      .stack > * + * { margin-top: 0.8rem; }
+      button {
+        font: inherit; font-weight: 600; padding: 0.55rem 1rem; border-radius: 6px;
+        border: 1px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer;
+      }
+      button.secondary { background: #fff; color: var(--ink); }
+      button:disabled { opacity: 0.5; cursor: default; }
+      .status { font-size: 0.9rem; color: var(--muted); min-height: 1.4em; }
+      .status.ok { color: var(--good); }
+      ul#documents { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+      ul#documents li { padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
+      ul#documents .meta { display: block; font-size: 0.78rem; color: var(--muted); }
+      #error { display: none; border: 1px solid var(--bad); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; }
+      #error h3 { margin: 0 0 0.5rem; font-size: 0.95rem; color: var(--bad); }
+      #error dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; margin: 0; font-size: 0.88rem; }
+      #error dt { color: var(--muted); }
+      code, #error dd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; margin: 0; }
+      footer { margin-top: 3rem; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Ship SDK — Authorization Code + PKCE</h1>
+    <p class="lede">
+      A single-page app that logs in with PKCE (generated here, in the browser, with Web Crypto),
+      stores the tokens in <code>LocalStorageTokenStore</code>, and lists your documents through
+      <code>@ship/sdk</code>. No client secret is involved — the code verifier is the proof.
+    </p>
+
+    <h2>Connection</h2>
+    <div class="stack">
+      <div class="row">
+        <div>
+          <label for="api-base">Ship API origin</label>
+          <input id="api-base" type="url" placeholder="http://localhost:3000" />
+        </div>
+        <div>
+          <label for="client-id">OAuth client_id</label>
+          <input id="client-id" type="text" placeholder="ship_app_…" />
+        </div>
+      </div>
+      <div>
+        <label for="scope">Scopes (space separated)</label>
+        <input id="scope" type="text" placeholder="documents:read" />
+      </div>
+      <div>
+        <label for="redirect-uri">Redirect URI (register this exact string on the app)</label>
+        <input id="redirect-uri" type="text" readonly />
+      </div>
+      <div class="stack">
+        <button id="connect" type="button">Connect to Ship</button>
+        <button id="sign-out" class="secondary" type="button">Sign out</button>
+      </div>
+      <p class="status" id="status"></p>
+    </div>
+
+    <h2>Finish a redirect by hand</h2>
+    <p class="lede" style="margin-bottom: 0.6rem">
+      Ship's <code>/oauth/authorize</code> returns JSON consent <em>context</em> — rendering the consent
+      screen is the first-party web app's job, not this demo's. If you approved the grant elsewhere,
+      paste the full redirect URL you were sent to and this page will finish the exchange.
+    </p>
+    <div class="stack">
+      <input id="paste-url" type="text" placeholder="http://localhost:5173/?code=ship_ac_…&amp;state=…" />
+      <button id="finish" class="secondary" type="button">Exchange the code</button>
+    </div>
+
+    <h2>Documents</h2>
+    <ul id="documents"></ul>
+
+    <section id="error">
+      <h3>The request failed</h3>
+      <dl>
+        <dt>kind</dt><dd id="error-kind"></dd>
+        <dt>code</dt><dd id="error-code"></dd>
+        <dt>status</dt><dd id="error-status"></dd>
+        <dt>request_id</dt><dd id="error-request-id"></dd>
+        <dt>message</dt><dd id="error-message"></dd>
+      </dl>
+    </section>
+
+    <footer>
+      <code>integrations/browser-demo</code> — imports <code>@ship/sdk</code> only, like every
+      other integration in this repo. See the README for setup.
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
