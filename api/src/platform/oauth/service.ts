@@ -561,6 +561,15 @@ export interface IssuedTokens {
  * transaction: an access token with no recorded refresh token would strand the
  * client at the one-hour mark with no way back.
  */
+/** Thrown when a family is revoked mid-issuance (concurrent replay). The
+ * token route maps this to the same `invalid_grant` a sequential replay gets. */
+export class RefreshFamilyRevokedError extends Error {
+  constructor(public readonly familyId: string) {
+    super(`Refresh token family ${familyId} was revoked during issuance`);
+    this.name = 'RefreshFamilyRevokedError';
+  }
+}
+
 export async function issueTokens(input: IssueTokensInput): Promise<IssuedTokens> {
   const app = await getAppById(input.appId);
   if (!app) throw new Error(`issueTokens: unknown app ${input.appId}`);
@@ -611,6 +620,31 @@ export async function issueTokens(input: IssueTokensInput): Promise<IssuedTokens
           REFRESH_TOKEN_TTL_DAYS,
         ]
       );
+    }
+
+    // Last-moment re-check against a concurrent family revocation.
+    //
+    // Rotation claims the old token in one statement, then issues here in a
+    // SEPARATE transaction. That leaves a window: if a stolen token is
+    // presented twice at once, the winner can be mid-issuance while the loser
+    // detects reuse and revokes the family. The revocation sweep cannot see
+    // rows this transaction has not committed, so the attacker's fresh tokens
+    // would SURVIVE a revocation the victim was already told had happened --
+    // exactly the attack family invalidation exists to stop. Re-reading inside
+    // our own transaction closes it: if anything in this family was revoked
+    // while we worked, abort and let the caller report reuse.
+    // Found by the contract audit.
+    if (input.familyId) {
+      const revoked = await client.query<{ n: string }>(
+        `SELECT count(*)::text AS n
+           FROM oauth_refresh_tokens
+          WHERE family_id = $1 AND revoked_at IS NOT NULL`,
+        [familyId]
+      );
+      if (Number(revoked.rows[0]?.n ?? '0') > 0) {
+        await client.query('ROLLBACK');
+        throw new RefreshFamilyRevokedError(familyId);
+      }
     }
 
     await client.query('COMMIT');
@@ -697,14 +731,27 @@ export async function rotateRefreshToken(rawToken: string): Promise<RotateRefres
 
   const claimedRow = claimed.rows[0];
   if (claimedRow) {
-    const tokens = await issueTokens({
-      appId: claimedRow.app_id,
-      userId: claimedRow.user_id,
-      workspaceId: claimedRow.workspace_id,
-      scopes: claimedRow.scopes,
-      familyId: claimedRow.family_id,
-    });
-    return { reused: false, tokens };
+    try {
+      const tokens = await issueTokens({
+        appId: claimedRow.app_id,
+        userId: claimedRow.user_id,
+        workspaceId: claimedRow.workspace_id,
+        scopes: claimedRow.scopes,
+        familyId: claimedRow.family_id,
+      });
+      return { reused: false, tokens };
+    } catch (err) {
+      // A concurrent presentation of this same token detected replay and
+      // revoked the family while we were issuing. Our tokens were rolled back;
+      // report replay so the caller sees the same invalid_grant a sequential
+      // replay produces, instead of walking away with live credentials in a
+      // family the server has already reported as revoked.
+      if (err instanceof RefreshFamilyRevokedError) {
+        await revokeRefreshFamily(claimedRow.family_id);
+        return { reused: true };
+      }
+      throw err;
+    }
   }
 
   const existing = await pool.query<RefreshTokenRow>(

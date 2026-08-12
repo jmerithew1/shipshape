@@ -473,4 +473,47 @@ describe('OAuth service', () => {
     );
     expect(await rotateRefreshToken(tokens.refreshToken!)).toBeNull();
   });
+
+  describe('contract audit #4 — concurrent replay cannot leave live credentials behind', () => {
+    it('revokes the family even when the winner is mid-issuance', async () => {
+      const app = await registerApp({
+        workspaceId,
+        ownerUserId: userId,
+        name: `Race App ${crypto.randomUUID()}`,
+        redirectUris: ['https://race.test/cb'],
+        requestedScopes: ['documents:read'],
+      });
+
+      const first = await issueTokens({
+        appId: app.app.id,
+        userId,
+        workspaceId,
+        scopes: ['documents:read'],
+      });
+
+      // Both callers present the SAME refresh token at the same instant: one
+      // claims it and issues, the other detects replay and revokes the family.
+      const [a, b] = await Promise.all([
+        rotateRefreshToken(first.refreshToken!),
+        rotateRefreshToken(first.refreshToken!),
+      ]);
+
+      const outcomes = [a, b];
+      expect(outcomes.filter((r) => r?.reused === true).length).toBeGreaterThanOrEqual(1);
+
+      // Whatever the interleaving, NOTHING in this family may remain usable.
+      const liveRefresh = await pool.query(
+        `SELECT count(*)::int AS n FROM oauth_refresh_tokens
+          WHERE family_id = $1 AND revoked_at IS NULL AND consumed_at IS NULL`,
+        [first.familyId]
+      );
+      const liveAccess = await pool.query(
+        `SELECT count(*)::int AS n FROM api_tokens
+          WHERE refresh_family_id = $1 AND revoked_at IS NULL`,
+        [first.familyId]
+      );
+      expect(liveRefresh.rows[0].n).toBe(0);
+      expect(liveAccess.rows[0].n).toBe(0);
+    });
+  });
 });
