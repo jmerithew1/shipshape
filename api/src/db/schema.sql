@@ -362,7 +362,12 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
   replay_of_id UUID REFERENCES webhook_deliveries(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   delivered_at TIMESTAMPTZ,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- (041) The exact bytes that were signed, plus the header they produced.
+  -- JSONB does not preserve key order, so re-serializing `payload` yields a
+  -- different string and a failing signature. Verification is over bytes.
+  signed_body TEXT,
+  signature_header TEXT
 );
 
 -- Public audit trail: every /api/v1 call. request_id is the correlation ID

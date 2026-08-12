@@ -160,3 +160,23 @@ describe('verifySignature', () => {
     });
   });
 });
+
+describe('log round-trip verification (what `ship webhooks tail` relies on)', () => {
+  it('verifies a signature recomputed from the STORED bytes, not from re-serialized JSON', () => {
+    const secret = 'whsec_round_trip';
+    // What the deliverer sends: one serialization, signed and transmitted.
+    const payload = { document_id: 'a', title: 'b', workspace_id: 'c' };
+    const signedBody = JSON.stringify(payload);
+    const header = signPayload(signedBody, secret, Math.floor(Date.now() / 1000));
+
+    // A client reading the delivery log verifies over the STORED bytes.
+    expect(verifySignature(header, signedBody, secret).ok).toBe(true);
+
+    // …and this is why signed_body exists. Postgres JSONB does not preserve
+    // key order, so a client that re-serializes `payload` from the API
+    // response can produce different bytes — and HMAC is over bytes.
+    const reserialized = JSON.stringify({ workspace_id: 'c', title: 'b', document_id: 'a' });
+    expect(reserialized).not.toBe(signedBody);
+    expect(verifySignature(header, reserialized, secret).ok).toBe(false);
+  });
+});

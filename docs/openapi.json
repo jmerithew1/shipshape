@@ -280,6 +280,19 @@
               "null"
             ]
           },
+          "signed_body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "signature_header": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "t=1715985600,v1=<hex>"
+          },
           "latency_ms": {
             "type": [
               "integer",
@@ -322,6 +335,8 @@
           "attempt_number",
           "response_status",
           "response_excerpt",
+          "signed_body",
+          "signature_header",
           "latency_ms",
           "last_error",
           "replay_of_id",

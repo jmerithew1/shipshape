@@ -120,6 +120,8 @@ export interface DeliveryRow {
   attempt_number: number;
   response_status: number | null;
   response_excerpt: string | null;
+  signed_body: string | null;
+  signature_header: string | null;
   latency_ms: number | null;
   last_error: string | null;
   replay_of_id: string | null;
@@ -138,6 +140,8 @@ export interface DeliveryView {
   attempt_number: number;
   response_status: number | null;
   response_excerpt: string | null;
+  signed_body: string | null;
+  signature_header: string | null;
   latency_ms: number | null;
   last_error: string | null;
   replay_of_id: string | null;
@@ -170,6 +174,8 @@ export function toDeliveryView(row: DeliveryRow): DeliveryView {
     attempt_number: row.attempt_number,
     response_status: row.response_status,
     response_excerpt: row.response_excerpt,
+    signed_body: row.signed_body,
+    signature_header: row.signature_header,
     latency_ms: row.latency_ms,
     last_error: row.last_error,
     replay_of_id: row.replay_of_id,
@@ -184,6 +190,7 @@ const SUBSCRIPTION_COLUMNS = `id, app_id, workspace_id, event_type, target_url,
 
 const DELIVERY_COLUMNS = `d.id, d.subscription_id, d.event_id, d.event_type, d.idempotency_key,
   d.status, d.attempt_number, d.response_status, d.response_excerpt, d.latency_ms,
+  d.signed_body, d.signature_header,
   d.last_error, d.replay_of_id, d.next_attempt_at, d.created_at, d.delivered_at`;
 
 // ─────────────────────────────────────────────────────────────────────────────

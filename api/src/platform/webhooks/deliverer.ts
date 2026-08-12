@@ -258,6 +258,7 @@ export class InProcessDeliverer implements IWebhookDeliverer {
     const rawBody = JSON.stringify(row.payload);
     const startedAt = this.now();
     const signatureHeader = signPayload(rawBody, row.signing_secret_hash, Math.floor(startedAt / 1000));
+    const signedMaterial = { body: rawBody, header: signatureHeader };
 
     let response: Response | null = null;
     let transportError: string | null = null;
@@ -294,7 +295,11 @@ export class InProcessDeliverer implements IWebhookDeliverer {
 
     if (!response) {
       // Network failure or timeout: transient by definition.
-      return this.record(row, this.scheduleRetry(attemptNumber, null, transportError ?? 'transport error', latencyMs));
+      return this.record(
+        row,
+        this.scheduleRetry(attemptNumber, null, transportError ?? 'transport error', latencyMs),
+        signedMaterial
+      );
     }
 
     const excerpt = await readExcerpt(response);
@@ -311,7 +316,7 @@ export class InProcessDeliverer implements IWebhookDeliverer {
         scheduledDelayMs: null,
         error: null,
         subscriptionDeactivated: false,
-      });
+      }, signedMaterial);
     }
 
     if (classification.disposition === 'permanent') {
@@ -330,7 +335,7 @@ export class InProcessDeliverer implements IWebhookDeliverer {
         scheduledDelayMs: null,
         error: `permanent failure: HTTP ${response.status}`,
         subscriptionDeactivated: classification.deactivateSubscription,
-      });
+      }, signedMaterial);
     }
 
     // Transient. 429 gets to name its own delay.
@@ -395,7 +400,15 @@ export class InProcessDeliverer implements IWebhookDeliverer {
    */
   private async record(
     row: DeliveryJoinRow,
-    outcome: Omit<DeliveryAttempt, 'deliveryId'>
+    outcome: Omit<DeliveryAttempt, 'deliveryId'>,
+    /**
+     * The EXACT string that was signed and the header it produced. Persisted
+     * so a consumer reading the delivery log can verify the signature over the
+     * same bytes we sent. Re-serializing `payload` would not reproduce them:
+     * it is JSONB, and JSONB normalizes key order. Absent on attempts that
+     * never got as far as signing.
+     */
+    signed?: { body: string; header: string }
   ): Promise<DeliveryAttempt> {
     const nowIso = new Date(this.now()).toISOString();
     await this.db.query(
@@ -408,6 +421,8 @@ export class InProcessDeliverer implements IWebhookDeliverer {
               last_error = $7,
               next_attempt_at = COALESCE($8::timestamptz, next_attempt_at),
               delivered_at = CASE WHEN $2 = 'succeeded' THEN $9::timestamptz ELSE delivered_at END,
+              signed_body = COALESCE($10, signed_body),
+              signature_header = COALESCE($11, signature_header),
               updated_at = now()
         WHERE id = $1`,
       [
@@ -420,6 +435,8 @@ export class InProcessDeliverer implements IWebhookDeliverer {
         outcome.error,
         outcome.nextAttemptAtMs === null ? null : new Date(outcome.nextAttemptAtMs).toISOString(),
         nowIso,
+        signed?.body ?? null,
+        signed?.header ?? null,
       ]
     );
     return { deliveryId: row.id, ...outcome };

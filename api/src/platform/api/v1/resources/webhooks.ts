@@ -103,6 +103,13 @@ export const WebhookDeliverySchema = z
     attempt_number: z.number().int(),
     response_status: z.number().int().nullable(),
     response_excerpt: z.string().nullable(),
+    // The exact bytes that were signed and the header they produced. Returned
+    // so a client can verify a delivery it reads back from the log — the only
+    // path available to a developer whose laptop has no public URL. Re-
+    // serializing `payload` would not reproduce these bytes (JSONB normalizes
+    // key order), and HMAC is over bytes.
+    signed_body: z.string().nullable(),
+    signature_header: z.string().nullable().openapi({ example: 't=1715985600,v1=<hex>' }),
     latency_ms: z.number().int().nullable(),
     last_error: z.string().nullable(),
     replay_of_id: z.string().uuid().nullable(),
