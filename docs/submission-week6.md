@@ -104,8 +104,9 @@ docker compose -f docker-compose.local.yml up -d postgres
 pnpm --filter @ship/api db:migrate
 pnpm build
 
-pnpm --filter @ship/api test        # 660
+pnpm --filter @ship/api test        # 839
 pnpm --filter @ship/sdk test        # 81
-pnpm --filter @ship/web test        # 160
+pnpm --filter @ship/web test        # 165
+pnpm --filter @ship/cli test        # 76
 pnpm exec playwright test e2e/oauth-pkce.spec.ts   # 8
 ```
