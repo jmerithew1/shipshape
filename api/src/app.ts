@@ -37,6 +37,7 @@ import { documentCommentsRouter, commentsRouter } from './routes/comments.js';
 import { setupSwagger } from './swagger.js';
 import { initializeCAIA } from './services/caia.js';
 import { createV1Router } from './platform/api/v1/router.js';
+import { registerV1Routes } from './platform/api/v1/resources/routes.js';
 
 // Validate SESSION_SECRET in production
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -201,7 +202,7 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   // (no cookie auth is accepted here), no shared middleware with the internal
   // /api routes below — the public/internal boundary is structural. Mounted
   // before the internal routes so nothing can shadow the /api/v1 prefix.
-  app.use('/api/v1', createV1Router());
+  app.use('/api/v1', createV1Router(registerV1Routes));
 
   // Setup routes (CSRF protected - first-time setup only)
   app.use('/api/setup', conditionalCsrf, setupRoutes);
