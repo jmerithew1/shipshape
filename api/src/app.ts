@@ -38,6 +38,9 @@ import { setupSwagger } from './swagger.js';
 import { initializeCAIA } from './services/caia.js';
 import { createV1Router } from './platform/api/v1/router.js';
 import { registerV1Routes } from './platform/api/v1/resources/routes.js';
+import oauthAppsRoutes from './routes/oauth-apps.js';
+import { createOAuthRouter } from './platform/oauth/routes.js';
+import { authMiddleware } from './middleware/auth.js';
 
 // Validate SESSION_SECRET in production
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -198,6 +201,24 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   // API documentation (no auth needed)
   setupSwagger(app);
 
+  // OAuth 2.0 authorization server (Week 6).
+  //
+  // CSRF is applied SELECTIVELY here, and the split matters:
+  //   - /oauth/token and /oauth/device/code are called by CLIs, servers and
+  //     SDKs that hold no session and no CSRF token. Requiring one would make
+  //     the grants unusable by every standard OAuth client.
+  //   - /oauth/authorize/decision and /oauth/device/verify are submitted by a
+  //     logged-in human's browser. A forged POST there is a SILENT CONSENT
+  //     GRANT, so these keep full CSRF protection.
+  const oauthCsrf = (req: Request, res: Response, next: NextFunction) => {
+    const humanConsentPaths = ['/authorize/decision', '/device/verify'];
+    if (req.method === 'POST' && humanConsentPaths.includes(req.path)) {
+      return conditionalCsrf(req, res, next);
+    }
+    return next();
+  };
+  app.use('/oauth', oauthCsrf, createOAuthRouter({ auth: authMiddleware }));
+
   // Public platform API (Week 6). Bearer-token-only surface: no CSRF wrapper
   // (no cookie auth is accepted here), no shared middleware with the internal
   // /api routes below — the public/internal boundary is structural. Mounted
@@ -230,6 +251,11 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
   app.use('/api/admin', conditionalCsrf, adminRoutes);
   app.use('/api/invites', conditionalCsrf, invitesRoutes);
   app.use('/api/api-tokens', conditionalCsrf, apiTokensRoutes);
+
+  // OAuth app management for the developer portal (Week 6). Session-authed
+  // by design: registering your first app is the bootstrap step, so it cannot
+  // itself require an OAuth token (see the file header for the full rationale).
+  app.use('/api/oauth-apps', conditionalCsrf, oauthAppsRoutes);
 
   // Claude context routes - read-only GET endpoints for Claude skills
   app.use('/api/claude', claudeRoutes);

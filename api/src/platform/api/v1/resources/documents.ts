@@ -129,17 +129,17 @@ async function listDocuments(
 
 const cursorOf = (d: { updated_at: string; id: string }) => ({ ts: d.updated_at, id: d.id });
 
-export const handleListDocuments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleListDocuments: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { rows, pageSize } = await listDocuments(req, { allowTypeFilter: true });
   res.json(buildPage(rows.map(toDocument), pageSize, cursorOf));
 });
 
-export const handleListIssues = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleListIssues: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { rows, pageSize } = await listDocuments(req, { fixedType: 'issue' });
   res.json(buildPage(rows.map(toIssue), pageSize, cursorOf));
 });
 
-export const handleListSprints = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleListSprints: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { rows, pageSize } = await listDocuments(req, { fixedType: 'sprint' });
   res.json(buildPage(rows.map(toSprint), pageSize, cursorOf));
 });
@@ -163,19 +163,19 @@ async function fetchOne(req: Request, fixedType?: string): Promise<DocumentRow> 
   return row;
 }
 
-export const handleGetDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleGetDocument: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   res.json(toDocument(await fetchOne(req)));
 });
 
-export const handleGetIssue = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleGetIssue: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   res.json(toIssue(await fetchOne(req, 'issue')));
 });
 
-export const handleGetSprint = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleGetSprint: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   res.json(toSprint(await fetchOne(req, 'sprint')));
 });
 
-export const handleCreateDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleCreateDocument: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const body = req.body as CreateDocumentInput;
   const content = body.content_text
     ? { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: body.content_text }] }] }
@@ -207,7 +207,7 @@ export const handleCreateDocument = asyncHandler(async (req: Request, res: Respo
 });
 
 /** GET /me — the SDK's first call and the drill's first checkpoint. */
-export const handleGetMe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const handleGetMe: RequestHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const ctx = req.platform!;
   const result = await pool.query('SELECT id, email, name FROM users WHERE id = $1', [ctx.userId]);
   const user = result.rows[0];
