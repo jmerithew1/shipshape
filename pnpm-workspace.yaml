@@ -2,6 +2,7 @@ packages:
   - 'api'
   - 'web'
   - 'shared'
+  - 'sdk'
 
 # Security floors for transitive criticals (GHSA advisories, 2026-07-29):
 # audit gate in CI runs at --audit-level critical.
