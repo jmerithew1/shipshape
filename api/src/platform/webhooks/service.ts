@@ -476,7 +476,8 @@ export async function replayDelivery(
         AND ($2::uuid IS NULL OR s.app_id = $2::uuid)
      RETURNING id, subscription_id, event_id, event_type, idempotency_key, status,
                attempt_number, response_status, response_excerpt, latency_ms,
-               last_error, replay_of_id, next_attempt_at, created_at, delivered_at`,
+               last_error, replay_of_id, next_attempt_at, created_at, delivered_at,
+               signed_body, signature_header`,
     [opts.id, opts.appId ?? null]
   );
   const row = result.rows[0];

@@ -439,6 +439,17 @@ describe('DEAD-LETTER AND REPLAY', () => {
     expect(dead.last_error).toContain('gave up after 6 attempts');
     expect(failing.calls).toHaveLength(MAX_ATTEMPTS);
 
+    // Regression (audit sweep): a delivery that dead-letters purely on transient
+    // 5xx must still carry the exact signed bytes. The transient branch used to
+    // drop them, so tail could not verify the very failures an operator most
+    // wants to inspect.
+    const signed = await pool.query<{ signed_body: string | null; signature_header: string | null }>(
+      `SELECT signed_body, signature_header FROM webhook_deliveries WHERE id = $1`,
+      [originalId]
+    );
+    expect(signed.rows[0]!.signed_body).not.toBeNull();
+    expect(signed.rows[0]!.signature_header).toMatch(/^t=\d+,v1=/);
+
     // A dead-lettered delivery is inert: further attempts do nothing.
     expect(await deliverer.deliverOnce(originalId)).toBeNull();
     expect(failing.calls).toHaveLength(MAX_ATTEMPTS);
@@ -449,6 +460,12 @@ describe('DEAD-LETTER AND REPLAY', () => {
     expect(replay.status).toBe('pending');
     expect(replay.attempt_number).toBe(0);
     expect(replay.replay_of_id).toBe(originalId);
+    // Regression (audit sweep): the freshly-enqueued replay has not been signed
+    // yet, so these are null — but they must be PRESENT as null, not dropped.
+    // The replay RETURNING clause used to omit both columns, so toDeliveryView
+    // emitted `undefined` and the required-nullable contract field vanished.
+    expect(replay.signed_body).toBeNull();
+    expect(replay.signature_header).toBeNull();
     // THE contract: one key, one processed side effect, N delivery rows.
     expect(replay.idempotency_key).toBe(dead.idempotency_key);
     expect(replay.idempotency_key).toBe(idempotencyKeyFor(event));

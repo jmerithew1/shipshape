@@ -130,13 +130,19 @@ const apiLimiter = rateLimit({
 export function createApp(corsOrigin: string = 'http://localhost:5173'): express.Express {
   const app = express();
 
-  // Trust proxy headers (CloudFront) for secure cookies and correct protocol detection
+  // Trust exactly one proxy hop. The Week-6 platform runs on Render, whose edge
+  // is a single reverse proxy that appends the real client IP to
+  // X-Forwarded-For — so `trust proxy: 1` makes req.ip the true client, which is
+  // what the IP-keyed limiter keys on. (The legacy AWS path — CloudFront in
+  // front of Elastic Beanstalk — is also a single appending hop, so 1 is correct
+  // for both; the CloudFront Via-header override below is simply inert on Render.)
   if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
 
-    // CloudFront with viewer_protocol_policy="redirect-to-https" always serves viewers over HTTPS.
-    // However, CloudFront -> EB uses HTTP (origin_protocol_policy="http-only"), so CloudFront
-    // sets X-Forwarded-Proto to "http". Override it to "https" when request comes via CloudFront.
+    // Legacy AWS path only: CloudFront serves viewers over HTTPS but reaches the
+    // origin over HTTP (origin_protocol_policy="http-only"), so it sets
+    // X-Forwarded-Proto: http. Rewrite it to https when the request came via
+    // CloudFront. On Render this branch never matches (no CloudFront Via header).
     app.use((req, _res, next) => {
       // CloudFront adds Via header like "2.0 <id>.cloudfront.net (CloudFront)"
       const viaHeader = req.headers['via'] as string;
@@ -173,8 +179,17 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
     },
   }));
 
-  // Apply rate limiting to all API routes
-  app.use('/api/', apiLimiter);
+  // Apply the IP-keyed limiter to the internal API — but NOT to /api/v1. The
+  // public surface has its own per-app + per-token bucket limiter mounted inside
+  // the v1 router, and that one is the authority whose numbers the X-RateLimit-*
+  // headers advertise. If this IP limiter also ran on v1 it would set (via
+  // legacyHeaders) a competing X-RateLimit-* set that its lower prod cap could
+  // enforce BEFORE the advertised per-app budget was spent — so a client
+  // obeying the headers would still be 429'd. One limiter owns the public
+  // surface; its headers therefore never lie. Found by the audit sweep.
+  app.use('/api/', (req, res, next) =>
+    req.path.startsWith('/v1') ? next() : apiLimiter(req, res, next)
+  );
   app.use(cors({
     origin: corsOrigin,
     credentials: true,

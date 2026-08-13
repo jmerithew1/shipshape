@@ -35,7 +35,7 @@
  */
 
 import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { chmod, readFile, writeFile } from 'node:fs/promises';
 import { Router, type Request, type Response } from 'express';
 import type { FetchLike } from './slack.js';
 
@@ -98,8 +98,15 @@ export class FileInstallationStore implements InstallationStore {
   async save(installation: Installation): Promise<void> {
     const all = (await this.readAll()).filter((i) => i.team_id !== installation.team_id);
     all.push(installation);
-    // mode 0600: a bot token is a bearer credential.
+    // mode 0600: a bot token is a bearer credential. The `mode` option only
+    // takes effect when writeFile CREATES the file; an already-existing store
+    // (created earlier, or by another process under a looser umask) would keep
+    // its old permissions. chmod every write so the tightening is unconditional.
     await writeFile(this.path, JSON.stringify(all, null, 2), { encoding: 'utf8', mode: 0o600 });
+    await chmod(this.path, 0o600).catch(() => {
+      // Best-effort: filesystems without POSIX modes (e.g. Windows) reject
+      // chmod. The credential-at-rest concern this guards is a POSIX concern.
+    });
   }
 
   async get(teamId: string): Promise<Installation | undefined> {

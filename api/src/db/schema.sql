@@ -380,7 +380,8 @@ CREATE TABLE IF NOT EXISTS public_audit_log (
   app_id UUID REFERENCES oauth_apps(id) ON DELETE SET NULL,
   client_id TEXT,
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  -- SET NULL, not CASCADE: an audit row must outlive its subject (migration 042).
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
   method TEXT NOT NULL,
   route TEXT NOT NULL,
   scope_used TEXT,

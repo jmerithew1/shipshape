@@ -392,7 +392,14 @@ export class InProcessDeliverer implements IWebhookDeliverer {
         ...this.scheduleRetry(attemptNumber, honored, `HTTP ${response.status}`, latencyMs),
         responseStatus: response.status,
         responseExcerpt: excerpt,
-      }
+      },
+      // Pass the signed bytes on the transient branch too. Without this a
+      // delivery that exhausts all six retries on 5xx/429 dead-letters with
+      // signed_body NULL — so `ship webhooks tail` cannot verify exactly the
+      // failed deliveries an operator most needs to inspect. The success,
+      // permanent, and transport-error branches already record it; this one
+      // was the outlier. Found by the final-submission audit sweep.
+      signedMaterial
     );
   }
 

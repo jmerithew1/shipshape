@@ -100,7 +100,7 @@ entirely, a discriminated error union consumers can `switch` on exhaustively,
 pluggable `ITokenStore`, one-call `verifyWebhook`, and single-flight token
 refresh so N concurrent 401s trigger exactly one refresh.
 
-**After.** 13.9 KB gzipped — 5.6% of the 250 KB budget. `SDK_ROUTE_MANIFEST` is
+**After.** 14.0 KB gzipped — 5.6% of the 250 KB budget (`pnpm --filter @ship/sdk size`). `SDK_ROUTE_MANIFEST` is
 load-bearing rather than descriptive: `resources.ts` builds its URLs from it, so
 a method cannot call an undeclared path.
 

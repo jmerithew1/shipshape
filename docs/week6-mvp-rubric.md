@@ -11,7 +11,7 @@ independent audits (an adversarial contract audit and a security review) were
 run against this work *before* it merged, and every defect they found is listed
 at the bottom with its fix and the regression test that locks it down.
 
-Test totals: **api 845 (61 files) · sdk 81 · cli 76 · slack 55 · web 165 · Playwright PKCE e2e 8 = 1,222**. All five required integrations shipped.
+Test totals: **api 859 (62 files) · sdk 81 · cli 76 · slack 62 · web 165 · Playwright PKCE e2e 8 = 1,251**. All five required integrations shipped.
 
 ---
 
@@ -109,7 +109,7 @@ does *after* bootstrap goes through `/api/v1`.
 | | |
 |---|---|
 | Package | `sdk/` — `@ship/sdk`, in `pnpm-workspace.yaml`, **zero runtime dependencies** |
-| Size | **13.9 KB gzipped** — 5.6% of the 250 KB budget |
+| Size | **14.0 KB gzipped** — 5.6% of the 250 KB budget (unminified `tsc` build; receipt `pnpm --filter @ship/sdk size`) |
 | Unit tests | 81 across 7 files, all with an injected fake `fetch` |
 | **Live-server proof** | `api/src/platform/api/v1/sdk-live.test.ts` — 9 tests booting the real app on an ephemeral port with a real OAuth token in Postgres |
 | Typed | the result is annotated `const me: ShipUser`, so a shape regression breaks compilation |
@@ -128,7 +128,7 @@ Measured, not asserted — `docs/week6-perf-regression.md`:
 | P95 `/api/projects` c=10 | 120.7 ms | 19.5 ms | **−83.8%** | PASS |
 | P95 `/api/auth/me` c=10 | 83.3 ms | 12.2 ms | **−85.4%** | PASS |
 | Main page cold queries | 57 | 32 | **−43.9%** | PASS |
-| api / web / sdk suites | — | 660 / 160 / 81 | — | all green |
+| api / web / sdk suites | — | 859 / 165 / 81 | — | all green (final count; the MVP-gate snapshot was 660/160/81) |
 
 **The performance clause passes. The regression-suite clause does not yet.**
 The full Playwright suite did not run green here: 8 specs failed under

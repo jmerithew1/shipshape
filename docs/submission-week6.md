@@ -60,7 +60,7 @@ Condensed; the full table with quotes is in the [rubric](week6-mvp-rubric.md).
 | 5 | `ApiError` on every public failure, fitness-tested | `platform/api/v1/errors.ts` | `contract.fitness.test.ts` + `envelope-edges.test.ts` |
 | 6 | ScopeRegistry as data, 403 names the missing scope | `platform/scopes/registry.ts` | asserted in 4 suites incl. live prod |
 | 7 | OpenAPI 3.1 generated from route metadata | `platform/openapi/` | 3.1 structural validity + `$ref` resolution |
-| 8 | SDK `.me()` against a running server | `sdk/` | `sdk-live.test.ts` (9), 13.9 KB gz |
+| 8 | SDK `.me()` against a running server | `sdk/` | `sdk-live.test.ts` (9), 14.0 KB gz (`pnpm --filter @ship/sdk size`) |
 | 9 | Perf within +10%; regression suite passes | — | perf **PASS**; Playwright clause **not demonstrated** — see below |
 | 10 | Deployed + grader OAuth app | Render, Terraform-managed | device flow verified end-to-end on prod |
 | 11 | Terraform pinned, plan artifact, destroy/redeploy | `terraform/render/` | `out/13-destroy` · `out/14-apply-redeploy` |
@@ -88,8 +88,8 @@ were never sent at all. Full list with severities in the
 
 **CI note — root-caused and fixed.** The `checks` job's coverage step failed on
 six consecutive commits, skipping the deploy job, which is why production
-served an older build for a while. It passes locally (839/839), so it was
-runner memory pressure: coverage re-runs all 59 api suites a second time under
+served an older build for a while. It passes locally (859/859), so it was
+runner memory pressure: coverage re-runs all 62 api suites a second time under
 v8 instrumentation. It has no thresholds — its output is a report, not a gate —
 so it now runs with 4 GB heap and `continue-on-error`. `Test (api)` remains the
 blocking correctness gate. A reporting step should never stop a release.
@@ -104,7 +104,7 @@ docker compose -f docker-compose.local.yml up -d postgres
 pnpm --filter @ship/api db:migrate
 pnpm build
 
-pnpm --filter @ship/api test        # 839
+pnpm --filter @ship/api test        # 859
 pnpm --filter @ship/sdk test        # 81
 pnpm --filter @ship/web test        # 165
 pnpm --filter @ship/cli test        # 76

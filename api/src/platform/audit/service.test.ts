@@ -89,7 +89,14 @@ describe('queryAuditLog', () => {
   });
 
   afterAll(async () => {
-    // public_audit_log.workspace_id is ON DELETE CASCADE.
+    // workspace_id is ON DELETE SET NULL (migration 042), so deleting the
+    // workspace no longer removes these rows — the audit trail must outlive its
+    // subject. Clean up explicitly by the run-scoped client_id, or the rows
+    // orphan to workspace_id NULL and accumulate across runs.
+    await pool.query(`DELETE FROM public_audit_log WHERE client_id IN ($1, $2)`, [
+      CLIENT_A,
+      CLIENT_B,
+    ]);
     for (const id of [workspaceId, otherWorkspaceId]) {
       if (id) await pool.query(`DELETE FROM workspaces WHERE id = $1`, [id]);
     }
@@ -166,5 +173,38 @@ describe('queryAuditLog', () => {
     const page = await queryAuditLog({ workspaceId: otherWorkspaceId, clientId: CLIENT_B });
     expect(page.data).toEqual([]);
     expect(page.next_cursor).toBeNull();
+  });
+
+  // Regression (audit sweep): the audit trail must outlive its subject. The FK
+  // was ON DELETE CASCADE, so a workspace owner deleting their workspace erased
+  // their own audit record — the subject could destroy the evidence. Migration
+  // 042 makes it SET NULL: the row survives, orphaned but intact.
+  it('keeps an audit row after its workspace is deleted (SET NULL, not CASCADE)', async () => {
+    const doomed = await pool.query<{ id: string }>(
+      `INSERT INTO workspaces (name) VALUES ($1) RETURNING id`,
+      [`Audit Doomed ${runId}`]
+    );
+    const doomedWs = doomed.rows[0]!.id;
+    const { rows } = await pool.query<{ id: string }>(
+      `INSERT INTO public_audit_log
+         (request_id, occurred_at, client_id, user_id, workspace_id,
+          method, route, scope_used, status, latency_ms)
+       VALUES (gen_random_uuid()::text, now(), $1, $2, $3,
+               'DELETE', '/api/v1/self', 'documents:write', 200, 5)
+       RETURNING id`,
+      [CLIENT_A, userId, doomedWs]
+    );
+    const auditId = rows[0]!.id;
+
+    await pool.query(`DELETE FROM workspaces WHERE id = $1`, [doomedWs]);
+
+    const after = await pool.query<{ workspace_id: string | null }>(
+      `SELECT workspace_id FROM public_audit_log WHERE id = $1`,
+      [auditId]
+    );
+    expect(after.rows).toHaveLength(1); // survived — not cascaded away
+    expect(after.rows[0]!.workspace_id).toBeNull(); // orphaned, as designed
+
+    await pool.query(`DELETE FROM public_audit_log WHERE id = $1`, [auditId]);
   });
 });

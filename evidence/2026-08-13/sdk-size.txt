@@ -1,0 +1,8 @@
+
+> @ship/sdk@0.1.0 size C:\dev\shipshape\sdk
+> node scripts/measure-size.mjs
+
+@ship/sdk bundle size (11 ESM files, zero deps)
+  raw:  48.4 KB
+  gzip: 14.0 KB
+  budget: 250 KB min+gzip → using 5.6% (unminified upper bound)

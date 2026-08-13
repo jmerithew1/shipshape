@@ -18,7 +18,7 @@ a verified signed event.
 > · OAuth 2.0 server — PKCE + device grant, refresh families that self-revoke on replay
 > · /api/v1 with one error shape and an OpenAPI spec generated from the routes
 > · Webhooks: retry ladder, DLQ, replay — all one Postgres table
-> · A typed SDK: 13.9 KB, zero dependencies
+> · A typed SDK: 14 KB gzipped, zero dependencies
 >
 > The thing I'll actually remember: I wrote a fitness test that walked my own
 > route registry and called drift "structurally impossible." It was reading the

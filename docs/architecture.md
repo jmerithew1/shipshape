@@ -12,10 +12,10 @@ in [`docs/week6-mvp-rubric.md`](week6-mvp-rubric.md).
 | Public `/api/v1` (authn, scopes, ApiError, cursor pagination) | **shipped** |
 | OpenAPI 3.1 generated from route metadata | **shipped** |
 | `@ship/sdk` typed client | **shipped** |
-| Developer portal UI | designed, not yet wired |
-| Webhooks (registry, bus, signer, deliverer, DLQ, replay) | designed, not yet wired |
-| Rate limiting per app/token, public audit trail | partial — limiter returns the public envelope; per-app buckets and the audit table are scheduled |
-| Agent-as-citizen rewire (Epic 7) | designed, not yet wired |
+| Developer portal UI | **shipped** — `web/src/pages/devportal/*` (apps, secret rotate, subscriptions, delivery log, replay) |
+| Webhooks (registry, bus, signer, deliverer, DLQ, replay) | **shipped** — `api/src/platform/webhooks/*`, migrations 040/041, routes served in `docs/openapi.json`, live-gated in prod |
+| Rate limiting per app/token, public audit trail | **shipped** — per-app + per-token buckets (`ratelimit/*`), `public_audit_log` (`audit/*`, migration 040) |
+| Agent-as-citizen rewire (Epic 7) | designed, not yet wired — the `ShipData` seam exists; `FLEETGRAPH_VIA_SDK` is set in no environment |
 
 ---
 
@@ -41,7 +41,7 @@ api/src/platform/            the entire public surface; imports nothing from api
 
 api/src/routes/oauth-apps.ts app registration for the portal (session-authed; bootstrap)
 
-sdk/src/                     @ship/sdk — zero runtime dependencies, 13.9 KB gzipped
+sdk/src/                     @ship/sdk — zero runtime dependencies, 14.0 KB gzipped (pnpm --filter @ship/sdk size)
 ├── client.ts                ShipClient + deviceLogin / authorizationCodeFlow / clientCredentials
 ├── resources.ts             documents · issues · sprints · webhooks clients
 ├── http.ts                  bearer injection, single-flight refresh, error mapping
@@ -164,7 +164,7 @@ including access tokens (`refresh_family_id`). Issuance re-checks the family for
 revocations inside its own transaction, so a concurrent replay cannot leave the
 attacker holding live credentials in a family already reported revoked.
 
-## 6. Webhook pipeline — *designed, not yet wired*
+## 6. Webhook pipeline — *shipped*
 
 ```
 domain write ─▶ IEventBus.publish ─▶ webhook_deliveries row (the outbox)
@@ -199,7 +199,7 @@ strict `pool.query` mocks in route tests stay valid.
 | `verifyWebhook(headers, rawBody, secret, toleranceSec = 300)` | stable |
 | `ITokenStore` (memory / file / localStorage) | stable |
 | `ShipClient.deviceLogin()`, `.authorizationCodeFlow()`, `.clientCredentials()` | pre-1.0 |
-| `client.webhooks` | pre-1.0 — server routes not yet wired |
+| `client.webhooks` | pre-1.0 — server routes shipped (`/api/v1/webhooks*`), client surface still stabilizing |
 
 Cursors never appear in consumer code: `iterate()` is an async generator that
 walks pages internally. `SDK_ROUTE_MANIFEST` is load-bearing rather than
@@ -246,3 +246,28 @@ The last known-good spec is committed at `docs/openapi.json`.
 **The database is unreachable.** `/ready` returns 503 and asserts the platform
 tables exist, so a silently-skipped migration cannot masquerade as a healthy
 deploy — the failure mode that cost us a Week-5 deploy.
+
+## 10. Known limitations (honest defense-in-depth backlog)
+
+Surfaced by the final-submission audit sweep and stated here rather than hidden.
+Neither is exploitable as shipped; both are hardening, not holes.
+
+**Webhook SSRF: static targets fully blocked, DNS rebinding narrowed not
+eliminated.** `webhooks/ssrf-guard.ts` resolves the target immediately before
+delivery and refuses any address inside the perimeter — including every encoding
+of an internal address (IPv4, IPv4-mapped/compatible IPv6 in dotted *or*
+hex-compressed form, the whole `fe80::/10` span), regression-tested in
+`ssrf-guard.test.ts`. What remains is a sub-millisecond TOCTOU: `fetch`
+re-resolves the hostname when it connects, so a resolver that answers public to
+the guard and internal to the connect a moment later still wins. Closing it fully
+needs the connection pinned to the verified IP (an undici dispatcher with a fixed
+`lookup`); that is the documented follow-up.
+
+**Audit rows with no workspace are not reachable by the tenant-scoped reader.**
+`public_audit_log` records every public request, but the portal reader filters by
+`workspace_id`, so rows written without workspace context (pre-auth failures,
+and — after migration 042 — rows orphaned when a workspace is deleted) are
+retained but invisible to that view. The audit trail is complete on disk; a
+super-admin/global read surface is the backlog item, not a data-loss bug.
+Migration 042 deliberately chose SET NULL over CASCADE so these rows survive
+their subject at all.
