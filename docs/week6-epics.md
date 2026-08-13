@@ -157,10 +157,25 @@ SDK-backed one authenticating as a first-party OAuth app via client credentials
 (no human at boot to consent, no browser to redirect). Behind
 `FLEETGRAPH_VIA_SDK` so the Week-5 suite passes with the flag on and off.
 
-**After / Proof.** The proof is not that it works — it is the **audit-log rows
-carrying the agent's `client_id`**. If our own agent needs a backstage pass to
-be useful, the platform isn't real. Landing at time of writing; the audit-row
-assertion is the named acceptance criterion.
+**After / Proof — and an honest correction.** The intended proof is audit-log
+rows carrying the agent's `client_id`. An adversarial audit found that claim
+overstated, and the correction is the more useful artifact:
+
+- `FLEETGRAPH_VIA_SDK` is set in **no** environment, so the deployed agent still
+  runs the Week-5 pool path. The SDK implementation exists; production does not
+  execute it.
+- The audit-row test never sets the flag and never calls `resolveShipData`, and
+  its assertion is not time-bounded — an earlier call with the same credential
+  satisfies it. It can pass without the detector making a single HTTP call.
+- The agent's **write** path is still raw SQL. `issues:write` / `sprints:write`
+  are registered but unexercised, so agent mutations remain unscoped and
+  unaudited — precisely the gap this epic claims to close.
+
+Demonstrated: client-credentials auth as a first-party app, correct scoping,
+`documents:write` correctly absent, and SDK reads producing audit rows.
+Not demonstrated: that the agent in production goes through the front door.
+`docs/architecture.md` labels E7 "designed, not yet wired" — that is the
+accurate description.
 
 ---
 

@@ -55,6 +55,7 @@
 import { pool } from '../../db/client.js';
 import type { Queryable } from './bus.js';
 import { IDEMPOTENCY_HEADER, SIGNATURE_HEADER, signPayload } from './signature.js';
+import { checkDeliveryTarget } from './ssrf-guard.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The schedule, as data
@@ -184,6 +185,13 @@ export interface DelivererDeps {
   random?: () => number;
   timeoutMs?: number;
   maxAttempts?: number;
+  /**
+   * Permit delivery to loopback/private addresses. TESTS ONLY — suites deliver
+   * to 127.0.0.1 on an ephemeral port. Never set from configuration in a
+   * deployed environment: a production-flippable switch would reintroduce the
+   * SSRF this guard closes.
+   */
+  allowPrivateTargets?: boolean;
 }
 
 interface DeliveryJoinRow {
@@ -219,6 +227,7 @@ export class InProcessDeliverer implements IWebhookDeliverer {
   private readonly random: () => number;
   private readonly timeoutMs: number;
   private readonly maxAttempts: number;
+  private readonly allowPrivateTargets: boolean;
 
   constructor(deps: DelivererDeps) {
     this.now = deps.now;
@@ -227,6 +236,7 @@ export class InProcessDeliverer implements IWebhookDeliverer {
     this.random = deps.random ?? Math.random;
     this.timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.maxAttempts = deps.maxAttempts ?? MAX_ATTEMPTS;
+    this.allowPrivateTargets = deps.allowPrivateTargets ?? process.env.NODE_ENV === 'test';
   }
 
   async deliverOnce(deliveryId: string): Promise<DeliveryAttempt | null> {
@@ -260,6 +270,28 @@ export class InProcessDeliverer implements IWebhookDeliverer {
     const signatureHeader = signPayload(rawBody, row.signing_secret_hash, Math.floor(startedAt / 1000));
     const signedMaterial = { body: rawBody, header: signatureHeader };
 
+    // SSRF guard, checked HERE rather than at registration because DNS answers
+    // change in between: a host that resolved publicly when the subscription
+    // was created can point at 169.254.169.254 by the time we deliver. A
+    // blocked target is a PERMANENT failure — retrying cannot make an internal
+    // address acceptable — so it dead-letters rather than burning the ladder.
+    const targetCheck = await checkDeliveryTarget(row.target_url, {
+      allowPrivate: this.allowPrivateTargets,
+    });
+    if (!targetCheck.allowed) {
+      return this.record(row, {
+        attemptNumber,
+        status: 'dead_lettered',
+        responseStatus: null,
+        responseExcerpt: null,
+        latencyMs: 0,
+        nextAttemptAtMs: null,
+        scheduledDelayMs: null,
+        error: `blocked target: ${targetCheck.reason}`,
+        subscriptionDeactivated: false,
+      });
+    }
+
     let response: Response | null = null;
     let transportError: string | null = null;
 
@@ -287,7 +319,6 @@ export class InProcessDeliverer implements IWebhookDeliverer {
       });
     } catch (err) {
       transportError = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-    } finally {
       if (timer) clearTimeout(timer);
     }
 
@@ -302,7 +333,14 @@ export class InProcessDeliverer implements IWebhookDeliverer {
       );
     }
 
+    // The timer is cleared AFTER the body read, not before it. `fetch` resolves
+    // on headers, so cancelling the abort here used to leave the body read
+    // untimed: a subscriber answering 200 then trickling one byte a minute
+    // forever stalled this call, `inFlight` stayed true, and delivery for EVERY
+    // tenant in the process stopped permanently — with nothing to recover it,
+    // since requeueStuckDeliveries only runs at boot. Found by the security review.
     const excerpt = await readExcerpt(response);
+    if (timer) clearTimeout(timer);
     const classification = classifyStatus(response.status);
 
     if (classification.disposition === 'success') {
@@ -443,16 +481,54 @@ export class InProcessDeliverer implements IWebhookDeliverer {
   }
 }
 
-/** Truncated response body. Never lets a subscriber's 5 MB HTML error page
- *  into the delivery log — and never lets its own failure fail the attempt. */
+/** Hard byte cap while reading, not after.
+ *
+ *  `response.text()` buffers the WHOLE body before we get to truncate it, so a
+ *  hostile subscriber could return multiple gigabytes and exhaust memory — the
+ *  previous comment here claimed the opposite. Read from the stream instead and
+ *  stop at the cap, so a huge or endless body costs a fixed number of bytes.
+ *  Never lets its own failure fail the delivery attempt. */
+const RESPONSE_READ_CAP_BYTES = 64 * 1024;
+
 async function readExcerpt(response: Response): Promise<string | null> {
   try {
-    const text = await response.text();
-    if (!text) return null;
-    return text.length > RESPONSE_EXCERPT_LIMIT ? `${text.slice(0, RESPONSE_EXCERPT_LIMIT)}…` : text;
+    const body = response.body;
+    if (!body) {
+      const text = await response.text();
+      return text ? truncateExcerpt(text) : null;
+    }
+
+    const reader = body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          total += value.byteLength;
+          if (total >= RESPONSE_READ_CAP_BYTES) break;
+        }
+      }
+    } finally {
+      // Releases the connection whether we hit the cap or the end.
+      await reader.cancel().catch(() => undefined);
+    }
+
+    if (total === 0) return null;
+    const merged = new Uint8Array(total);
+    let offset = 0;
+    for (const c of chunks) { merged.set(c, offset); offset += c.byteLength; }
+    return truncateExcerpt(new TextDecoder().decode(merged));
   } catch {
     return null;
   }
+}
+
+function truncateExcerpt(text: string): string | null {
+  if (!text) return null;
+  return text.length > RESPONSE_EXCERPT_LIMIT ? `${text.slice(0, RESPONSE_EXCERPT_LIMIT)}…` : text;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

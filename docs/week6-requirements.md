@@ -137,11 +137,40 @@ integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 | Architecture document | docs/architecture.md, 1–2 pages, 9 required sections (module layout, SOLID w/ file paths, composition root, public/internal boundary seq diagram, OAuth flow diagrams, webhook pipeline, SDK surface, agent-as-citizen before/after, failure modes) | **MET** — `docs/architecture.md`, all 9 sections, with a shipped-vs-designed status banner |
 | OpenAPI spec | Live at /api/v1/openapi.json on deployed instance + static copy at docs/openapi.json | **MET** — both, 3.1.0, 11 paths / 13 operations, verified live |
 | AI cost analysis | Tracked dev spend; projections at 100/1k/10k/100k users; explicit assumptions: webhook fanout ratio, agent active rate, storage retention | **MET** — `docs/week6-cost-analysis.md`; all three assumptions stated with reasoning, measured spend separated from projections |
-| Per-epic write-up | Before → fix → after → proof | **MET** — `docs/week6-epics.md`; E7's proof is live (audit rows carrying the agent's client_id) |
+| Per-epic write-up | Before → fix → after → proof | **MET** — `docs/week6-epics.md`. NOTE: E7 is written as **designed, not yet wired**, matching `docs/architecture.md`. See the Epic-7 status note below |
 | Three discoveries | Candidates: Device Grant in TS; Zod→OpenAPI parity; HMAC+timestamp anti-replay; async-iterator pagination | PLANNED (rolling) |
 | Deployed application | Public URL + pre-registered read-only OAuth app + credentials in README; portal reachable; spec resolvable | PLANNED (Tue deploy, rolling) |
 | Social post | @GauntletAI; screenshot = ship webhooks tail showing verified signed event live | **OWED** — two drafts in `docs/week6-social-post.md` (hook/receipts/lesson); posting + screenshot are the owner's |
 | Epic-7 token-volume proof | Rewire doesn't change token volume — before/after via LangSmith traces | **NOT MEASURED** — the rewire changes the data-access seam, not prompts or model routing, so token volume is unchanged by construction; a LangSmith before/after was not captured |
+
+## Epic 7 — corrected status (read this before believing any E7 claim)
+
+An adversarial audit caught this ledger overstating Epic 7, and the correction
+matters more than the feature:
+
+**`FLEETGRAPH_VIA_SDK` is set in no environment.** Not in `terraform/render/`,
+not in CI, not in any compose file or env template. It defaults OFF
+(`api/src/fleetgraph/index.ts`). **The deployed agent therefore still runs the
+Week-5 code path — a direct database pool.** The SDK path exists, is
+implemented, and is unit-tested, but it is not what production executes.
+
+**The audit-row test does not prove what its name claims.** It never sets the
+flag and never calls `resolveShipData`; its assertion scans all audit rows for
+the agent's `client_id` without bounding the time window, and an earlier test in
+the same file already made a real `/api/v1` call with that credential. It can
+pass with zero HTTP calls from the detector under test.
+
+**The agent's write path is still raw SQL.** `issues:write` and `sprints:write`
+are registered scopes that nothing exercises; agent mutations remain unscoped,
+unrate-limited, and produce no audit row — the exact gap Epic 7 claims to close.
+
+What IS true and demonstrated: the agent can authenticate via client credentials
+as a first-party OAuth app, the token is scoped, `documents:write` is correctly
+absent, and reads through the SDK produce audit rows. What is NOT true: that the
+deployed agent uses it.
+
+`docs/architecture.md` had this right all along ("designed, not yet wired").
+This ledger is now consistent with it.
 
 ## I. Critical guidance compliance (doc §Critical Guidance)
 
