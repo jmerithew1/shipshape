@@ -1,3 +1,37 @@
+# ---------------------------------------------------------------------------
+# Fast, deterministic gates keyed to WHAT YOU STAGED. Kept cheap on purpose:
+# a pre-commit hook people wait 90s for gets bypassed, and a bypassed gate is
+# a disabled gate. The full test suite lives in pre-push, not here.
+# ---------------------------------------------------------------------------
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Type-check only the packages whose TypeScript actually changed. A commit that
+# does not compile should never enter history and be discovered minutes later
+# in CI.
+if printf '%s\n' "$STAGED" | grep -Eq '\.tsx?$'; then
+  printf '%s\n' "$STAGED" | grep -q '^api/'    && { echo "▸ tsc @ship/api";    pnpm --filter @ship/api    exec tsc --noEmit || exit 1; }
+  printf '%s\n' "$STAGED" | grep -q '^web/'    && { echo "▸ tsc @ship/web";    pnpm --filter @ship/web    exec tsc --noEmit || exit 1; }
+  printf '%s\n' "$STAGED" | grep -q '^sdk/'    && { echo "▸ tsc @ship/sdk";    pnpm --filter @ship/sdk    exec tsc --noEmit || exit 1; }
+  printf '%s\n' "$STAGED" | grep -q '^integrations/cli/'   && { echo "▸ tsc @ship/cli";   pnpm --filter @ship/cli   exec tsc --noEmit || exit 1; }
+  printf '%s\n' "$STAGED" | grep -q '^integrations/slack/' && { echo "▸ tsc @ship/slack"; pnpm --filter @ship/slack exec tsc --noEmit || exit 1; }
+fi
+
+# The public OpenAPI spec is generated. If a platform route changed but the
+# committed docs/openapi.json was not regenerated to match, the published
+# contract is a lie. Regenerate and refuse the commit on any drift — the exact
+# failure the route factory exists to prevent, caught before it lands.
+if printf '%s\n' "$STAGED" | grep -q '^api/src/platform/'; then
+  echo "▸ regenerating docs/openapi.json"
+  pnpm --filter @ship/api openapi:v1 >/dev/null 2>&1
+  if ! git diff --quiet -- docs/openapi.json; then
+    echo ""
+    echo "✗ docs/openapi.json is stale — a platform route changed but the spec was not regenerated."
+    echo "  Run:  pnpm --filter @ship/api openapi:v1  &&  git add docs/openapi.json"
+    echo ""
+    exit 1
+  fi
+fi
+
 # Fail on empty Playwright tests (they silently pass - major footgun)
 if [ -f "./scripts/check-empty-tests.sh" ]; then
   ./scripts/check-empty-tests.sh

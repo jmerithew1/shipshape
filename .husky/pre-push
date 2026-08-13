@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Pre-push: the heavy deterministic gate. Fires per push — the same cadence as
+# the thing it guards ("don't publish a red suite to a shared branch"), not
+# per turn and not per commit. A push is rare enough to afford the full suites
+# and important enough to justify them.
+#
+# Escape hatch for a genuine emergency: git push --no-verify. Use it knowingly;
+# CI still runs the same checks and will block the deploy.
+# ---------------------------------------------------------------------------
+
+# The SDK suite is fast and needs no database — always worth running.
+echo "▸ @ship/sdk tests"
+pnpm --filter @ship/sdk test || exit 1
+
+# The API suite needs Postgres on :5433. If it is not up, that is a real reason
+# not to push code you cannot test — fail loudly rather than skip silently.
+echo "▸ @ship/api tests (needs docker postgres on :5433)"
+pnpm --filter @ship/api test || {
+  echo ""
+  echo "✗ api tests failed. If the cause is a missing database, start it:"
+  echo "    docker compose -f docker-compose.local.yml up -d postgres"
+  echo "  then push again. To bypass in a genuine emergency: git push --no-verify"
+  echo ""
+  exit 1
+}
+
+# The workspace must actually build. CI builds before it deploys; catching a
+# broken build here saves a round trip.
+echo "▸ workspace build"
+pnpm build || exit 1
