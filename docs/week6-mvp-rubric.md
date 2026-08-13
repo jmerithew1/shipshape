@@ -11,7 +11,7 @@ independent audits (an adversarial contract audit and a security review) were
 run against this work *before* it merged, and every defect they found is listed
 at the bottom with its fix and the regression test that locks it down.
 
-Test totals at time of writing: **api 660 · sdk 81 · Playwright e2e 8**.
+Test totals at time of writing: **api 845 (61 files) · sdk 81 · cli 76 · web 165 · Playwright PKCE e2e 8**.
 
 ---
 
