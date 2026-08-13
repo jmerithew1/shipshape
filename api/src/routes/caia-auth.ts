@@ -40,11 +40,24 @@ function isValidEmail(email: string): boolean {
 }
 
 /**
- * Validate returnTo URL is same-origin (prevent open redirect)
+ * Validate returnTo is a same-origin relative path (prevent open redirect).
+ *
+ * The naive check (`startsWith('/') && !startsWith('//')`) is not enough:
+ * browsers fold a backslash to a forward slash when resolving Location, so
+ * `/\evil.com` passes both conditions yet navigates to `//evil.com` →
+ * `https://evil.com`. Reject any backslash, and resolve against a fixed origin
+ * as defense in depth — anything that escapes to another origin is refused.
  */
-function isValidReturnTo(returnTo: string): boolean {
-  // Only allow relative paths starting with /
-  return returnTo.startsWith('/') && !returnTo.startsWith('//');
+export function isValidReturnTo(returnTo: string): boolean {
+  if (!returnTo.startsWith('/')) return false;
+  if (returnTo.startsWith('//')) return false;
+  if (returnTo.includes('\\')) return false;
+  try {
+    const base = 'https://ship.internal';
+    return new URL(returnTo, base).origin === base;
+  } catch {
+    return false;
+  }
 }
 
 // GET /api/auth/caia/status - Check if CAIA auth is available

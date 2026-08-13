@@ -74,7 +74,7 @@ integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| C1 | terraform/ topology; all provider + module versions pinned; terraform plan runs cleanly; no unpinned versions | PARTIAL | terraform/render/versions.tf pins render-oss/render 1.9.1; re-verify plan cleanly this week |
+| C1 | terraform/ topology; all provider + module versions pinned; terraform plan runs cleanly; no unpinned versions | **MET (config) / PARTIAL (live plan)** | `terraform/render/versions.tf` exact-pins `render-oss/render 1.9.1` (`required_version >= 1.6.0`), lock file committed. Re-verified 2026-08-13: `terraform init -backend=false` + `terraform validate` → "configuration is valid"; `fmt -check -recursive` clean; no unpinned versions. A live `plan`/drift run needs `RENDER_API_KEY` (owner-run — deliberately not held by the agent). |
 | C2 | IAM least-privilege: start AdministratorAccess task role → lock to minimum; verify service works; verify out-of-policy action denied; before/after policy with per-permission rationale | PLANNED (Thu after early sub) | On real SSM Parameter Store identity; duplicate identity first (zero blast radius), prod swap w/ rollback |
 | C3 | Drift: manually change a resource, terraform plan shows diff; destroy → apply from scratch; screenshots/log proof service came back identically | PARTIAL | Week-5 proof exists (terraform/render/out/); refresh with week-6 resources Sat |
 | C4 | Defense: walk a modified terraform plan — every resource change, blast radius, risky ops — WITHOUT AI. Auto-fail if unable | IN PREP (today) | One-pager map + mock rehearsal rounds today |

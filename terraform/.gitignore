@@ -18,4 +18,11 @@ override.tf.json
 
 # Sensitive variable files
 *.auto.tfvars.secret
+
+# Terraform plan files — NEVER commit. A binary plan embeds the AWS account id,
+# the IAM principal, and the full network topology in cleartext. `*.tfplan`
+# alone missed a file literally named `tfplan` (no extension), which is exactly
+# what `terraform plan -out=tfplan` produces. Match every form.
 *.tfplan
+tfplan
+*tfplan
