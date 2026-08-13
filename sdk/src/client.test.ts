@@ -381,4 +381,26 @@ describe('ShipClient.authorizationCodeFlow', () => {
     expect(error.code).toBe('state_mismatch');
     expect(fetchImpl).not.toHaveBeenCalled();
   });
+
+  // Regression (security scan, LOW / CWE-352). An ABSENT state used to skip the
+  // check (the guard was `state !== undefined && state !== expected`), so an
+  // attacker-crafted redirect carrying a valid code but no state bypassed CSRF
+  // and reached the token exchange. A missing state is now a hard reject.
+  it('rejects a redirect that omits state entirely (CSRF), without exchanging the code', async () => {
+    const fetchImpl = vi.fn(async () => json({ access_token: 'nope' })) as unknown as typeof fetch;
+
+    const error = (await ShipClient.authorizationCodeFlow({
+      baseUrl: BASE_URL,
+      clientId: 'spa_app',
+      redirectUri: 'https://app.example.com/callback',
+      onAuthorizeUrl: () => undefined,
+      // No `state` field at all — the dangerous case.
+      waitForRedirect: async () => ({ code: 'c' }) as unknown as { code: string; state: string },
+      fetch: fetchImpl,
+    }).catch((e: unknown) => e)) as ShipError;
+
+    expect(ShipError.is(error)).toBe(true);
+    expect(error.code).toBe('state_mismatch');
+    expect(fetchImpl).not.toHaveBeenCalled(); // code was never exchanged
+  });
 });

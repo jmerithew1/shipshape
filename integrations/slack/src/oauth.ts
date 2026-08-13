@@ -218,6 +218,18 @@ interface SlackAccessResponse {
   team?: { id?: string; name?: string };
 }
 
+/** Extract a Bearer token from the Authorization header, or '' if absent. */
+function bearerToken(req: Request): string {
+  const auth = req.headers['authorization'];
+  if (typeof auth !== 'string') return '';
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  return match?.[1] ?? '';
+}
+
+function isProduction(): boolean {
+  return process.env['NODE_ENV'] === 'production';
+}
+
 /**
  * Mounts `/slack/install` and `/slack/oauth/callback`.
  *
@@ -237,11 +249,14 @@ export function createOAuthRouter(deps: OAuthRouterDeps): Router {
 
   router.get('/slack/install', (req: Request, res: Response) => {
     // Operator gate. Compared in constant time so the secret cannot be
-    // recovered by timing the response. Absent config secret = open (dev only),
-    // and that case is logged so it is never silently relied on in production.
+    // recovered by timing the response.
     const required = deps.config.installSecret;
     if (required !== undefined && required !== '') {
-      const provided = typeof req.query['key'] === 'string' ? req.query['key'] : '';
+      // The secret travels in the Authorization header, NOT the URL query: a
+      // query string lands in access logs and browser history (the same reason
+      // the token exchange keeps client_secret in the POST body). Operators call
+      // this once, e.g. `curl -H "Authorization: Bearer <secret>" .../slack/install`.
+      const provided = bearerToken(req);
       const a = Buffer.from(provided);
       const b = Buffer.from(required);
       const ok = a.length === b.length && timingSafeEqual(a, b);
@@ -250,8 +265,18 @@ export function createOAuthRouter(deps: OAuthRouterDeps): Router {
         res.status(403).type('text/plain').send('Not authorized to install this app.');
         return;
       }
+    } else if (isProduction()) {
+      // Fail CLOSED in production. A completed install swaps the process-wide
+      // bot token, so an unset operator secret must not leave that open to any
+      // unauthenticated caller — the default deployment used to only warn.
+      log('[slack:oauth] REFUSED /slack/install — installSecret unset in production (fail closed)');
+      res
+        .status(403)
+        .type('text/plain')
+        .send('Install flow is not configured. Set SLACK_INSTALL_SECRET.');
+      return;
     } else {
-      log('[slack:oauth] WARNING: /slack/install is UNGATED (no installSecret configured)');
+      log('[slack:oauth] WARNING: /slack/install is UNGATED (no installSecret; non-production)');
     }
     const state = stateStore.issue(generateState());
     res.redirect(302, buildAuthorizeUrl(deps.config, state, authorizeUrl));

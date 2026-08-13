@@ -154,6 +154,14 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
     await pool.query('UPDATE api_tokens SET revoked_at = NOW() WHERE oauth_app_id = $1 AND revoked_at IS NULL', [
       req.params.id!,
     ]);
+    // Revoke the refresh tokens too, not just the access tokens. Otherwise a
+    // deactivated app keeps a live issuance channel — POST /oauth/token with
+    // grant_type=refresh_token would mint fresh credentials off an outstanding
+    // refresh token even though the app is "deleted". (Security scan, CWE-613.)
+    await pool.query(
+      'UPDATE oauth_refresh_tokens SET revoked_at = NOW() WHERE app_id = $1 AND revoked_at IS NULL',
+      [req.params.id!]
+    );
     res.json({ success: true, data: { id: req.params.id, active: false } });
   } catch (err) {
     next(err);

@@ -300,10 +300,10 @@ export async function createSubscription(
 }
 
 export async function listSubscriptions(
-  opts: { appId: string; eventType?: ShipEventType; db?: Queryable }
+  opts: { appId: string; workspaceId: string; eventType?: ShipEventType; db?: Queryable }
 ): Promise<SubscriptionView[]> {
   const db = opts.db ?? pool;
-  const params: unknown[] = [opts.appId];
+  const params: unknown[] = [opts.appId, opts.workspaceId];
   let clause = '';
   if (opts.eventType) {
     params.push(opts.eventType);
@@ -312,7 +312,7 @@ export async function listSubscriptions(
   const result = await db.query<SubscriptionRow>(
     `SELECT ${SUBSCRIPTION_COLUMNS}
        FROM webhook_subscriptions
-      WHERE app_id = $1${clause}
+      WHERE app_id = $1 AND workspace_id = $2${clause}
       ORDER BY created_at DESC, id DESC`,
     params
   );
@@ -320,12 +320,13 @@ export async function listSubscriptions(
 }
 
 export async function getSubscription(
-  opts: { appId: string; id: string; db?: Queryable }
+  opts: { appId: string; workspaceId: string; id: string; db?: Queryable }
 ): Promise<SubscriptionView | null> {
   const db = opts.db ?? pool;
   const result = await db.query<SubscriptionRow>(
-    `SELECT ${SUBSCRIPTION_COLUMNS} FROM webhook_subscriptions WHERE id = $1 AND app_id = $2`,
-    [opts.id, opts.appId]
+    `SELECT ${SUBSCRIPTION_COLUMNS} FROM webhook_subscriptions
+      WHERE id = $1 AND app_id = $2 AND workspace_id = $3`,
+    [opts.id, opts.appId, opts.workspaceId]
   );
   const row = result.rows[0];
   return row ? toSubscriptionView(row) : null;
@@ -337,12 +338,13 @@ export async function getSubscription(
  * this way another app's id simply matches nothing.
  */
 export async function deleteSubscription(
-  opts: { appId: string; id: string; db?: Queryable }
+  opts: { appId: string; workspaceId: string; id: string; db?: Queryable }
 ): Promise<boolean> {
   const db = opts.db ?? pool;
   const result = await db.query<{ id: string }>(
-    `DELETE FROM webhook_subscriptions WHERE id = $1 AND app_id = $2 RETURNING id`,
-    [opts.id, opts.appId]
+    `DELETE FROM webhook_subscriptions
+      WHERE id = $1 AND app_id = $2 AND workspace_id = $3 RETURNING id`,
+    [opts.id, opts.appId, opts.workspaceId]
   );
   return result.rows.length > 0;
 }
@@ -365,6 +367,7 @@ export async function setSubscriptionActive(
 
 export interface ListDeliveriesInput {
   appId: string;
+  workspaceId: string;
   subscriptionId?: string;
   status?: string;
   cursor?: string;
@@ -382,8 +385,11 @@ export async function listDeliveries(input: ListDeliveriesInput): Promise<Page<D
   const db = input.db ?? pool;
   const pageSize = clampPageSize(input.limit);
 
-  const where: string[] = ['s.app_id = $1'];
-  const params: unknown[] = [input.appId];
+  // app_id AND workspace_id: an OAuth app can be authorized in many workspaces,
+  // so app_id alone is NOT a tenant key — the token's workspace_id is the real
+  // isolation boundary, matching the fan-out path in bus.ts.
+  const where: string[] = ['s.app_id = $1', 's.workspace_id = $2'];
+  const params: unknown[] = [input.appId, input.workspaceId];
   const push = (sql: string, value: unknown): void => {
     params.push(value);
     where.push(sql.replace('$?', `$${params.length}`));
@@ -434,15 +440,15 @@ export async function listDeliveries(input: ListDeliveriesInput): Promise<Page<D
 }
 
 export async function getDelivery(
-  opts: { appId: string; id: string; db?: Queryable }
+  opts: { appId: string; workspaceId: string; id: string; db?: Queryable }
 ): Promise<DeliveryView | null> {
   const db = opts.db ?? pool;
   const result = await db.query<DeliveryRow>(
     `SELECT ${DELIVERY_COLUMNS}
        FROM webhook_deliveries d
        JOIN webhook_subscriptions s ON s.id = d.subscription_id
-      WHERE d.id = $1 AND s.app_id = $2`,
-    [opts.id, opts.appId]
+      WHERE d.id = $1 AND s.app_id = $2 AND s.workspace_id = $3`,
+    [opts.id, opts.appId, opts.workspaceId]
   );
   const row = result.rows[0];
   return row ? toDeliveryView(row) : null;
@@ -461,7 +467,7 @@ export async function getDelivery(
  * the row that was replayed, so replays of replays form a walkable chain.
  */
 export async function replayDelivery(
-  opts: { id: string; appId?: string; db?: Queryable }
+  opts: { id: string; appId?: string; workspaceId?: string; db?: Queryable }
 ): Promise<DeliveryView> {
   const db = opts.db ?? pool;
   const result = await db.query<DeliveryRow>(
@@ -474,11 +480,12 @@ export async function replayDelivery(
        JOIN webhook_subscriptions s ON s.id = src.subscription_id
       WHERE src.id = $1
         AND ($2::uuid IS NULL OR s.app_id = $2::uuid)
+        AND ($3::uuid IS NULL OR s.workspace_id = $3::uuid)
      RETURNING id, subscription_id, event_id, event_type, idempotency_key, status,
                attempt_number, response_status, response_excerpt, latency_ms,
                last_error, replay_of_id, next_attempt_at, created_at, delivered_at,
                signed_body, signature_header`,
-    [opts.id, opts.appId ?? null]
+    [opts.id, opts.appId ?? null, opts.workspaceId ?? null]
   );
   const row = result.rows[0];
   // Same 404 whether the delivery does not exist or belongs to another app —

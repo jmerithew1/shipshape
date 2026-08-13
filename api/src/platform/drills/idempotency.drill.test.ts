@@ -316,7 +316,7 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
       step(`deliver  → HTTP 200, subscriber PROCESSED (side effects: 1)`);
 
       // ── Replay through the service, exactly as the portal's button does.
-      const replay = await replayDelivery({ id: originalId!, appId });
+      const replay = await replayDelivery({ id: originalId!, appId, workspaceId });
       expect(replay.id).not.toBe(originalId);
       // The replay is a NEW row pointing back at the original — the delivery
       // log stays append-only, so "what happened on the first attempt" is
@@ -371,7 +371,7 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
 
       // And the delivery log kept the exact signed bytes, so an integrator can
       // re-verify from the log rather than taking our word for it (migration 041).
-      const logged = await getDelivery({ appId, id: replay.id });
+      const logged = await getDelivery({ appId, workspaceId, id: replay.id });
       expect(logged?.signed_body).toBe(subscriber.received[1]!.rawBody);
       expect(logged?.signature_header).toBe(subscriber.received[1]!.signature);
       step(`log check: signed_body/signature_header on the replay row match the bytes sent`);
@@ -411,9 +411,9 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
       const [originalId] = await deliveryIdsFor(created.subscription.id);
       await deliverer.deliverOnce(originalId!);
 
-      const firstReplay = await replayDelivery({ id: originalId!, appId });
+      const firstReplay = await replayDelivery({ id: originalId!, appId, workspaceId });
       await deliverer.deliverOnce(firstReplay.id);
-      const secondReplay = await replayDelivery({ id: firstReplay.id, appId });
+      const secondReplay = await replayDelivery({ id: firstReplay.id, appId, workspaceId });
       await deliverer.deliverOnce(secondReplay.id);
 
       // The chain is walkable — replay-of-a-replay points at its own parent…
@@ -483,7 +483,7 @@ describe('DRILL — a replayed delivery reaches the subscriber twice and runs on
 
       const [originalId] = await deliveryIdsFor(created.subscription.id);
       await deliverer.deliverOnce(originalId!);
-      const replay = await replayDelivery({ id: originalId!, appId });
+      const replay = await replayDelivery({ id: originalId!, appId, workspaceId });
       await deliverer.deliverOnce(replay.id);
 
       // Two side effects from one event. The platform behaved identically; the

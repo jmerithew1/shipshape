@@ -192,10 +192,10 @@ async function mapErrors<T>(fn: () => Promise<T>): Promise<T> {
 
 export const handleListWebhookSubscriptions: RequestHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { appId } = requireApp(req);
+    const { appId, workspaceId } = requireApp(req);
     const q = (req.validated?.query ?? {}) as { event_type?: (typeof EVENT_TYPES)[number] };
     const subscriptions = await mapErrors(() =>
-      listSubscriptions({ appId, eventType: q.event_type })
+      listSubscriptions({ appId, workspaceId, eventType: q.event_type })
     );
     // The list envelope, with `next_cursor` permanently null. "Every public
     // list endpoint paginates, no exemptions" is the rule that lets the
@@ -235,10 +235,10 @@ export const handleCreateWebhookSubscription: RequestHandler = asyncHandler(
 
 export const handleDeleteWebhookSubscription: RequestHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { appId } = requireApp(req);
+    const { appId, workspaceId } = requireApp(req);
     const id = String(req.params.id);
-    const deleted = await mapErrors(() => deleteSubscription({ appId, id }));
-    // Same 404 whether it never existed or belongs to another app.
+    const deleted = await mapErrors(() => deleteSubscription({ appId, workspaceId, id }));
+    // Same 404 whether it never existed or belongs to another app/workspace.
     if (!deleted) throw ApiError.notFound('Webhook subscription not found');
     res.status(204).end();
   }
@@ -246,7 +246,7 @@ export const handleDeleteWebhookSubscription: RequestHandler = asyncHandler(
 
 export const handleListWebhookDeliveries: RequestHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { appId } = requireApp(req);
+    const { appId, workspaceId } = requireApp(req);
     // Read the VALIDATED query, never req.query: Zod strips unknown keys
     // rather than rejecting them, so reading the raw object would let an
     // undeclared param reach SQL unvalidated.
@@ -259,6 +259,7 @@ export const handleListWebhookDeliveries: RequestHandler = asyncHandler(
     const page = await mapErrors(() =>
       listDeliveries({
         appId,
+        workspaceId,
         cursor: q.cursor,
         limit: q.limit,
         subscriptionId: q.subscription_id,
@@ -271,9 +272,9 @@ export const handleListWebhookDeliveries: RequestHandler = asyncHandler(
 
 export const handleReplayWebhookDelivery: RequestHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { appId } = requireApp(req);
+    const { appId, workspaceId } = requireApp(req);
     const id = String(req.params.id);
-    const replay = await mapErrors(() => replayDelivery({ id, appId }));
+    const replay = await mapErrors(() => replayDelivery({ id, appId, workspaceId }));
     // 202, not 200: the replay is enqueued, not delivered. The response body
     // is the new delivery row, so the caller can poll it by id.
     res.status(202).json(replay);

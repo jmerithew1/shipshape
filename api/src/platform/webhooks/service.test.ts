@@ -13,6 +13,7 @@ import {
   deleteSubscription,
   deriveSigningKey,
   getDelivery,
+  getSubscription,
   listDeliveries,
   listSubscriptions,
   replayDelivery,
@@ -23,6 +24,7 @@ const sha = (s: string): string => crypto.createHash('sha256').update(s).digest(
 const runId = crypto.randomBytes(4).toString('hex');
 
 let workspaceId: string;
+let otherWorkspaceId: string;
 let userId: string;
 let appId: string;
 let otherAppId: string;
@@ -87,6 +89,11 @@ beforeAll(async () => {
     [`W6 Webhook Service ${runId}`]
   );
   workspaceId = ws.rows[0]!.id;
+  const ws2 = await pool.query<{ id: string }>(
+    `INSERT INTO workspaces (name) VALUES ($1) RETURNING id`,
+    [`W6 Webhook Service Other ${runId}`]
+  );
+  otherWorkspaceId = ws2.rows[0]!.id;
   const user = await pool.query<{ id: string }>(
     `INSERT INTO users (email, name) VALUES ($1,'Webhook Service Tester') RETURNING id`,
     [`whsvc-${runId}@ship.local`]
@@ -98,6 +105,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (workspaceId) await pool.query('DELETE FROM workspaces WHERE id = $1', [workspaceId]);
+  if (otherWorkspaceId) await pool.query('DELETE FROM workspaces WHERE id = $1', [otherWorkspaceId]);
   if (userId) await pool.query('DELETE FROM users WHERE id = $1', [userId]);
 });
 
@@ -181,28 +189,30 @@ describe('listing and deleting subscriptions', () => {
       targetUrl: 'https://hooks.test/theirs',
     });
 
-    const listed = await listSubscriptions({ appId });
+    const listed = await listSubscriptions({ appId, workspaceId });
     expect(listed.map((s) => s.id)).toEqual([mine.subscription.id]);
   });
 
   it('filters by event type', async () => {
     await create({ eventType: 'issue.created' });
     const sprint = await create({ eventType: 'sprint.started' });
-    const listed = await listSubscriptions({ appId, eventType: 'sprint.started' });
+    const listed = await listSubscriptions({ appId, workspaceId, eventType: 'sprint.started' });
     expect(listed.map((s) => s.id)).toEqual([sprint.subscription.id]);
   });
 
   it('refuses to delete another app’s subscription', async () => {
     const { subscription } = await create();
-    expect(await deleteSubscription({ appId: otherAppId, id: subscription.id })).toBe(false);
-    expect(await deleteSubscription({ appId, id: subscription.id })).toBe(true);
-    expect(await deleteSubscription({ appId, id: subscription.id })).toBe(false);
+    expect(await deleteSubscription({ appId: otherAppId, workspaceId, id: subscription.id })).toBe(
+      false
+    );
+    expect(await deleteSubscription({ appId, workspaceId, id: subscription.id })).toBe(true);
+    expect(await deleteSubscription({ appId, workspaceId, id: subscription.id })).toBe(false);
   });
 
   it('deactivates without deleting (the 410 path and the portal toggle)', async () => {
     const { subscription } = await create();
     expect(await setSubscriptionActive({ id: subscription.id, active: false })).toBe(true);
-    const [listed] = await listSubscriptions({ appId });
+    const [listed] = await listSubscriptions({ appId, workspaceId });
     expect(listed!.active).toBe(false);
   });
 });
@@ -219,7 +229,7 @@ describe('listDeliveries', () => {
     const mineDelivery = await seedDelivery(mine.subscription.id);
     await seedDelivery(theirs.subscription.id);
 
-    const page = await listDeliveries({ appId });
+    const page = await listDeliveries({ appId, workspaceId });
     expect(page.data.map((d) => d.id)).toEqual([mineDelivery.id]);
   });
 
@@ -230,15 +240,15 @@ describe('listDeliveries', () => {
     const dead = await seedDelivery(a.subscription.id, { status: 'dead_lettered' });
     await seedDelivery(b.subscription.id, { status: 'pending' });
 
-    const bySub = await listDeliveries({ appId, subscriptionId: a.subscription.id });
+    const bySub = await listDeliveries({ appId, workspaceId, subscriptionId: a.subscription.id });
     expect(bySub.data.map((d) => d.id).sort()).toEqual([pending.id, dead.id].sort());
 
-    const byStatus = await listDeliveries({ appId, status: 'dead_lettered' });
+    const byStatus = await listDeliveries({ appId, workspaceId, status: 'dead_lettered' });
     expect(byStatus.data.map((d) => d.id)).toEqual([dead.id]);
   });
 
   it('rejects an unknown status rather than silently returning everything', async () => {
-    await expect(listDeliveries({ appId, status: 'exploded' })).rejects.toBeInstanceOf(
+    await expect(listDeliveries({ appId, workspaceId, status: 'exploded' })).rejects.toBeInstanceOf(
       WebhookServiceError
     );
   });
@@ -251,12 +261,12 @@ describe('listDeliveries', () => {
       seeded.push((await seedDelivery(subscription.id, { createdAt: created })).id);
     }
 
-    const first = await listDeliveries({ appId, limit: 2 });
+    const first = await listDeliveries({ appId, workspaceId, limit: 2 });
     expect(first.data).toHaveLength(2);
     expect(first.next_cursor).not.toBeNull();
 
-    const second = await listDeliveries({ appId, limit: 2, cursor: first.next_cursor! });
-    const third = await listDeliveries({ appId, limit: 2, cursor: second.next_cursor! });
+    const second = await listDeliveries({ appId, workspaceId, limit: 2, cursor: first.next_cursor! });
+    const third = await listDeliveries({ appId, workspaceId, limit: 2, cursor: second.next_cursor! });
     expect(third.next_cursor).toBeNull();
 
     const walked = [...first.data, ...second.data, ...third.data].map((d) => d.id);
@@ -268,7 +278,7 @@ describe('listDeliveries', () => {
   });
 
   it('rejects a tampered cursor', async () => {
-    await expect(listDeliveries({ appId, cursor: 'not-a-cursor' })).rejects.toBeInstanceOf(
+    await expect(listDeliveries({ appId, workspaceId, cursor: 'not-a-cursor' })).rejects.toBeInstanceOf(
       WebhookServiceError
     );
   });
@@ -279,7 +289,7 @@ describe('replayDelivery', () => {
     const { subscription } = await create();
     const original = await seedDelivery(subscription.id, { status: 'dead_lettered' });
 
-    const replay = await replayDelivery({ id: original.id, appId });
+    const replay = await replayDelivery({ id: original.id, appId, workspaceId });
     expect(replay.id).not.toBe(original.id);
     expect(replay.idempotency_key).toBe(original.idempotencyKey);
     expect(replay.replay_of_id).toBe(original.id);
@@ -299,8 +309,8 @@ describe('replayDelivery', () => {
   it('supports replaying a replay, forming a walkable chain', async () => {
     const { subscription } = await create();
     const original = await seedDelivery(subscription.id, { status: 'dead_lettered' });
-    const first = await replayDelivery({ id: original.id, appId });
-    const second = await replayDelivery({ id: first.id, appId });
+    const first = await replayDelivery({ id: original.id, appId, workspaceId });
+    const second = await replayDelivery({ id: first.id, appId, workspaceId });
 
     expect(second.replay_of_id).toBe(first.id);
     expect(second.idempotency_key).toBe(original.idempotencyKey);
@@ -321,9 +331,57 @@ describe('replayDelivery', () => {
   it('exposes the replay through the same delivery log', async () => {
     const { subscription } = await create();
     const original = await seedDelivery(subscription.id);
-    const replay = await replayDelivery({ id: original.id, appId });
-    const fetched = await getDelivery({ appId, id: replay.id });
+    const replay = await replayDelivery({ id: original.id, appId, workspaceId });
+    const fetched = await getDelivery({ appId, workspaceId, id: replay.id });
     expect(fetched?.replay_of_id).toBe(original.id);
-    expect(await getDelivery({ appId: otherAppId, id: replay.id })).toBeNull();
+    expect(await getDelivery({ appId: otherAppId, workspaceId, id: replay.id })).toBeNull();
+  });
+});
+
+// Regression (security scan, HIGH / CWE-863). An OAuth app can be authorized in
+// many workspaces, so the SAME app_id spans tenants — the token's workspace_id
+// is the real isolation boundary. These management queries used to scope by
+// app_id ALONE, so a token for the app in workspace B could read, delete, and
+// replay workspace A's subscriptions and delivery payloads. Every query now
+// filters on (app_id, workspace_id), mirroring the fan-out path in bus.ts.
+describe('cross-workspace isolation for a shared OAuth app', () => {
+  // The victim's subscription + delivery live under `appId` in `workspaceId`.
+  // The attacker holds a token for the SAME `appId` but in `otherWorkspaceId`.
+  it('hides another workspace’s subscriptions and deliveries from a same-app token', async () => {
+    const victim = await create(); // appId, workspaceId
+    const victimDelivery = await seedDelivery(victim.subscription.id);
+
+    // The attacker (same app, different workspace) sees nothing.
+    expect(await listSubscriptions({ appId, workspaceId: otherWorkspaceId })).toEqual([]);
+    expect(
+      await getSubscription({ appId, workspaceId: otherWorkspaceId, id: victim.subscription.id })
+    ).toBeNull();
+    expect((await listDeliveries({ appId, workspaceId: otherWorkspaceId })).data).toEqual([]);
+    expect(
+      await getDelivery({ appId, workspaceId: otherWorkspaceId, id: victimDelivery.id })
+    ).toBeNull();
+
+    // …cannot delete it (row survives)…
+    expect(
+      await deleteSubscription({ appId, workspaceId: otherWorkspaceId, id: victim.subscription.id })
+    ).toBe(false);
+    expect(
+      await getSubscription({ appId, workspaceId, id: victim.subscription.id })
+    ).not.toBeNull();
+
+    // …and cannot replay it (same 404 as a non-existent row — no cross-tenant oracle).
+    await expect(
+      replayDelivery({ id: victimDelivery.id, appId, workspaceId: otherWorkspaceId })
+    ).rejects.toMatchObject({ code: 'not_found' });
+
+    // The legitimate owner (same app, correct workspace) still can do all of it.
+    expect((await listSubscriptions({ appId, workspaceId })).map((s) => s.id)).toContain(
+      victim.subscription.id
+    );
+    expect((await listDeliveries({ appId, workspaceId })).data.map((d) => d.id)).toContain(
+      victimDelivery.id
+    );
+    const replay = await replayDelivery({ id: victimDelivery.id, appId, workspaceId });
+    expect(replay.replay_of_id).toBe(victimDelivery.id);
   });
 });

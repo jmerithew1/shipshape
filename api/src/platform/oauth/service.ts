@@ -731,6 +731,17 @@ export async function rotateRefreshToken(rawToken: string): Promise<RotateRefres
 
   const claimedRow = claimed.rows[0];
   if (claimedRow) {
+    // A deactivated (revoked/deleted) app must not keep minting tokens off an
+    // outstanding refresh token. Access tokens are already rejected downstream
+    // by tokenGate's active-check, but that left the issuance channel open —
+    // this closes it, so revocation is complete at the OAuth layer instead of
+    // resting on a single downstream gate. The token was already consumed above;
+    // revoke the whole family so no sibling survives either.
+    const app = await getAppById(claimedRow.app_id);
+    if (!app || !app.active) {
+      await revokeRefreshFamily(claimedRow.family_id);
+      return null;
+    }
     try {
       const tokens = await issueTokens({
         appId: claimedRow.app_id,

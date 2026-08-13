@@ -456,6 +456,34 @@ describe('OAuth service', () => {
     expect(await rotateRefreshToken(gen2.refreshToken!)).toBeNull();
   });
 
+  // Regression (security scan, LOW / CWE-613). Deactivating an app must cut off
+  // its token-issuance channel, not just its access tokens. The refresh grant
+  // used to reissue regardless of the app's active flag, so a "deleted" app kept
+  // minting fresh credentials off an outstanding refresh token.
+  it('refuses to rotate a refresh token once the app is deactivated', async () => {
+    const { app } = await newApp();
+    const first = await issueTokens({
+      appId: app.id,
+      userId,
+      workspaceId,
+      scopes: ['documents:read'],
+    });
+
+    // The app is deleted/deactivated in the portal.
+    await pool.query('UPDATE oauth_apps SET active = false WHERE id = $1', [app.id]);
+
+    // The refresh grant now refuses — no fresh credentials for a dead app.
+    expect(await rotateRefreshToken(first.refreshToken!)).toBeNull();
+
+    // …and the whole family is revoked, so no sibling can rotate either.
+    const rows = await pool.query<{ revoked_at: Date | null }>(
+      `SELECT revoked_at FROM oauth_refresh_tokens WHERE family_id = $1`,
+      [first.familyId]
+    );
+    expect(rows.rows.length).toBeGreaterThan(0);
+    for (const row of rows.rows) expect(row.revoked_at).not.toBeNull();
+  });
+
   it('rotateRefreshToken returns null for unknown and expired tokens', async () => {
     const { app } = await newApp();
     expect(await rotateRefreshToken('ship_rt_unknown')).toBeNull();

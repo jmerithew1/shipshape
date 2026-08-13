@@ -688,3 +688,30 @@ describe('the poller claim', () => {
     }
   });
 });
+
+// Regression (security scan, MEDIUM / CWE-918). The suite runs with
+// NODE_ENV=test, which is exactly why the guard is normally off here (so tests
+// can deliver to 127.0.0.1). Production wiring passes allowPrivateTargets:false
+// explicitly, so a stray NODE_ENV=test on a deployed worker can NOT re-open
+// SSRF. This proves the guard engages when the flag is false regardless of
+// NODE_ENV, and that it blocks BEFORE any request is made.
+describe('SSRF guard engages when allowPrivateTargets is explicitly false', () => {
+  it('dead-letters a loopback target without making the request', async () => {
+    const subId = await newSubscription({ url: 'http://127.0.0.1:9/hook' });
+    const { id } = await newDelivery(subId);
+
+    const transport = makeTransport([{ status: 200, body: 'should never be called' }]);
+    const deliverer = new InProcessDeliverer({
+      now: () => Date.UTC(2026, 7, 13, 12, 0, 0),
+      fetch: transport.fetch,
+      timeoutMs: 0,
+      allowPrivateTargets: false, // what initWebhooks passes in production
+    });
+
+    const outcome = await deliverer.deliverOnce(id);
+    expect(outcome!.status).toBe('dead_lettered');
+    expect(outcome!.error).toMatch(/blocked target/);
+    // The guard runs BEFORE fetch — the loopback host is never contacted.
+    expect(transport.calls).toHaveLength(0);
+  });
+});

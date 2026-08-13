@@ -75,8 +75,14 @@ export function initWebhooks(
     fetch: globalThis.fetch,
     db: pool,
     intervalMs: opts.intervalMs ?? 1_000,
+    // Pin the SSRF guard ON explicitly. The deliverer's default derives the
+    // bypass from `NODE_ENV === 'test'`, which is convenient for suites but
+    // means a stray NODE_ENV=test on a deployed worker would silently disable
+    // the guard. Production wiring never leaves that to an ambient variable —
+    // it passes false, so no environment value can turn the guard off here.
+    allowPrivateTargets: false,
   });
-  console.log('[webhooks] delivery poller started');
+  console.log('[webhooks] delivery poller started (SSRF guard enforced)');
   return handle;
 }
 

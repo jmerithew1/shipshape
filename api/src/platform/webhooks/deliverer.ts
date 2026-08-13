@@ -189,7 +189,8 @@ export interface DelivererDeps {
    * Permit delivery to loopback/private addresses. TESTS ONLY — suites deliver
    * to 127.0.0.1 on an ephemeral port. Never set from configuration in a
    * deployed environment: a production-flippable switch would reintroduce the
-   * SSRF this guard closes.
+   * SSRF this guard closes. Production wiring (initWebhooks) passes `false`
+   * EXPLICITLY so the guard cannot be turned off by an ambient NODE_ENV.
    */
   allowPrivateTargets?: boolean;
 }
@@ -237,6 +238,16 @@ export class InProcessDeliverer implements IWebhookDeliverer {
     this.timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.maxAttempts = deps.maxAttempts ?? MAX_ATTEMPTS;
     this.allowPrivateTargets = deps.allowPrivateTargets ?? process.env.NODE_ENV === 'test';
+    // Never let the SSRF guard be off outside a test run without saying so out
+    // loud. Production wiring passes `false` explicitly, so reaching this warning
+    // means either a real test or a misconfiguration worth screaming about.
+    if (this.allowPrivateTargets && process.env.NODE_ENV !== 'test') {
+      console.warn(
+        '[webhooks] WARNING: SSRF guard is DISABLED (allowPrivateTargets=true) outside a test ' +
+          'environment. Webhook delivery can reach internal/loopback/metadata addresses. ' +
+          'This must never be the case in production.'
+      );
+    }
   }
 
   async deliverOnce(deliveryId: string): Promise<DeliveryAttempt | null> {

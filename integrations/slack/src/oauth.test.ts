@@ -271,14 +271,44 @@ describe('security review — install is gated and workspace-pinned', () => {
 
   it('refuses /slack/install with a WRONG operator key', async () => {
     const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
-    const res = await fetch(`${url}/slack/install?key=nope`, { redirect: 'manual' });
+    const res = await fetch(`${url}/slack/install`, {
+      redirect: 'manual',
+      headers: { authorization: 'Bearer nope' },
+    });
     expect(res.status).toBe(403);
   });
 
-  it('allows /slack/install with the correct operator key', async () => {
+  it('allows /slack/install with the correct operator key in the Authorization header', async () => {
+    const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
+    const res = await fetch(`${url}/slack/install`, {
+      redirect: 'manual',
+      headers: { authorization: 'Bearer op-secret' },
+    });
+    expect(res.status).toBe(302);
+  });
+
+  it('ignores the operator secret in the URL query — it must not travel in the URL', async () => {
+    // Regression (security scan, CWE-598): the secret used to be read from
+    // ?key=, which lands in access logs and browser history. Only the
+    // Authorization header is honored now, so the query form is refused.
     const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
     const res = await fetch(`${url}/slack/install?key=op-secret`, { redirect: 'manual' });
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(403);
+  });
+
+  it('fails CLOSED in production when installSecret is unset', async () => {
+    // Regression (security scan, CWE-306): the default (no installSecret) used
+    // to leave the token-swapping install flow open to anyone. In production it
+    // now refuses rather than only logging a warning.
+    const prev = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const { url } = await harness(); // no installSecret configured
+      const res = await fetch(`${url}/slack/install`, { redirect: 'manual' });
+      expect(res.status).toBe(403);
+    } finally {
+      process.env.NODE_ENV = prev;
+    }
   });
 
   it('refuses a completed install for a workspace it was not configured to serve', async () => {

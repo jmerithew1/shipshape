@@ -284,8 +284,12 @@ export async function runAuthorizationCodeFlow(
   await opts.onAuthorizeUrl(authorizeUrl.toString(), state);
 
   const redirect = await opts.waitForRedirect(state);
-  // CSRF: a redirect carrying someone else's state is not our flow.
-  if (redirect.state !== undefined && redirect.state !== state) {
+  // CSRF: the redirect MUST carry back exactly the state we issued. An absent
+  // state is a mismatch, not a pass — treating `undefined` as acceptable let an
+  // attacker-crafted redirect that omits state skip the check entirely and bind
+  // the victim's session to the attacker's authorization (login CSRF). The
+  // comparison is unconditional so a missing state is a hard reject.
+  if (redirect.state !== state) {
     throw new ShipError({
       kind: 'auth',
       code: 'state_mismatch',
