@@ -9,6 +9,21 @@ import { linkUserToWorkspaceViaInvite } from '../services/invite-acceptance.js';
 
 const router: RouterType = Router();
 
+/**
+ * The user id of the caller's active session, or null if unauthenticated.
+ * These invite routes are mounted WITHOUT authMiddleware (a brand-new user has
+ * no account yet), so identity is read straight from the session cookie.
+ */
+async function currentUserId(req: Request): Promise<string | null> {
+  const sessionId = req.cookies?.session_id;
+  if (!sessionId) return null;
+  const { rows } = await pool.query<{ user_id: string }>(
+    'SELECT user_id FROM sessions WHERE id = $1 AND expires_at > NOW()',
+    [sessionId]
+  );
+  return rows[0]?.user_id ?? null;
+}
+
 // GET /api/invites/:token - Validate invite token
 router.get('/:token', async (req: Request, res: Response): Promise<void> => {
   const { token } = req.params;
@@ -193,6 +208,44 @@ router.post('/:token/accept', async (req: Request, res: Response): Promise<void>
         });
         return;
       }
+
+      // Existing account, not yet a member of this workspace. A pending invite
+      // token must NOT by itself authenticate an existing user — that would be
+      // account takeover (CWE-287): anyone holding the token would get a session
+      // as the invited person. Require the caller to ALREADY hold a session for
+      // THIS user before joining them, and never mint a new session here.
+      const callerId = await currentUserId(req);
+      if (callerId !== user.id) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          error: {
+            code: ERROR_CODES.UNAUTHORIZED,
+            message:
+              'This email already has a Ship account. Log in as that account first, then reopen this invite link to join the workspace.',
+          },
+          data: { requiresLogin: true, email: invite.email },
+        });
+        return;
+      }
+
+      // The caller IS the invited user (proven by their own session). Add the
+      // membership via the shared service (which also marks the invite used) and
+      // return — they are already authenticated, so no new session is issued.
+      await linkUserToWorkspaceViaInvite(user, invite);
+      await logAuditEvent({
+        workspaceId: invite.workspace_id,
+        actorUserId: user.id,
+        action: 'invite.accept',
+        resourceType: 'invite',
+        resourceId: invite.id,
+        details: { email: invite.email, role: invite.role, existing_user: true },
+        req,
+      });
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: { workspace_id: invite.workspace_id, joined: true },
+      });
+      return;
     } else {
       // Create new user
       if (!password || password.length < 8) {

@@ -179,6 +179,12 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Build the workspace in dependency order BEFORE anything imports it. The
+      # TTFE drill compiles against @ship/sdk (and prove-live may too); without
+      # sdk/dist present its tsc fails "Cannot find module '@ship/sdk'" and every
+      # downstream type collapses to implicit-any. A full build can't lose the
+      # ordering the way `--filter @ship/sdk build` alone did.
+      - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - name: Wait for the release to be live
         run: |
@@ -191,8 +197,6 @@ jobs:
           echo "::error::deployed instance did not become ready"; exit 1
       - name: Verify the live deployment (browser, with receipts)
         run: pnpm exec playwright test e2e/prove-live.spec.ts --workers=1
-      - name: Build the SDK (the TTFE drill imports @ship/sdk)
-        run: pnpm --filter @ship/sdk build
       - name: TTFE drill against the live deployment (fails the build past threshold)
         # The proof spine: from a clean checkout, how long until a developer holds
         # a signed event they have verified themselves? Client Credentials against
