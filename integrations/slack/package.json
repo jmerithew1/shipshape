@@ -1,0 +1,29 @@
+{
+  "name": "@ship/slack",
+  "version": "0.1.0",
+  "description": "Slack integration for Ship — a signature-verifying webhook receiver that posts document.created and issue.assigned to a channel, plus the Slack OAuth install flow. Speaks to Ship only through @ship/sdk.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ship/sdk": "workspace:*",
+    "express": "4.22.1"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "22.19.5",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
