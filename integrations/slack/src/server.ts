@@ -190,10 +190,14 @@ export function createApp(options: CreateAppOptions): AppHandle {
     }
 
     // ── Gate 4: dedupe. Delivery is at-least-once; replays reuse the key. ────
-    const idempotencyKey =
-      typeof req.headers['ship-idempotency-key'] === 'string'
-        ? req.headers['ship-idempotency-key']
-        : `evt_${event.id}`;
+    // The key is derived from event.id, which is INSIDE the signed body — never
+    // from the Ship-Idempotency-Key header, which the HMAC does not cover.
+    // Keying on the header let an attacker who captured one valid signed
+    // delivery replay the exact bytes within the 5-minute tolerance while
+    // incrementing the header, defeating dedupe and posting N duplicate
+    // messages. The signed id cannot be varied without breaking the signature.
+    // Found by the security review.
+    const idempotencyKey = `evt_${event.id}`;
 
     if (!store.claim(idempotencyKey)) {
       log(`[ship] duplicate delivery ${idempotencyKey} (${event.type}) — not posting again`);
@@ -202,15 +206,32 @@ export function createApp(options: CreateAppOptions): AppHandle {
     }
 
     // ── Post, racing the ack deadline. ──────────────────────────────────────
-    const result = await raceDeadline(
-      options.poster.post({ channel: options.poster.channel, text }),
-      ackDeadlineMs
-    );
+    // The post promise is captured so the 202 background path can OBSERVE it.
+    // Previously a post that failed AFTER the 2.5s ack was never seen: the claim
+    // stayed held, so Ship's retry (and the operator's manual replay) deduped to
+    // a no-op and the message was silently lost — during precisely a Slack
+    // incident, when the 2.5–5s band is where failing calls land. Found by the
+    // security review.
+    const postPromise = options.poster.post({ channel: options.poster.channel, text });
+    const result = await raceDeadline(postPromise, ackDeadlineMs);
 
     if (!result.settled) {
-      // Ack now, finish later. The claim stays held so a Ship retry is a no-op
-      // rather than a second message in the channel.
+      // Ack now, finish later — but keep watching the post. On success the held
+      // claim correctly makes a Ship retry a no-op. On FAILURE we release the
+      // claim so the retry/replay actually reposts instead of being deduped into
+      // silence. Ship already has its 202 (an accepted delivery), so we cannot
+      // change its outcome for THIS attempt — releasing the claim is what makes
+      // recovery possible on the next one.
       log(`[ship] ${idempotencyKey}: Slack slow, acking 202 and finishing in background`);
+      void postPromise
+        .then(() => {
+          log(`[ship] ${idempotencyKey}: background post succeeded`);
+        })
+        .catch((err: unknown) => {
+          const m = err instanceof Error ? err.message : String(err);
+          store.release(idempotencyKey);
+          log(`[ship] ${idempotencyKey}: background post FAILED after 202 — ${m} (claim released for retry)`);
+        });
       res.status(202).json({ status: 'accepted', key: idempotencyKey });
       return;
     }

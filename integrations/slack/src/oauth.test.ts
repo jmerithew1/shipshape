@@ -47,6 +47,7 @@ function harness(
     accessThrows?: boolean;
     state?: string;
     stateStore?: StateStore;
+    configOverrides?: Partial<OAuthConfig>;
   } = {}
 ): Promise<Harness> {
   const store = new MemoryInstallationStore();
@@ -75,7 +76,7 @@ function harness(
   const app = express();
   app.use(
     createOAuthRouter({
-      config: CONFIG,
+      config: { ...CONFIG, ...options.configOverrides },
       store,
       fetchImpl,
       logger: () => {},
@@ -257,5 +258,51 @@ describe('StateStore', () => {
     store.issue('c');
     expect(store.consume('a')).toBe(false);
     expect(store.consume('c')).toBe(true);
+  });
+});
+
+// ── Security review fixes (unauthenticated install + workspace hijack) ───────
+describe('security review — install is gated and workspace-pinned', () => {
+  it('refuses /slack/install without the operator key when a secret is set', async () => {
+    const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
+    const res = await fetch(`${url}/slack/install`, { redirect: 'manual' });
+    expect(res.status).toBe(403);
+  });
+
+  it('refuses /slack/install with a WRONG operator key', async () => {
+    const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
+    const res = await fetch(`${url}/slack/install?key=nope`, { redirect: 'manual' });
+    expect(res.status).toBe(403);
+  });
+
+  it('allows /slack/install with the correct operator key', async () => {
+    const { url } = await harness({ configOverrides: { installSecret: 'op-secret' } });
+    const res = await fetch(`${url}/slack/install?key=op-secret`, { redirect: 'manual' });
+    expect(res.status).toBe(302);
+  });
+
+  it('refuses a completed install for a workspace it was not configured to serve', async () => {
+    // Slack's fake response is team T0TEAM; pin to a DIFFERENT workspace.
+    const state = 'fixed-state';
+    const { url, store, installed } = await harness({
+      state,
+      configOverrides: { expectedTeamId: 'T-OTHER' },
+    });
+    // Mint the state via /install, then complete the callback.
+    await fetch(`${url}/slack/install`, { redirect: 'manual' });
+    const res = await fetch(`${url}/slack/oauth/callback?code=c&state=${state}`, { redirect: 'manual' });
+    expect(res.status).toBe(403);
+    // The hijack is fully prevented: nothing saved, nothing swapped.
+    expect(await store.latest()).toBeUndefined();
+    expect(installed).toHaveLength(0);
+  });
+
+  it('accepts a completed install for the pinned workspace', async () => {
+    const state = 'fixed-state-2';
+    const { url, store } = await harness({ state, configOverrides: { expectedTeamId: 'T0TEAM' } });
+    await fetch(`${url}/slack/install`, { redirect: 'manual' });
+    const res = await fetch(`${url}/slack/oauth/callback?code=c&state=${state}`, { redirect: 'manual' });
+    expect(res.status).toBe(200);
+    expect((await store.latest())?.team_id).toBe('T0TEAM');
   });
 });

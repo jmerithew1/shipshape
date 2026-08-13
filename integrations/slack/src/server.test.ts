@@ -541,3 +541,63 @@ describe('logging', () => {
     expect(lines.join('\n')).not.toContain(SECRET);
   });
 });
+
+// ── Security review fixes: unsigned dedupe header + the 202 background hole ───
+describe('security review — dedupe keys on the signed id, not the header', () => {
+  it('ignores a mutated Ship-Idempotency-Key and dedupes on the signed event id', async () => {
+    const poster = spyPoster();
+    const { app } = createApp({ secret: SECRET, poster, logger: () => {} });
+    const url = await listen(app);
+    const rawBody = documentCreatedBody();
+
+    // Same signed bytes replayed while the attacker varies the UNSIGNED header.
+    // Keying on the header would post twice; keying on the signed event.id
+    // makes the second a duplicate.
+    const first = await deliver(url, { rawBody, idempotencyKey: 'attacker-1' });
+    const second = await deliver(url, {
+      rawBody,
+      idempotencyKey: 'attacker-2',
+      signature: sign(rawBody),
+    });
+
+    expect(first.status).toBe(200);
+    expect(await first.json()).toMatchObject({ status: 'posted' });
+    expect(await second.json()).toMatchObject({ status: 'duplicate' });
+    expect(poster.calls).toHaveLength(1);
+  });
+});
+
+describe('security review — a post failing after the 202 releases the claim', () => {
+  it('releases the held claim when the background post fails after the ack', async () => {
+    // Deterministic, no timer race: the post PENDS until we reject it by hand,
+    // so the 20ms ack deadline reliably fires first and the request 202s with
+    // the post still in flight. We then fail the post and assert the claim was
+    // released — previously it stayed held forever and the event was lost, so a
+    // Ship redelivery deduped into silence during exactly a Slack incident.
+    const poster = spyPoster();
+    let rejectPost!: (e: Error) => void;
+    const postGate = new Promise<void>((_resolve, reject) => {
+      rejectPost = reject;
+    });
+    poster.post = async (m) => {
+      poster.calls.push(m);
+      await postGate;
+    };
+
+    const store = new IdempotencyStore();
+    const { app } = createApp({ secret: SECRET, poster, store, ackDeadlineMs: 20, logger: () => {} });
+    const url = await listen(app);
+    const rawBody = documentCreatedBody();
+    const key = 'evt_11111111-1111-4111-8111-111111111111';
+
+    const res = await deliver(url, { rawBody });
+    expect(res.status).toBe(202);
+    expect(store.has(key)).toBe(true); // claim held while the post is in flight
+
+    rejectPost(new Error('slack exploded after the ack'));
+    await new Promise((r) => setTimeout(r, 30)); // let the background .catch run
+
+    expect(store.has(key)).toBe(false); // released → a redelivery can repost
+    expect(poster.calls).toHaveLength(1);
+  });
+});

@@ -80,8 +80,22 @@ function main(): void {
       ? new FileInstallationStore(storePath)
       : new MemoryInstallationStore();
 
+    const installSecret = env['SLACK_INSTALL_SECRET'];
+    const expectedTeamId = env['SLACK_TEAM_ID'];
+    if (!installSecret) {
+      console.warn(
+        '[ship] WARNING: SLACK_INSTALL_SECRET is unset — /slack/install is open to anyone. Set it in production.'
+      );
+    }
+
     oauth = {
-      config: { clientId, clientSecret, redirectUri },
+      config: {
+        clientId,
+        clientSecret,
+        redirectUri,
+        ...(installSecret ? { installSecret } : {}),
+        ...(expectedTeamId ? { expectedTeamId } : {}),
+      },
       store,
       onInstalled: (installation: Installation) => {
         poster.swap(createSlackPoster({ token: installation.bot_token, channel }));

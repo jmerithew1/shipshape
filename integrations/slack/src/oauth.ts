@@ -34,7 +34,7 @@
  * expect to replace first.
  */
 
-import { randomBytes, randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { Router, type Request, type Response } from 'express';
 import type { FetchLike } from './slack.js';
@@ -158,6 +158,22 @@ export interface OAuthConfig {
   /** Must byte-match the redirect URL registered in the Slack app manifest. */
   redirectUri: string;
   scopes?: string[];
+  /**
+   * Shared secret gating who may START an install. Without it `/slack/install`
+   * was open to the whole internet: anyone could install the app into their own
+   * workspace and, via onInstalled, swap the process-wide bot token — hijacking
+   * the deployment's poster. The operator hits
+   * `/slack/install?key=<installSecret>`; a mismatch or absence is refused.
+   * Found by the security review. Undefined disables the gate (dev only).
+   */
+  installSecret?: string;
+  /**
+   * The one Slack workspace this deployment is allowed to serve. Even a
+   * completed OAuth exchange is refused unless team.id matches — so an install
+   * that somehow reaches the callback for a DIFFERENT workspace cannot replace
+   * the poster. Undefined disables the pin (dev/single-tenant convenience).
+   */
+  expectedTeamId?: string;
 }
 
 export interface OAuthRouterDeps {
@@ -212,7 +228,24 @@ export function createOAuthRouter(deps: OAuthRouterDeps): Router {
   const doFetch: FetchLike =
     deps.fetchImpl ?? ((input, init) => fetch(input, init) as unknown as ReturnType<FetchLike>);
 
-  router.get('/slack/install', (_req: Request, res: Response) => {
+  router.get('/slack/install', (req: Request, res: Response) => {
+    // Operator gate. Compared in constant time so the secret cannot be
+    // recovered by timing the response. Absent config secret = open (dev only),
+    // and that case is logged so it is never silently relied on in production.
+    const required = deps.config.installSecret;
+    if (required !== undefined && required !== '') {
+      const provided = typeof req.query['key'] === 'string' ? req.query['key'] : '';
+      const a = Buffer.from(provided);
+      const b = Buffer.from(required);
+      const ok = a.length === b.length && timingSafeEqual(a, b);
+      if (!ok) {
+        log('[slack:oauth] refused /slack/install — missing or wrong operator key');
+        res.status(403).type('text/plain').send('Not authorized to install this app.');
+        return;
+      }
+    } else {
+      log('[slack:oauth] WARNING: /slack/install is UNGATED (no installSecret configured)');
+    }
     const state = stateStore.issue(generateState());
     res.redirect(302, buildAuthorizeUrl(deps.config, state, authorizeUrl));
   });
@@ -275,8 +308,20 @@ export function createOAuthRouter(deps: OAuthRouterDeps): Router {
         return;
       }
 
+      const teamId = payload.team?.id ?? randomUUID();
+
+      // Workspace pin. Even a fully valid OAuth exchange is refused if it is for
+      // a workspace this deployment was not configured to serve — so a
+      // completed install for a stranger's workspace can never reach save() or
+      // onInstalled() and cannot swap the poster's bot token.
+      if (deps.config.expectedTeamId !== undefined && teamId !== deps.config.expectedTeamId) {
+        log(`[slack:oauth] refused install for unexpected workspace ${teamId}`);
+        res.status(403).type('text/plain').send('This app is not configured for that Slack workspace.');
+        return;
+      }
+
       const installation: Installation = {
-        team_id: payload.team?.id ?? randomUUID(),
+        team_id: teamId,
         team_name: payload.team?.name ?? 'unknown workspace',
         bot_token: payload.access_token,
         bot_user_id: payload.bot_user_id ?? '',
