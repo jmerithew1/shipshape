@@ -80,6 +80,16 @@ jobs:
       # runner (passes locally, 839/839), blocking the deploy job behind a
       # step that asserts nothing. Give it heap headroom, and do not let a
       # reporting step gate a release.
+      - name: OpenAPI spec drift (committed copy must match the generator)
+        run: |
+          pnpm --filter @ship/api openapi:v1
+          if ! git diff --quiet -- docs/openapi.json; then
+            echo "::error::docs/openapi.json is stale. Run: pnpm --filter @ship/api openapi:v1"
+            git --no-pager diff -- docs/openapi.json
+            exit 1
+          fi
+          echo "spec is byte-current with the generator"
+
       - name: Coverage (api)
         continue-on-error: true
         env:
@@ -152,3 +162,39 @@ jobs:
             -H "Content-Type: application/json" \
             "https://api.render.com/v1/services/srv-d9p97qpt0dsc73d3sr20/deploys" \
             -d '{}'
+
+  # A deploy is not proof the deployed thing works. This walks the live surface
+  # in a real browser after the release lands and fails the run if production is
+  # not actually serving. It exists because a deploy was twice reported as
+  # successful while prod still ran an older build.
+  verify-deployment:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Wait for the release to be live
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS https://ship-api-r1om.onrender.com/ready | grep -q '"platform_tables":true'; then
+              echo "live after ${i} attempts"; exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::deployed instance did not become ready"; exit 1
+      - name: Verify the live deployment (browser, with receipts)
+        run: pnpm exec playwright test e2e/prove-live.spec.ts --workers=1
+      - name: Upload verification receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-verification-${{ github.sha }}
+          path: evidence/
+          retention-days: 30
