@@ -9,9 +9,9 @@ Updated at the end of every slice. This ledger is the anchor of the week's devia
 ## A. MVP hard gate (all required to pass — Tue Aug 12, 11:59 PM CT)
 
 Evidence current as of the final integration. Test totals:
-**api 845 (61 files) · sdk 81 · cli 76 · web 165 · Playwright PKCE e2e 8** — zero
-regressions in the pre-existing suites. Deployed and verified live at 11 paths /
-13 operations.
+**api 845 (61 files) · sdk 81 · cli 76 · slack 55 · web 165 · Playwright PKCE e2e 8
+= 1,222 tests** — zero regressions in the pre-existing suites. All five required
+integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 
 | # | Requirement (verbatim condensed) | Status | Evidence |
 |---|---|---|---|
@@ -125,7 +125,7 @@ regressions in the pre-existing suites. Deployed and verified live at 11 paths /
 | Refresh-token rotation drill (stolen reuse invalidates family) | **MET** — `drills/refresh-rotation.drill.test.ts`; asserts already-minted ACCESS tokens die too, not just the refresh chain |
 | Idempotency-Key end-to-end dedupe drill | **MET** — `drills/idempotency.drill.test.ts`; 2 deliveries, 1 key, **1 side effect**, plus a dedupe-disabled control |
 | Browser SDK demo (Auth Code + PKCE SPA listing documents) | **MET (built, not browser-driven)** — `integrations/browser-demo/`; PKCE via Web Crypto, LocalStorageTokenStore, lists documents. Type-checks and builds; never exercised in a real browser because Ship has no rendered consent screen (`/oauth/authorize` returns consent CONTEXT as JSON by design) |
-| Slack integration (signed webhooks → channel posts via Slack OAuth) | IN PROGRESS — the fifth integration; four are already met |
+| Slack integration (signed webhooks → channel posts via Slack OAuth) | **MET (OAuth flow unexercised against real Slack)** — `integrations/slack/`, 55 tests. Raw-body verify before any action, bounded-LRU dedupe on `Ship-Idempotency-Key`, and a deliberate status contract: 4xx for what can never succeed on retry (bad signature, Slack's permanent refusals) so Ship dead-letters once, 5xx only for transient failures with the idempotency claim RELEASED so the retry actually posts. No Slack workspace exists here, so the install round-trip against slack.com is unverified |
 
 ## H. Submission deliverables (Final: Sun Aug 16, 11:59 AM CT)
 
