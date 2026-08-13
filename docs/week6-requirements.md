@@ -90,13 +90,13 @@ integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 | D6 | Subscription via SDK → create document → signed POST arrives <2s → SDK verifies → tampered body rejected | **MET** | `platform/webhooks/*.test.ts` — subscription → event → signed delivery → SDK verifies → tampered body rejected. 84 webhook tests |
 | D7 | Subscriber 500s ×3 then 200: retry waits ≥1s/4s/16s before attempts; 4th records success in delivery log | **MET** | `deliverer.test.ts` — 500 x3 then 200, waits asserted >=1s/4s/16s via an INJECTED clock (zero sleeps), 4th attempt records success in the delivery log |
 | D8 | 6 consecutive failures → DLQ visible in portal → Replay against healthy subscriber succeeds with original idempotency key | **MET** | 6 forced failures → `dead_lettered`; replay asserted to carry the ORIGINAL idempotency key with `replay_of_id` set (`drills/idempotency.drill.test.ts`, incl. a dedupe-disabled control so the pass cannot be vacuous) |
-| D9 | TTFE drill end-to-end from clean container: install → login → create → verified webhook, <30min human / <60s CI | **PARTIAL** | `pnpm drill ttfe` exists with per-stage timing and a failing threshold; proven end-to-end against a fake API (615 ms total). NOT yet run against production — needs `SHIP_CLIENT_SECRET` provisioned. The 0%-flake-over-20-runs target is therefore unproven |
+| D9 | TTFE drill end-to-end from clean container: install → login → create → verified webhook, <30min human / <60s CI | **PARTIAL → wired** | `pnpm --filter @ship/cli drill ttfe` — per-stage timing + failing threshold; proven end-to-end at 615 ms against a fake API. Now WIRED against **prod** in CI (`verify-deployment`, Client Credentials as the grader app, poll mode) with `SHIP_CLIENT_SECRET` provisioned. The against-prod number and the 0%-flake-over-20-runs evidence accrue from the CI runs starting with the push that lands this step (each run uploads a `ttfe-<sha>` timing artifact). |
 
 ## E. Performance targets
 
 | Metric | Target | Status |
 |---|---|---|
-| TTFE (clean machine, docs only) | ≤ 30 min; CI < 60 s (P95) | **PARTIAL** — drill proven end-to-end at 615 ms against a fake API; not yet run against prod (needs `SHIP_CLIENT_SECRET`) |
+| TTFE (clean machine, docs only) | ≤ 30 min; CI < 60 s (P95) | **PARTIAL → wired** — 615 ms against a fake API; now runs against prod in CI (`verify-deployment`) with `SHIP_CLIENT_SECRET` set. Prod P95 accrues from CI runs starting with this push (`ttfe-<sha>` artifacts). |
 | OAuth Auth Code + PKCE round-trip P95 | < 3 s | **MET** — the 8-spec Playwright suite completes in 18.4 s serial for the whole file |
 | OpenAPI spec parity (fitness) | 100% | **MET** — `sdk-parity.test.ts`, both directions + method/path, zero drift |
 | Webhook delivery P95 (first attempt) | < 2 s | **MET** — in-process deliverer; drill measured 573 ms receive against a local subscriber |
@@ -115,7 +115,7 @@ integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 | `pnpm drill ttfe` runs full loop vs containerized Ship from clean working dir | **MET** — `integrations/cli/drill/ttfe.ts` |
 | Per-stage timing instrumentation (install, login, subscribe, create, receive, verify) in ms | **MET** — measured run: install 1 · login 30 · subscribe 7 · create 3 · receive 573 · verify 1 ms |
 | One-line SDK verification; tampered/expired fail, valid passes | **MET** — `verifyWebhook()`; tampered → exit 1 with an explicit failure line |
-| Drill in CI on every PR; regression past threshold fails build | **NOT WIRED** — the CI step is written in the CLI agent's report but not added, because it needs `SHIP_CLIENT_SECRET` as a repo secret |
+| Drill in CI on every PR; regression past threshold fails build | **WIRED** — `.github/workflows/ci.yml` `verify-deployment` runs `pnpm --filter @ship/cli drill ttfe --json` against prod after each deploy; a run over the threshold exits non-zero and fails the job. `SHIP_CLIENT_SECRET` provisioned as a repo secret. Timing uploaded as the `ttfe-<sha>` artifact. (Evidence = the first green run after this lands.) |
 
 ## G. Integrations (5 of 7; CLI must-ship)
 
@@ -181,4 +181,4 @@ This ledger is now consistent with it.
 | In-memory deliverer resolves synchronously in unit tests; real deliverer tested with deterministic clock injection — never setTimeout waits | **MET** — injected clock throughout; zero sleeps in any webhook test |
 | One LLM call per agent turn; platform never invokes the LLM | COMPLIANT BY DESIGN (platform is LLM-free; FleetGraph unchanged) |
 | integrations/ imports only @ship/sdk — never api/src — enforced by workspace dependency rule | **MET** — lint rule verified NON-vacuously: a deliberate `api/src` import was added, confirmed to error, then removed |
-| TTFE drill in CI from Day 5 onward | **NOT WIRED** — drill exists and passes; the CI step needs `SHIP_CLIENT_SECRET` as a repo secret |
+| TTFE drill in CI from Day 5 onward | **WIRED** — added to the `verify-deployment` job; runs against prod on every push to main. `SHIP_CLIENT_SECRET` set. Poll mode (reads signed_body from the delivery log — no inbound URL). First prod run is the push that lands this. |

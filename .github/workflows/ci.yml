@@ -191,6 +191,33 @@ jobs:
           echo "::error::deployed instance did not become ready"; exit 1
       - name: Verify the live deployment (browser, with receipts)
         run: pnpm exec playwright test e2e/prove-live.spec.ts --workers=1
+      - name: Build the SDK (the TTFE drill imports @ship/sdk)
+        run: pnpm --filter @ship/sdk build
+      - name: TTFE drill against the live deployment (fails the build past threshold)
+        # The proof spine: from a clean checkout, how long until a developer holds
+        # a signed event they have verified themselves? Client Credentials against
+        # prod as the grader app (SHIP_CLIENT_ID / SHIP_BASE_URL default to the
+        # grader app + deployed URL). Poll mode needs no inbound URL — it reads the
+        # delivery and its signed_body back from the delivery log and verifies the
+        # signature locally. A run over the threshold (default 60s) exits non-zero
+        # and fails this job, exactly like a broken test.
+        env:
+          SHIP_CLIENT_SECRET: ${{ secrets.SHIP_CLIENT_SECRET }}
+        run: |
+          if [ -z "${SHIP_CLIENT_SECRET}" ]; then
+            echo "::warning::SHIP_CLIENT_SECRET not set — skipping TTFE drill. Set it in repo secrets to enable the gate."
+            exit 0
+          fi
+          set +e
+          pnpm --silent --filter @ship/cli drill ttfe --json | tee ttfe-result.json
+          exit ${PIPESTATUS[0]}
+      - name: Upload TTFE timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ttfe-${{ github.sha }}
+          path: ttfe-result.json
+          retention-days: 30
       - name: Upload verification receipts
         if: always()
         uses: actions/upload-artifact@v4
