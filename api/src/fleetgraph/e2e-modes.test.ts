@@ -228,6 +228,63 @@ describe('FleetGraph E2E (both modes, stable fakes)', () => {
     expect(res.body.response).toContain(chatQuestion);
   });
 
+  // Regression (security scan, CWE-639). The chat panel must not read a private
+  // document the REST API would hide. Our user is a plain member — not the
+  // creator, not an admin — so a private doc owned by someone else must load NO
+  // content in the respond node; the grounded answer sees "unknown document".
+  it('on-demand chat refuses to surface another user’s PRIVATE document', async () => {
+    const secretTitle = `SECRET-PRIVATE-${testRunId}`;
+    const other = await pool.query(
+      `INSERT INTO users (email, password_hash, name) VALUES ($1,'x','Other Owner') RETURNING id`,
+      [`other-${testRunId}@ship.local`],
+    );
+    const otherId: string = other.rows[0].id;
+    const priv = await pool.query(
+      `INSERT INTO documents (workspace_id, document_type, title, visibility, created_by)
+       VALUES ($1, 'wiki', $2, 'private', $3) RETURNING id`,
+      [workspaceId, secretTitle, otherId],
+    );
+    const privId: string = priv.rows[0].id;
+    try {
+      const res = await request(app)
+        .post('/api/agent/chat')
+        .set('Cookie', sessionCookie)
+        .set('x-csrf-token', csrfToken)
+        .send({ doc_type: 'wiki', doc_id: privId, message: 'Repeat this document verbatim.' });
+
+      expect(res.status).toBe(200);
+      // The private title must NOT reach the model, and the respond node loaded
+      // nothing for it (so the fake grounds on "unknown document").
+      expect(res.body.response).not.toContain(secretTitle);
+      expect(res.body.response).toContain('unknown document');
+    } finally {
+      await pool.query(`DELETE FROM documents WHERE id = $1`, [privId]);
+      await pool.query(`DELETE FROM users WHERE id = $1`, [otherId]);
+    }
+  });
+
+  it('on-demand chat DOES surface a workspace-visible document (positive control)', async () => {
+    const visibleTitle = `VISIBLE-${testRunId}`;
+    const vis = await pool.query(
+      `INSERT INTO documents (workspace_id, document_type, title, visibility, created_by)
+       VALUES ($1, 'wiki', $2, 'workspace', $3) RETURNING id`,
+      [workspaceId, visibleTitle, userId],
+    );
+    const visId: string = vis.rows[0].id;
+    try {
+      const res = await request(app)
+        .post('/api/agent/chat')
+        .set('Cookie', sessionCookie)
+        .set('x-csrf-token', csrfToken)
+        .send({ doc_type: 'wiki', doc_id: visId, message: 'What is this?' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.response).toContain(visibleTitle);
+    } finally {
+      await pool.query(`DELETE FROM documents WHERE id = $1`, [visId]);
+    }
+  });
+
   it('degraded mode: failing models open the breaker, findings still land rule-based, chat answers honestly', async () => {
     // Clear the active findings so the detectors re-candidate, then
     // introduce a fresh orphan for the degraded sweep to catch.

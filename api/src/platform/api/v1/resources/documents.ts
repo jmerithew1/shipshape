@@ -132,9 +132,18 @@ async function listDocuments(
 
   // pageSize + 1 is the lookahead that tells buildPage whether another page exists.
   params.push(pageSize + 1);
+  // created_at/updated_at are emitted at MICROSECOND precision, not the
+  // millisecond a JS Date (what the pg driver hands back for timestamptz) would
+  // give. The cursor carries this value, and the keyset compares it back
+  // against the microsecond-precision column — so two rows created in the same
+  // millisecond are ordered and paged deterministically. With millisecond
+  // truncation, a row whose created_at fell between the truncated cursor and
+  // the real last-row value was silently SKIPPED. Still valid ISO 8601.
   const result = await pool.query<DocumentRow>(
     `SELECT d.id, d.title, d.document_type, d.properties, d.ticket_number,
-            d.parent_id, d.created_at, d.updated_at
+            d.parent_id,
+            to_char(d.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS created_at,
+            to_char(d.updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS updated_at
        FROM documents d
       WHERE ${where.join(' AND ')}
       ORDER BY d.created_at DESC, d.id DESC

@@ -42,6 +42,30 @@ function formatFileSize(bytes: number): string {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
+/**
+ * Only ever hand an anchor an http(s) or same-origin-relative URL.
+ *
+ * `url` is a document node attribute, and document content is fully
+ * attacker-controllable (PATCH /api/documents/:id/content stores arbitrary
+ * TipTap JSON). React does NOT sanitize a `javascript:` href, and this custom
+ * NodeView bypasses TipTap's own link sanitizer — so a persisted
+ * `javascript:fetch(...)` attachment would execute in a viewer's session on
+ * click (stored XSS, CWE-79). Anything that is not plainly http(s)/relative
+ * returns null, and the attachment renders without a download link rather than
+ * with a dangerous one. Found by the security scan.
+ */
+export function safeDownloadHref(url: unknown): string | null {
+  if (typeof url !== 'string' || url === '') return null;
+  // Same-origin relative path (but not protocol-relative "//host").
+  if (url.startsWith('/') && !url.startsWith('//')) return url;
+  try {
+    const scheme = new URL(url, window.location.origin).protocol;
+    return scheme === 'http:' || scheme === 'https:' ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 // React component for rendering file attachment
 function FileAttachmentComponent({ node }: { node: any }) {
   const { filename, url, size, mimeType, uploading } = node.attrs;
@@ -49,6 +73,7 @@ function FileAttachmentComponent({ node }: { node: any }) {
 
   const fileIcon = getFileIcon(mimeType);
   const formattedSize = size ? formatFileSize(size) : '';
+  const safeUrl = safeDownloadHref(url);
 
   return (
     <NodeViewWrapper className="file-attachment-wrapper" data-file-attachment>
@@ -65,9 +90,9 @@ function FileAttachmentComponent({ node }: { node: any }) {
             </div>
           )}
         </div>
-        {!uploading && url && (
+        {!uploading && safeUrl && (
           <a
-            href={url}
+            href={safeUrl}
             download={filename}
             target="_blank"
             rel="noopener noreferrer"

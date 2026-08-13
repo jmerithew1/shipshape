@@ -103,6 +103,7 @@ export function buildFleetGraph({ pool, models, rng = Math.random, shipData }: F
     .addNode('fetchIssues', async (s: FleetStateType) => {
       const { rows } = await pool.query(
         `SELECT d.id, d.title, d.workspace_id, d.created_at, d.updated_at,
+                d.visibility, d.created_by,
                 d.properties->>'state' AS state,
                 d.properties->>'priority' AS priority,
                 d.properties->>'assignee_id' AS assignee_id,
@@ -257,11 +258,31 @@ export function buildFleetGraph({ pool, models, rng = Math.random, shipData }: F
     .addNode('respond', async (s: FleetStateType) => {
       const trigger = s.trigger;
       if (trigger.kind !== 'chat') return { path: 'chat' as const };
+
+      // Access control (security scan, CWE-639). The chat panel must not become
+      // a back door that returns document content the REST read path would 404.
+      // Apply the SAME visibility rule GET /api/documents/:id uses:
+      // visibility='workspace' OR created_by=caller OR caller is a workspace
+      // admin. An inaccessible (or private, or deleted) doc simply loads no
+      // content, and `recentIssues` is filtered to what the caller may see.
+      const adminRow = await pool.query(
+        `SELECT (SELECT role FROM workspace_memberships
+                  WHERE workspace_id = $1 AND user_id = $2) = 'admin' AS is_admin`,
+        [s.workspaceId, trigger.userId],
+      );
+      const callerIsAdmin = adminRow.rows[0]?.is_admin === true;
+
       const doc = await pool.query(
         `SELECT d.title, d.document_type, d.properties, d.updated_at,
                 LEFT(d.content::text, 4000) AS content_excerpt
-           FROM documents d WHERE d.id = $1 AND d.workspace_id = $2`,
-        [trigger.docId, s.workspaceId],
+           FROM documents d
+          WHERE d.id = $1 AND d.workspace_id = $2 AND d.deleted_at IS NULL
+            AND (d.visibility = 'workspace' OR d.created_by = $3 OR $4 = TRUE)`,
+        [trigger.docId, s.workspaceId, trigger.userId, callerIsAdmin],
+      );
+
+      const visibleIssues = (s.issues ?? []).filter(
+        (i) => i.visibility === 'workspace' || i.created_by === trigger.userId || callerIsAdmin,
       );
       try {
         const response = await models.breaker.exec(() =>
@@ -272,7 +293,7 @@ export function buildFleetGraph({ pool, models, rng = Math.random, shipData }: F
             new HumanMessage(
               JSON.stringify({
                 viewing: doc.rows[0] ?? null,
-                recentIssues: s.issues?.slice(0, 30) ?? [],
+                recentIssues: visibleIssues.slice(0, 30),
                 question: trigger.message,
               }),
             ),

@@ -39,6 +39,10 @@ export interface IssueRow {
   is_system_generated: boolean;
   created_at: Date;
   updated_at: Date;
+  // Carried so the chat path can filter to what the asking user may see. The
+  // detector path ignores them.
+  visibility: string;
+  created_by: string | null;
 }
 
 export interface WeekRow {

@@ -177,9 +177,16 @@ describe('cursor pagination (requirement B9)', () => {
     );
     try {
       for (let i = 0; i < 7; i++) {
+        // Set created_at — the keyset SORT KEY — to distinct, well-separated
+        // values. Setting only updated_at (the old sort key) left all 7 rows on
+        // the same default created_at=now(); under fast CI inserts several tied,
+        // the keyset tie-break engaged, and the walk skipped a row ("expected 7,
+        // got 6"). This flake was red in CI and — because `checks` gates the
+        // deploy job — was silently blocking every release. Deterministic
+        // created_at makes the walk stable in CI and locally alike.
         await pool.query(
-          `INSERT INTO documents (workspace_id, document_type, title, created_by, updated_at)
-           VALUES ($1,'wiki',$2,$3, now() - ($4 || ' minutes')::interval)`,
+          `INSERT INTO documents (workspace_id, document_type, title, created_by, created_at, updated_at)
+           VALUES ($1,'wiki',$2,$3, now() - ($4 || ' minutes')::interval, now() - ($4 || ' minutes')::interval)`,
           [pagWorkspace, `Doc ${i}`, userId, String(i)]
         );
       }
@@ -201,6 +208,48 @@ describe('cursor pagination (requirement B9)', () => {
       expect(cursor).toBeNull(); // terminated cleanly
     } finally {
       await pool.query('DELETE FROM workspaces WHERE id = $1', [pagWorkspace]);
+    }
+  });
+
+  // Regression (found via the CI flake): a JS Date is millisecond-precise, so a
+  // cursor built from `toISOString()` truncated Postgres's microseconds. Two
+  // rows created in the SAME millisecond then collapsed to one cursor key and
+  // the walk skipped a row. The list query now emits microsecond precision.
+  it('does not skip rows created within the same millisecond', async () => {
+    const ws = await pool.query(`INSERT INTO workspaces (name) VALUES ('W6 Pagination µs') RETURNING id`);
+    const msWorkspace = ws.rows[0].id;
+    const raw = `ship_${crypto.randomBytes(32).toString('hex')}`;
+    await pool.query(
+      `INSERT INTO api_tokens (user_id, workspace_id, name, token_hash, token_prefix, oauth_app_id, scopes)
+       VALUES ($1,$2,'pag-us',$3,$4,NULL,NULL)`,
+      [userId, msWorkspace, sha(raw), raw.slice(0, 8)]
+    );
+    try {
+      // Seven rows sharing ONE millisecond (…00.000) but a microsecond apart.
+      for (let i = 1; i <= 7; i++) {
+        await pool.query(
+          `INSERT INTO documents (workspace_id, document_type, title, created_by, created_at, updated_at)
+           VALUES ($1,'wiki',$2,$3,
+                   timestamptz '2026-01-01 00:00:00 UTC' + ($4 || ' microseconds')::interval,
+                   timestamptz '2026-01-01 00:00:00 UTC' + ($4 || ' microseconds')::interval)`,
+          [msWorkspace, `US Doc ${i}`, userId, String(i)]
+        );
+      }
+      const seen: string[] = [];
+      let cursor: string | null = null;
+      for (let page = 0; page < 5; page++) {
+        const url = `/api/v1/documents?limit=3${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`;
+        const res: { status: number; body: { data: { id: string }[]; next_cursor: string | null } } =
+          await request(app()).get(url).set('Authorization', `Bearer ${raw}`);
+        expect(res.status).toBe(200);
+        seen.push(...res.body.data.map((d) => d.id));
+        cursor = res.body.next_cursor;
+        if (!cursor) break;
+      }
+      expect(new Set(seen).size).toBe(7); // every row, exactly once — none skipped
+      expect(cursor).toBeNull();
+    } finally {
+      await pool.query('DELETE FROM workspaces WHERE id = $1', [msWorkspace]);
     }
   });
 
