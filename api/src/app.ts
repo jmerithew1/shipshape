@@ -264,7 +264,16 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
       await pool.query(`SELECT 1 FROM oauth_authorization_codes LIMIT 0`);
       await pool.query(`SELECT 1 FROM oauth_device_codes LIMIT 0`);
       await pool.query(`SELECT 1 FROM oauth_refresh_tokens LIMIT 0`);
-      res.json({ status: 'ready', agent_tables: true, platform_tables: true });
+      // The commit this instance is running. Render injects RENDER_GIT_COMMIT
+      // automatically; CI's verify-deployment waits until this matches the SHA
+      // it just pushed, so the TTFE drill can't race a not-yet-live deploy and
+      // test the OLD code. null locally / where the var is unset.
+      res.json({
+        status: 'ready',
+        agent_tables: true,
+        platform_tables: true,
+        commit: process.env.RENDER_GIT_COMMIT ?? null,
+      });
     } catch (err) {
       res.status(503).json({
         status: 'not_ready',

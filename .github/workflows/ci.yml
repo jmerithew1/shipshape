@@ -186,15 +186,22 @@ jobs:
       # ordering the way `--filter @ship/sdk build` alone did.
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - name: Wait for the release to be live
+      - name: Wait for THIS commit to be the live release
+        # Not just "ready" — /ready is true on the OLD instance too, so waiting
+        # on it let the drill race a not-yet-live deploy and test the previous
+        # code. /ready now reports the running RENDER_GIT_COMMIT; wait until it
+        # equals the SHA we just pushed, so prove-live and the TTFE drill test
+        # THIS build. Up to 15 min (Render build + rollout).
         run: |
-          for i in $(seq 1 40); do
-            if curl -fsS https://ship-api-r1om.onrender.com/ready | grep -q '"platform_tables":true'; then
-              echo "live after ${i} attempts"; exit 0
-            fi
+          want="${{ github.sha }}"
+          for i in $(seq 1 60); do
+            body=$(curl -fsS https://ship-api-r1om.onrender.com/ready 2>/dev/null || echo '{}')
+            live=$(echo "$body" | grep -o '"commit":"[^"]*"' | cut -d'"' -f4)
+            if [ "$live" = "$want" ]; then echo "live commit ${live} matches after ${i} checks"; exit 0; fi
+            echo "attempt ${i}: live=${live:-<none>} want=${want}"
             sleep 15
           done
-          echo "::error::deployed instance did not become ready"; exit 1
+          echo "::error::deployed commit never became ${want} (last live: ${live:-<none>})"; exit 1
       - name: Verify the live deployment (browser, with receipts)
         run: pnpm exec playwright test e2e/prove-live.spec.ts --workers=1
       - name: TTFE drill against the live deployment (fails the build past threshold)
