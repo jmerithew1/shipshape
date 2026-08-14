@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Router, Request, Response } from 'express';
 import { pool } from '../db/client.js';
 import { z } from 'zod';
@@ -572,6 +573,29 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
     }
 
     await client.query('COMMIT');
+
+    // Fire document.created for webhook subscribers from the app's OWN create
+    // path too — not just the public /api/v1 path. Best-effort and out-of-band
+    // (after commit): a webhook failure must never fail the create.
+    // publishEventSafely no-ops when WEBHOOKS_ENABLED=false, so the route-test
+    // mocks that assert exact query sequences stay valid.
+    try {
+      const { buildEvent, publishEventSafely } = await import('../platform/webhooks/index.js');
+      publishEventSafely(
+        buildEvent('document.created', {
+          id: randomUUID(),
+          workspaceId: req.workspaceId!,
+          data: {
+            document_id: newDoc.id,
+            document_type: newDoc.document_type,
+            title: newDoc.title,
+            parent_id: newDoc.parent_id ?? null,
+          },
+        })
+      );
+    } catch {
+      /* webhook publication is best-effort by design */
+    }
 
     // Broadcast accountability update for document types that affect action items
     // Sprint plans clear the "write sprint plan" action item
