@@ -207,12 +207,15 @@ jobs:
       - name: TTFE drill against the live deployment (fails the build past threshold)
         # The proof spine: from a clean checkout, how long until a developer holds
         # a signed event they have verified themselves? Client Credentials against
-        # prod as the grader app (SHIP_CLIENT_ID / SHIP_BASE_URL default to the
-        # grader app + deployed URL). Poll mode needs no inbound URL — it reads the
-        # delivery and its signed_body back from the delivery log and verifies the
-        # signature locally. A run over the threshold (default 60s) exits non-zero
-        # and fails this job, exactly like a broken test.
+        # prod as the dedicated first-party drill app (migration 043) — the grader
+        # app is read-only and non-first-party by design, so it cannot subscribe
+        # or create. The drill app reuses the grader app's secret hash, so the
+        # same SHIP_CLIENT_SECRET authenticates it. Poll mode needs no inbound URL
+        # — it reads the delivery and its signed_body back from the delivery log
+        # and verifies the signature locally. A run over the threshold (60s) exits
+        # non-zero and fails this job, exactly like a broken test.
         env:
+          SHIP_CLIENT_ID: ship_app_ttfe_drill
           SHIP_CLIENT_SECRET: ${{ secrets.SHIP_CLIENT_SECRET }}
         run: |
           if [ -z "${SHIP_CLIENT_SECRET}" ]; then
