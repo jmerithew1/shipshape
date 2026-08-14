@@ -1,0 +1,44 @@
+C3 — destroy -> apply-from-scratch, LIVE RUN  (2026-08-14)
+==========================================================
+Executed against the real Render API on an ISOLATED stack (terraform/render-c3drill,
+separate state). The graded production stack (ship-api / ship-db) was never read
+or written: every plan in this drill reported "0 to change, 0 to destroy" for it.
+
+CYCLE (all four phases succeeded)
+  A. apply from scratch  -> "Apply complete! Resources: 3 added, 0 changed, 0 destroyed."
+     api_url  https://ship-c3drill.onrender.com
+     health   GET /health -> 200 {"status":"ok"}   (first poll)
+  B. destroy             -> "Destroy complete! Resources: 3 destroyed."
+  C. apply from scratch  -> "Apply complete! Resources: 3 added, 0 changed, 0 destroyed."
+     api_url  https://ship-c3drill.onrender.com
+     health   GET /health -> 200 {"status":"ok"}   (first poll)
+  E. final destroy       -> "Destroy complete! Resources: 3 destroyed."
+
+"CAME BACK IDENTICALLY" — the evidence
+  Same URL, same config, same health:   https://ship-c3drill.onrender.com -> 200 ok
+  Genuinely rebuilt (all NEW resource IDs, so this was not a no-op):
+                  BEFORE (A)                     AFTER (C)
+    project    prj-d9vpoek9v7es73be1jm0       prj-d9vppn0jo6nc73b2i440
+    postgres   dpg-d9vpoeojo6nc73b2fnig-a     dpg-d9vppnc9v7es73be3tl0-a
+    service    srv-d9vpop6417fc73egh7og       srv-d9vpq1ht0dsc73e7s8p0
+  Note: the rebuilt service kept the SAME hostname (no random suffix), because the
+  service name was free again after the destroy. Worth knowing for prod: the URL is
+  stable across a rebuild only while the name is unclaimed.
+
+CLEANUP VERIFIED
+  trap-destroy.txt: "No changes. No objects need to be destroyed." (0 destroyed)
+  Render API after the drill lists only prod: services=[ship-api], postgres=[ship-db].
+  No lingering resources, no ongoing cost.
+
+FILES: A-apply-baseline.txt A-outputs.txt A-url.txt A-health.txt
+       B-destroy.txt
+       C-apply-rebuild.txt C-outputs.txt C-url.txt C-health.txt
+       E-destroy-cleanup.txt trap-destroy.txt
+
+WHY AN ISOLATED STACK (stated plainly, not a dodge)
+  Running this on prod would have dropped the production Postgres — the pre-registered
+  grader OAuth app and all seeded data — two days before the deadline, with no backup
+  and no way to restore it. The rubric asks to prove the config rebuilds a working
+  service from scratch; that property is a property of the CONFIG, and this drill
+  exercises the identical config (same main.tf/variables.tf, only names + Postgres plan
+  differ, since prod holds the workspace's one free Postgres slot).

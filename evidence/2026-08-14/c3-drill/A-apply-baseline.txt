@@ -1,0 +1,170 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # render_postgres.ship will be created
+  + resource "render_postgres" "ship" {
+      + connection_info           = (sensitive value)
+      + database_name             = "ship_dev"
+      + database_user             = "ship"
+      + disk_size_gb              = (known after apply)
+      + environment_id            = (known after apply)
+      + high_availability_enabled = (known after apply)
+      + id                        = (known after apply)
+      + ip_allow_list             = (known after apply)
+      + log_stream_override       = (known after apply)
+      + name                      = "ship-c3drill-db"
+      + plan                      = "basic_256mb"
+      + primary_postgres_id       = (known after apply)
+      + region                    = "oregon"
+      + role                      = (known after apply)
+      + version                   = "16"
+    }
+
+  # render_project.ship will be created
+  + resource "render_project" "ship" {
+      + environments = {
+          + "staging" = {
+              + id               = (known after apply)
+              + name             = "staging"
+              + network_isolated = (known after apply)
+              + protected_status = "unprotected"
+            },
+        }
+      + id           = (known after apply)
+      + name         = "ship-c3drill"
+    }
+
+  # render_web_service.api will be created
+  + resource "render_web_service" "api" {
+      + active_custom_domains         = (known after apply)
+      + env_vars                      = {
+          + "ANTHROPIC_API_KEY" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "CORS_ORIGIN" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "DATABASE_URL" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "FLEETGRAPH_SWEEP_MINUTES" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_API_KEY" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_PROJECT" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "LANGSMITH_TRACING" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "NODE_ENV" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "NODE_VERSION" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "PORT" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "SERVE_WEB" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+          + "SESSION_SECRET" = {
+              + generate_value = true
+              + value          = (sensitive value)
+            },
+          + "WEB_DIST_PATH" = {
+              + generate_value = false
+              + value          = (sensitive value)
+            },
+        }
+      + environment_id                = (known after apply)
+      + health_check_path             = "/health"
+      + id                            = (known after apply)
+      + log_stream_override           = (known after apply)
+      + maintenance_mode              = {
+          + enabled = false
+          + uri     = ""
+        }
+      + max_shutdown_delay_seconds    = (known after apply)
+      + name                          = "ship-c3drill"
+      + notification_override         = (known after apply)
+      + num_instances                 = (known after apply)
+      + plan                          = "free"
+      + previews                      = (known after apply)
+      + pull_request_previews_enabled = (known after apply)
+      + region                        = "oregon"
+      + root_directory                = (known after apply)
+      + runtime_source                = {
+          + native_runtime = {
+              + auto_deploy         = false
+              + auto_deploy_trigger = (known after apply)
+              + branch              = "main"
+              + build_command       = "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build"
+              + repo_url            = "https://github.com/jmerithew1/shipshape"
+              + runtime             = "node"
+            }
+        }
+      + slug                          = (known after apply)
+      + start_command                 = "node api/dist/db/migrate.js && node api/dist/index.js"
+      + url                           = (known after apply)
+    }
+
+Plan: 3 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + api_docs_url     = (known after apply)
+  + api_url          = (known after apply)
+  + health_check_url = (known after apply)
+  + postgres_id      = (known after apply)
+  + project_id       = (known after apply)
+  + web_service_id   = (known after apply)
+render_project.ship: Creating...
+render_project.ship: Creation complete after 0s [id=prj-d9vpoek9v7es73be1jm0]
+render_postgres.ship: Creating...
+render_postgres.ship: Still creating... [00m10s elapsed]
+render_postgres.ship: Still creating... [00m20s elapsed]
+render_postgres.ship: Still creating... [00m30s elapsed]
+render_postgres.ship: Still creating... [00m40s elapsed]
+render_postgres.ship: Creation complete after 42s [id=dpg-d9vpoeojo6nc73b2fnig-a]
+render_web_service.api: Creating...
+render_web_service.api: Still creating... [00m10s elapsed]
+render_web_service.api: Still creating... [00m20s elapsed]
+render_web_service.api: Still creating... [00m30s elapsed]
+render_web_service.api: Still creating... [00m40s elapsed]
+render_web_service.api: Still creating... [00m50s elapsed]
+render_web_service.api: Still creating... [01m00s elapsed]
+render_web_service.api: Still creating... [01m10s elapsed]
+render_web_service.api: Still creating... [01m20s elapsed]
+render_web_service.api: Still creating... [01m30s elapsed]
+render_web_service.api: Still creating... [01m40s elapsed]
+render_web_service.api: Still creating... [01m50s elapsed]
+render_web_service.api: Creation complete after 1m54s [id=srv-d9vpop6417fc73egh7og]
+
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+api_docs_url = "https://ship-c3drill.onrender.com/api/docs/"
+api_url = "https://ship-c3drill.onrender.com"
+health_check_url = "https://ship-c3drill.onrender.com/health"
+postgres_id = "dpg-d9vpoeojo6nc73b2fnig-a"
+project_id = "prj-d9vpoek9v7es73be1jm0"
+web_service_id = "srv-d9vpop6417fc73egh7og"

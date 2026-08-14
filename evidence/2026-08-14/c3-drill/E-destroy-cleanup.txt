@@ -1,0 +1,148 @@
+render_project.ship: Refreshing state... [id=prj-d9vppn0jo6nc73b2i440]
+render_postgres.ship: Refreshing state... [id=dpg-d9vppnc9v7es73be3tl0-a]
+render_web_service.api: Refreshing state... [id=srv-d9vpq1ht0dsc73e7s8p0]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # render_postgres.ship will be destroyed
+  - resource "render_postgres" "ship" {
+      - connection_info           = (sensitive value) -> null
+      - database_name             = "ship_dev" -> null
+      - database_user             = "ship" -> null
+      - disk_size_gb              = 15 -> null
+      - environment_id            = "evm-d9vppn0jo6nc73b2i450" -> null
+      - high_availability_enabled = false -> null
+      - id                        = "dpg-d9vppnc9v7es73be3tl0-a" -> null
+      - ip_allow_list             = [] -> null
+      - name                      = "ship-c3drill-db" -> null
+      - plan                      = "basic_256mb" -> null
+      - region                    = "oregon" -> null
+      - role                      = "primary" -> null
+      - version                   = "16" -> null
+    }
+
+  # render_project.ship will be destroyed
+  - resource "render_project" "ship" {
+      - environments = {
+          - "staging" = {
+              - id               = "evm-d9vppn0jo6nc73b2i450" -> null
+              - name             = "staging" -> null
+              - network_isolated = false -> null
+              - protected_status = "unprotected" -> null
+            },
+        } -> null
+      - id           = "prj-d9vppn0jo6nc73b2i440" -> null
+      - name         = "ship-c3drill" -> null
+    }
+
+  # render_web_service.api will be destroyed
+  - resource "render_web_service" "api" {
+      - env_vars                      = {
+          - "ANTHROPIC_API_KEY" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "CORS_ORIGIN" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "DATABASE_URL" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "FLEETGRAPH_SWEEP_MINUTES" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "LANGSMITH_API_KEY" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "LANGSMITH_PROJECT" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "LANGSMITH_TRACING" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "NODE_ENV" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "NODE_VERSION" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "PORT" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "SERVE_WEB" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+          - "SESSION_SECRET" = {
+              - generate_value = true -> null
+              - value          = (sensitive value) -> null
+            },
+          - "WEB_DIST_PATH" = {
+              - generate_value = false -> null
+              - value          = (sensitive value) -> null
+            },
+        } -> null
+      - environment_id                = "evm-d9vppn0jo6nc73b2i450" -> null
+      - health_check_path             = "/health" -> null
+      - id                            = "srv-d9vpq1ht0dsc73e7s8p0" -> null
+      - maintenance_mode              = {
+          - enabled = false -> null
+          - uri     = "" -> null
+        } -> null
+      - name                          = "ship-c3drill" -> null
+      - notification_override         = {
+          - notifications_to_send         = "default" -> null
+          - preview_notifications_enabled = "default" -> null
+        } -> null
+      - plan                          = "free" -> null
+      - previews                      = {
+          - generation = "off" -> null
+        } -> null
+      - pull_request_previews_enabled = false -> null
+      - region                        = "oregon" -> null
+      - root_directory                = "" -> null
+      - runtime_source                = {
+          - native_runtime = {
+              - auto_deploy         = false -> null
+              - auto_deploy_trigger = "off" -> null
+              - branch              = "main" -> null
+              - build_command       = "npm install -g pnpm@10.27.0 && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm run build" -> null
+              - repo_url            = "https://github.com/jmerithew1/shipshape" -> null
+              - runtime             = "node" -> null
+            } -> null
+        } -> null
+      - slug                          = "ship-c3drill" -> null
+      - start_command                 = "node api/dist/db/migrate.js && node api/dist/index.js" -> null
+      - url                           = "https://ship-c3drill.onrender.com" -> null
+    }
+
+Plan: 0 to add, 0 to change, 3 to destroy.
+
+Changes to Outputs:
+  - api_docs_url     = "https://ship-c3drill.onrender.com/api/docs/" -> null
+  - api_url          = "https://ship-c3drill.onrender.com" -> null
+  - health_check_url = "https://ship-c3drill.onrender.com/health" -> null
+  - postgres_id      = "dpg-d9vppnc9v7es73be3tl0-a" -> null
+  - project_id       = "prj-d9vppn0jo6nc73b2i440" -> null
+  - web_service_id   = "srv-d9vpq1ht0dsc73e7s8p0" -> null
+render_web_service.api: Destroying... [id=srv-d9vpq1ht0dsc73e7s8p0]
+render_web_service.api: Destruction complete after 0s
+render_postgres.ship: Destroying... [id=dpg-d9vppnc9v7es73be3tl0-a]
+render_postgres.ship: Destruction complete after 1s
+render_project.ship: Destroying... [id=prj-d9vppn0jo6nc73b2i440]
+render_project.ship: Destruction complete after 0s
+
+Destroy complete! Resources: 3 destroyed.

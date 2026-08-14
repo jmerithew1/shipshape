@@ -1,0 +1,6 @@
+api_docs_url = "https://ship-c3drill.onrender.com/api/docs/"
+api_url = "https://ship-c3drill.onrender.com"
+health_check_url = "https://ship-c3drill.onrender.com/health"
+postgres_id = "dpg-d9vppnc9v7es73be3tl0-a"
+project_id = "prj-d9vppn0jo6nc73b2i440"
+web_service_id = "srv-d9vpq1ht0dsc73e7s8p0"
