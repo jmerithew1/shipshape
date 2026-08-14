@@ -1,0 +1,24 @@
+Full Playwright e2e suite — single worker — reconfirmation after the A9 fix
+===========================================================================
+848 passed | 0 failed | 7 flaky (passed on retry) | 36 skipped | 32.6 min
+Playwright exit code: 0
+
+Baseline before the fix was 842 passed / 6 failed / 7 flaky / 36 skipped.
+The 6 previously-hard failures are now PASSING (842 + 6 = 848); zero hard
+failures remain. The fix: editor specs switched from hardcoded `Meta` (Cmd,
+macOS-only) to Playwright's platform-aware `ControlOrMeta` key.
+
+The 7 flaky (pass on retry — pre-existing contention/timing, unrelated to the
+Week-6 branch or the fix):
+  bulk-selection.spec.ts:1327       archive shows success toast
+  feedback-consolidation.spec.ts:52 source badge "External" for external issues
+  my-week-stale-data.spec.ts:28     plan edits visible on /my-week after nav back
+  my-week-stale-data.spec.ts:63     retro edits visible on /my-week after nav back
+  performance.spec.ts:228           rapid typing does not cause lag
+  project-weeks.spec.ts:178         project link navigates back to project
+  weekly-accountability.spec.ts:384 allocation grid person status
+
+36 skipped = the 5 quarantined FIXME specs (test.describe.fixme) + other
+conditionally-skipped tests. External noise in the log ("429 Monthly unique
+traces usage limit exceeded") is LangSmith's trace quota hit by the Epic-7
+agent — not a test result.
