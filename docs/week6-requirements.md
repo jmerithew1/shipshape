@@ -96,7 +96,7 @@ integrations shipped. Deployed and verified live at 11 paths / 13 operations.
 
 | Metric | Target | Status |
 |---|---|---|
-| TTFE (clean machine, docs only) | ≤ 30 min; CI < 60 s (P95) | **MET (CI)** — ~1.4 s end-to-end against LIVE prod in CI (`verify-deployment`, first green run CI #68 / 63f973b), far under the 60 s budget. Prod P95 accrues run-over-run via the `ttfe-<sha>` artifacts. |
+| TTFE (clean machine, docs only) | ≤ 30 min; CI < 60 s (P95) | **MET (CI + human)** — ~1.4–2 s end-to-end against LIVE prod in CI (`verify-deployment`, first green run CI #68 / 63f973b). Also walked **by hand** against prod following only the published README path — dated receipt `evidence/2026-08-14/grader-walkthrough.txt` (contract, 401 envelope, device-flow `slow_down`, client-credentials token, `/me`, 403 naming `sprints:read`, and the full drill loop: signature verified in 2002 ms). The human path is minutes, not the 30-minute ceiling. |
 | OAuth Auth Code + PKCE round-trip P95 | < 3 s | **MET** — the 8-spec Playwright suite completes in 18.4 s serial for the whole file |
 | OpenAPI spec parity (fitness) | 100% | **MET** — `sdk-parity.test.ts`, both directions + method/path, zero drift |
 | Webhook delivery P95 (first attempt) | < 2 s | **MET** — in-process deliverer; drill measured 573 ms receive against a local subscriber |

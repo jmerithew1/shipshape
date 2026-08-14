@@ -1,0 +1,29 @@
+# Grader clean-walkthrough — live against prod (Fri Aug 14 18:55:53 UTC 2026 UTC-ish)
+## 1. Public contract (no auth)
+{"openapi":"3.1.0","info":{"title":"Ship Public API","version":"1.0.0","description":"The Ship public API. Every endpoin
+## 2. /api/v1/me with NO token -> 401 ApiError envelope
+{"code":"unauthorized","message":"Missing bearer token","request_id":"afa4bd4e-2637-4e9f-b759-351977c20a70"} [HTTP 401]
+## 3. device flow: issue code, then slow_down
+{"device_code":"ship_dc_6e58a91432c621762e9c8811740661d3191c0273811dbff5","user_code":"EW3K-R3NT","verification_uri":"/device","verification_uri_complete":"/dev
+   poll #1:
+{"error":"authorization_pending","error_description":"The user has not yet approved this request"}   poll #2 (immediate -> slow_down):
+{"error":"slow_down","error_description":"Polling too frequently; increase the interval"}## 4. Client Credentials, NARROWED to documents:read
+   token: ship_af24d83a2...
+## 5. /api/v1/me WITH token
+{"id":"a14c1af1-d452-4a1f-8d5c-c0e5d1fb6329","email":"demo@ship.local","name":"demo","workspace_id":"1030389b-9dce-4178-9a9b-86f5f6ff8434","client_id":"ship_app_ttfe_drill","scopes":["documents:read"]} [HTTP 200]
+## 6. 403 naming the missing scope (documents-only token asks for sprints)
+{"code":"forbidden","message":"Insufficient scope: this request requires 'sprints:read'","request_id":"461216f3-d101-4b73-a9eb-4d6157155607","details":{"missing_scope":"sprints:read"}} [HTTP 403]
+
+## 7. Full TTFE loop against prod (install->login->subscribe->create->receive->verify)
+stage       elapsed
+─────────────────────
+install         3 ms   resolve + load @ship/sdk
+login         507 ms
+subscribe     147 ms   document.created → https://ship-api-r1om.onrender.com/api/v1/_ttfe_sink
+create        107 ms
+receive      1237 ms   delivery log (signature checked locally)
+verify          1 ms   HMAC-SHA256 checked locally; secret never sent
+─────────────────────
+total        2002 ms   PASS (threshold 60000 ms)
+
+signature verified. First event in 2002 ms, inside the 60000 ms budget.
