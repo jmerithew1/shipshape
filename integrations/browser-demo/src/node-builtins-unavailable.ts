@@ -35,6 +35,9 @@ function unavailable(symbol: string): never {
 export function createHmac(): never {
   return unavailable('crypto.createHmac');
 }
+export function createHash(): never {
+  return unavailable('crypto.createHash');
+}
 export function timingSafeEqual(): never {
   return unavailable('crypto.timingSafeEqual');
 }
@@ -56,4 +59,4 @@ export function rm(): never {
   return unavailable('fs.rm');
 }
 
-export default { createHmac, timingSafeEqual, readFile, writeFile, mkdir, chmod, rm };
+export default { createHmac, createHash, timingSafeEqual, readFile, writeFile, mkdir, chmod, rm };
