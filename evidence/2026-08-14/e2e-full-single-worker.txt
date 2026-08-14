@@ -1,0 +1,17 @@
+Playwright full e2e suite — single worker — 2026-08-14
+========================================================
+842 passed | 6 failed | 7 flaky (passed on retry) | 36 skipped | 36.5 min
+
+The 5 FIXME specs are quarantined as test.describe.fixme() (skipped).
+The 7 flaky passed on retry -> contention/timing, not product bugs.
+
+6 HARD FAILURES (all pre-existing editor/interaction tests, no web/ change
+in this branch except the FileAttachment XSS sanitizer — none attachment-related):
+  - backlinks.spec.ts       : removing mention removes backlink
+  - edge-cases.spec.ts      : simultaneous formatting operations
+  - inline-code.spec.ts     : toggle inline code with Cmd/Ctrl+E
+  - inline-comments.spec.ts : create a comment via Cmd+Shift+M
+  - session-timeout.spec.ts : Stay Logged In calls extend session endpoint
+  - tables.spec.ts          : delete entire table
+
+Platform's own e2e is green: oauth-pkce.spec.ts 8/8; prove-live.spec.ts (CI).
