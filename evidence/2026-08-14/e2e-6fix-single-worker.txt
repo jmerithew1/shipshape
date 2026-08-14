@@ -1,0 +1,24 @@
+Targeted re-run of the 6 previously-failing specs — single worker — 2026-08-14
+==============================================================================
+104 passed | 0 failed | 2 flaky (passed on retry) | 6.8 min
+(106 tests across inline-code, edge-cases, inline-comments, backlinks, tables,
+ session-timeout)
+
+ROOT CAUSE of 5 of the 6 hard failures: the specs hardcoded the `Meta` (Cmd)
+modifier for editor shortcuts and select-all. Off macOS, ProseMirror binds
+those to `Mod` = Ctrl, and `Meta+A` isn't even select-all — so the shortcut
+never fired and the assertion failed. Fixed by switching to Playwright's
+platform-aware `ControlOrMeta` key (Ctrl on Win/Linux, Cmd on Mac), matching
+the app's `Mod` binding on every platform.
+
+  backlinks.spec.ts:110      removing mention removes backlink   -> PASS
+  edge-cases.spec.ts:346     simultaneous formatting            -> PASS
+  inline-code.spec.ts:69     toggle inline code Cmd/Ctrl+E      -> PASS
+  inline-comments.spec.ts:97 create comment Cmd+Shift+M         -> PASS
+  tables.spec.ts:375         delete entire table                -> PASS
+  session-timeout.spec.ts:629 extend-session (NOT a modifier)   -> flaky, passed on retry
+
+The 2 flaky (session-timeout:629, inline-comments:118) are timing-sensitive
+(clock/route + decoration re-render); they pass on retry and are not product
+bugs. The earlier full-suite run double-failed session-timeout:629 only under
+worker contention.
