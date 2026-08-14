@@ -295,3 +295,50 @@ describe('issues and sprints resources', () => {
     expect(denied.body.details).toEqual({ missing_scope: 'sprints:read' });
   });
 });
+
+// Regression (found when the TTFE drill failed against prod): document.created
+// was in the event registry but NOTHING published it, so a subscription to it
+// never delivered. The public create handler now emits it.
+describe('document.created fires from the public API create', () => {
+  beforeAll(() => {
+    process.env.WEBHOOKS_ENABLED = 'true'; // test/setup.ts pins it 'false'
+  });
+  afterAll(() => {
+    process.env.WEBHOOKS_ENABLED = 'false';
+  });
+
+  it('enqueues a document.created delivery for a matching subscription', async () => {
+    const sub = await pool.query<{ id: string }>(
+      `INSERT INTO webhook_subscriptions
+         (app_id, workspace_id, event_type, target_url, signing_secret_hash, signing_secret_prefix)
+       VALUES ($1,$2,'document.created','https://sink.test/hook',$3,'abcd1234')
+       RETURNING id`,
+      [appId, workspaceId, sha(`whsec_${crypto.randomBytes(8).toString('hex')}`)]
+    );
+    const subId = sub.rows[0]!.id;
+    try {
+      const res = await request(app())
+        .post('/api/v1/documents')
+        .set('Authorization', `Bearer ${writeToken}`)
+        .send({ title: 'Webhook drill doc', document_type: 'wiki' });
+      expect(res.status).toBe(201);
+      const docId = res.body.id;
+
+      // publishEventSafely is out-of-band; poll the outbox briefly (≤1s).
+      let found = false;
+      for (let i = 0; i < 40 && !found; i++) {
+        const d = await pool.query(
+          `SELECT 1 FROM webhook_deliveries
+            WHERE subscription_id = $1 AND payload::text LIKE '%' || $2 || '%'`,
+          [subId, docId]
+        );
+        if (d.rows.length > 0) found = true;
+        else await new Promise((r) => setTimeout(r, 25));
+      }
+      expect(found).toBe(true);
+    } finally {
+      await pool.query(`DELETE FROM webhook_deliveries WHERE subscription_id = $1`, [subId]);
+      await pool.query(`DELETE FROM webhook_subscriptions WHERE id = $1`, [subId]);
+    }
+  });
+});

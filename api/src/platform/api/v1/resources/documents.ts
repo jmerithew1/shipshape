@@ -10,6 +10,7 @@
  * Every query is workspace-scoped from the token context; no handler trusts a
  * workspace id from the client.
  */
+import { randomUUID } from 'node:crypto';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { pool } from '../../../../db/client.js';
 import { ApiError } from '../errors.js';
@@ -229,7 +230,33 @@ export const handleCreateDocument: RequestHandler = asyncHandler(async (req: Req
     ]
   );
 
-  res.status(201).json(toDocument(result.rows[0]!));
+  const created = result.rows[0]!;
+
+  // Publish document.created so webhook subscribers fire for documents created
+  // through the PUBLIC API — not just the internal UI path. This event type was
+  // in the registry but nothing ever emitted it, so a subscription to
+  // document.created never delivered (the TTFE drill, and any real integration,
+  // waited forever). Best-effort and out-of-band, exactly like the internal
+  // chokepoints: a webhook failure must never fail the create itself.
+  try {
+    const { buildEvent, publishEventSafely } = await import('../../../webhooks/index.js');
+    publishEventSafely(
+      buildEvent('document.created', {
+        id: randomUUID(),
+        workspaceId: req.platform!.workspaceId,
+        data: {
+          document_id: created.id,
+          document_type: created.document_type,
+          title: created.title,
+          parent_id: created.parent_id ?? null,
+        },
+      })
+    );
+  } catch {
+    /* webhook publication is best-effort by design */
+  }
+
+  res.status(201).json(toDocument(created));
 });
 
 /** GET /me — the SDK's first call and the drill's first checkpoint. */
