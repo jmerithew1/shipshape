@@ -1,0 +1,44 @@
+C1 / C3 — live drift detection + reconcile, full cycle (2026-08-14)
+====================================================================
+Run against the real Render API on the GRADED production stack. Read-only
+plans only; no `apply` was ever run against prod.
+
+1. DRIFT INTRODUCED (owner, Render dashboard): FLEETGRAPH_SWEEP_MINUTES changed
+   out-of-band.
+
+2. DRIFT DETECTED  -> tf-plan-drift-detected.txt
+     ~ update in-place  # render_web_service.api
+         ~ "FLEETGRAPH_SWEEP_MINUTES" = { ~ value = (sensitive value) }
+     Plan: 0 to add, 1 to change, 0 to destroy
+   Terraform caught exactly the field that was changed. This is the C3 receipt.
+
+3. LATENT DEFECT SURFACED BY THE SAME PLAN (the valuable part):
+     ~ repo_url = "https://github.com/jmerithew1/shipshape"
+                -> "https://labs.gauntletai.com/jamesmerithew/shipshape"
+   Prod had been applied with `-var repo_url=<github mirror>`, but variables.tf
+   still DEFAULTED to the self-hosted GitLab origin, which Render refuses to
+   fetch (documented rejection, variables.tf). Consequences:
+     - `terraform plan` carried a permanent phantom diff, so "no drift" could
+       never be asserted cleanly; real drift would hide in the noise.
+     - any future `terraform apply` without -var would try to set an
+       unfetchable URL and FAIL the deploy.
+   The reconcile apply was therefore deliberately NOT run against prod.
+
+4. REVERT (owner, dashboard): FLEETGRAPH_SWEEP_MINUTES restored.
+   -> tf-plan-after-revert.txt : the sweep-minutes diff is GONE; only the
+      repo_url phantom diff remained. Confirms the revert took.
+
+5. DEFECT FIXED (config): variables.tf default is now the GitHub mirror that
+   actually deploys, with the history and the Render limitation documented.
+
+6. FINAL STATE -> tf-plan-clean-after-fix.txt
+     terraform fmt -check -recursive : clean
+     terraform validate              : "Success! The configuration is valid."
+     terraform plan                  : "No changes. Your infrastructure matches
+                                        the configuration."
+   Config and live infrastructure now agree exactly — so the next real drift
+   will stand out immediately instead of hiding behind a permanent diff.
+
+NOTE: the fix changes only a declared default in the config. Prod itself was
+never mutated by this exercise; step 6 proves the running service already
+matched what the config now declares.

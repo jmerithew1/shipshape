@@ -90,14 +90,23 @@ variable "repo_url" {
     default URL succeeds without credentials. Render allowlists the two hosts
     regardless.
 
-    To deploy: mirror this fork to github.com or gitlab.com, then
+    RESOLUTION (2026-08-14): the default below is now the GitHub mirror this
+    deployment actually builds from, so `terraform apply` with no -var matches
+    the live service.
 
-      terraform apply -var repo_url=https://github.com/<you>/shipshape
+    This was found by the C3 drift exercise, not by reading the config: prod had
+    been applied with `-var repo_url=<github mirror>` while this default still
+    pointed at the unfetchable GitLab origin, so `terraform plan` reported a
+    permanent phantom diff and any future `apply` would have tried to set a URL
+    Render rejects — failing the deploy. Receipt:
+    evidence/2026-08-14/tf-plan-drift-detected.txt.
 
-    Nothing else in this config needs to change. See docs/deployment-render.md.
+    The self-hosted origin remains https://labs.gauntletai.com/jamesmerithew/shipshape;
+    it is the source of truth for code, but Render cannot fetch it, so the mirror
+    is what deploys. See docs/deployment-render.md.
   EOT
   type        = string
-  default     = "https://labs.gauntletai.com/jamesmerithew/shipshape"
+  default     = "https://github.com/jmerithew1/shipshape"
 }
 
 variable "branch" {

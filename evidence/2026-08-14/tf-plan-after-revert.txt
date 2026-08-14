@@ -1,0 +1,51 @@
+render_project.ship: Refreshing state... [id=prj-d9p97g8ae00c73egpn80]
+render_postgres.ship: Refreshing state... [id=dpg-d9p97gnlk1mc73dj3dng-a]
+render_web_service.api: Refreshing state... [id=srv-d9p97qpt0dsc73d3sr20]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # render_web_service.api will be updated in-place
+  ~ resource "render_web_service" "api" {
+      + active_custom_domains         = (known after apply)
+      ~ env_vars                      = {
+          ~ "SESSION_SECRET" = {
+              ~ value          = (sensitive value)
+                # (1 unchanged attribute hidden)
+            },
+            # (12 unchanged elements hidden)
+        }
+        id                            = "srv-d9p97qpt0dsc73d3sr20"
+      + log_stream_override           = (known after apply)
+      + max_shutdown_delay_seconds    = (known after apply)
+        name                          = "ship-api"
+      ~ notification_override         = {
+          ~ notifications_to_send         = "default" -> (known after apply)
+          ~ preview_notifications_enabled = "default" -> (known after apply)
+        } -> (known after apply)
+      + num_instances                 = (known after apply)
+      ~ previews                      = {
+          ~ generation = "off" -> (known after apply)
+        } -> (known after apply)
+      ~ pull_request_previews_enabled = false -> (known after apply)
+      ~ root_directory                = null -> (known after apply)
+      ~ runtime_source                = {
+          ~ native_runtime = {
+              ~ auto_deploy_trigger = "off" -> (known after apply)
+              ~ repo_url            = "https://github.com/jmerithew1/shipshape" -> "https://labs.gauntletai.com/jamesmerithew/shipshape"
+                # (4 unchanged attributes hidden)
+            }
+        }
+      ~ slug                          = "ship-api-r1om" -> (known after apply)
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
