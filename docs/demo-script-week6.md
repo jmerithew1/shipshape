@@ -1,95 +1,86 @@
-# Week 6 — Demo Script (simple, ~3–4 min)
+# Week 6 — Demo Script (browser-only, ~4 min)
 
-Submitting the MVP *as* the final, so this one video shows both: the platform is
-**built and works** (MVP), and every claim is **verified, tested, and gated in
-CI against the live deployment** (final). Three reliable beats, nothing fragile.
+No terminal. Everything runs in a browser against the live deployment. Submitting
+the MVP *as* the final, so this one video shows both: the platform is built and
+works (MVP), and it's verified and CI-gated against the deployed system (final).
 
----
-
-## Setup (off camera, ~2 min)
-
-1. Big terminal font (readable at 720p).
-2. Build the client once:
-   ```bash
-   pnpm --filter @ship/sdk build && pnpm --filter @ship/cli build
-   ```
-3. Export the drill credentials so the on-camera command stays clean (these are
-   the *published* grader credentials):
-   ```bash
-   export SHIP_CLIENT_ID=ship_app_ttfe_drill
-   export SHIP_CLIENT_SECRET=ship_sec_bd48273402dbb7560d7a8f47d7cea4c95b0836743e108117ca9ef6adf88f9e80
-   ```
-4. Open two browser tabs:
-   - **Live spec:** `https://ship-api-r1om.onrender.com/api/v1/openapi.json`
-   - **Green CI run:** GitHub → repo → **Actions** → the newest green run.
+Live base URL: **https://ship-api-r1om.onrender.com**
 
 ---
 
-## Beat 1 — The claim + the live contract (0:00–0:40)
+## Setup (off camera, ~3 min)
 
-**Say:** "For five weeks Ship was an app. This week it became a platform anyone
-can build on. The real test isn't how many endpoints I shipped — it's whether a
-stranger can go from nothing to a *verified, signed webhook*. Let me show you
-that, live."
+1. In a browser, open a fresh **webhook.site** tab — it hands you a unique URL and
+   shows every request it receives. Copy that URL. (This is the "subscriber".)
+2. Open `https://ship-api-r1om.onrender.com` and **log in**: `demo@ship.local` /
+   `demo1234`.
+3. Go to `https://ship-api-r1om.onrender.com/devportal`:
+   - **Apps** → *Register an app* → name it "Demo Integration", any redirect URI →
+     it appears with a `client_id`.
+   - **Subscriptions** → create one: event `document.created`, target URL = the
+     **webhook.site URL** from step 1. (Copy the signing secret it shows once.)
+4. Do a dry run: in the app, create a document → within a second the event lands
+   on webhook.site and a row appears in the portal's **Deliveries** tab. Delete
+   that doc so you start clean on camera.
 
-**Show:** the `openapi.json` tab. Scroll once.
-
-**Say:** "This OpenAPI spec is generated from the routes themselves — I never
-hand-write it, so the published contract can't drift from what the server
-actually does."
-
----
-
-## Beat 2 — The whole loop, one command (0:40–2:00)
-
-**Say:** "Here's the entire platform in one command — the Time-To-First-Event
-drill. From a clean checkout it logs in with OAuth, subscribes to an event,
-creates a document, receives the signed delivery, and verifies the signature —
-the exact path a real integrator walks."
-
-**Run:**
-```bash
-pnpm --filter @ship/cli drill ttfe
-```
-
-**Narrate as the table prints:** "Login. Subscribe to `document.created`. Create
-a doc. The event fires, the delivery lands, and — *signature verified*. Ship
-signed it with the subscription's secret; the SDK checked it locally, so the
-signing key never left this machine. About a second and a half — against the
-**live deployed API**, not a mock."
+*(Tabs to have open on camera: **App**, **webhook.site**, **/devportal**, and one
+extra: the **green CI run** at github.com/jmerithew1/shipshape/actions.)*
 
 ---
 
-## Beat 3 — It's real, and it's not staged (2:00–2:40)
+## 🎥 Record — ~4 min
 
-**Show:** the green Actions run tab.
+### Beat 1 — The product, then the platform (0:00–0:50)
+**Show:** the app (`/`), logged in.
+**Say:** "For five weeks, Ship was this — a documents-and-projects app. This week
+it became a platform other people can build on."
+**Show:** `/api-docs` (Swagger UI). Expand `POST /api/v1/webhooks`.
+**Say:** "Here's the public, versioned API — and these docs are generated from the
+routes themselves, so the contract can't drift from what the server does."
 
-**Say:** "And this isn't a one-off I got working for the camera. That exact drill
-runs in CI against the live production deployment on **every push** — if first
-event ever takes longer than 60 seconds, or a signature fails to verify, the
-build goes red and nothing ships. Here's a green run: checks, deploy, and the
-live drill, all passing."
+### Beat 2 — The developer console (0:50–1:40)
+**Show:** `/devportal` → **Apps**.
+**Say:** "This is where a developer sets up. They register an app and get a
+client_id and a secret — shown exactly once, like Stripe."
+**Show:** **Subscriptions** tab.
+**Say:** "Then they subscribe to the events they care about — here, every time a
+document is created."
 
----
+### Beat 3 — The loop, live (1:40–3:00) — the payoff
+**Show:** the app. Create a document — title it "hello".
+**Say:** "Watch. I create a document…"
+**Switch to:** the **webhook.site** tab.
+**Say:** "…and there it is — Ship delivered a signed `document.created` event.
+That `Ship-Signature` header is an HMAC of the payload with the subscription's
+secret. A subscriber verifies it locally, so the signing key never travels."
+**Switch to:** `/devportal` → **Deliveries**.
+**Say:** "And the platform keeps the delivery log — status, attempts, latency.
+Any delivery can be replayed with its original idempotency key."
+**Do:** click **Replay** on the row → switch to webhook.site → the replay arrives.
 
-## Beat 4 — MVP + final, in one breath (2:40–3:10)
+### Beat 4 — Not staged: it's gated in CI (3:00–3:35)
+**Show:** the green CI run tab.
+**Say:** "And this isn't a one-off for the camera. That whole loop — log in,
+subscribe, create, receive, verify — runs in CI against this live deployment on
+**every push**. Over 60 seconds, or a bad signature, and the build goes red and
+nothing ships. Here it is green."
 
-**Say:** "So that's the MVP: a real OAuth 2.0 server, a public versioned API with
-one error shape and cursor pagination, HMAC-signed webhooks with retries, a
-dead-letter queue and replay, a typed zero-dependency SDK, a CLI, a developer
-portal, and five working integrations. And it's the final quality bar too —
-every claim you just saw is verified end-to-end, tested, and gated in CI against
-the *deployed* system. Not 'works on my machine' — it works in production, on
-every push. That's the platform."
+### Beat 5 — MVP + final, one breath (3:35–4:00)
+**Say:** "So that's the MVP: an OAuth 2.0 server, a public versioned API with one
+error shape and cursor pagination, HMAC-signed webhooks with retries, a
+dead-letter queue and replay, a typed SDK, a CLI, and this portal. And it's the
+final bar too — everything you just saw is verified, tested, and gated in CI
+against the deployed system. It works in production, on every push. That's the
+platform."
 
 *(Stop recording.)*
 
 ---
 
-### If a beat fails on camera
-- **Drill errors:** re-run it — it's deterministic (bounded polls, no sleeps). If
-  login fails, re-check the two exported env vars in the setup step.
-- **Want more visual?** Optionally run the dev portal locally
-  (`pnpm --filter @ship/web dev` → `http://localhost:5173/devportal`) to show the
-  app list, the delivery log, and the **Replay** button — but the three beats
-  above are the submission; the portal is a bonus, not required.
+### If something doesn't appear
+- **No delivery on webhook.site:** confirm the subscription's target URL is the
+  exact webhook.site URL, and that prod is on the latest deploy
+  (`/ready` shows the running commit). Give the deploy a couple of minutes.
+- **Prefer one command instead?** `pnpm --filter @ship/cli drill ttfe` runs the
+  whole loop in one shot (see git history) — but the browser flow above needs no
+  terminal at all.
