@@ -164,7 +164,7 @@ async function ensureSubscription(
   targetUrl: string
 ): Promise<{ hook: ShipWebhook; secret: string }> {
   const create = async (): Promise<ShipWebhook> =>
-    client.webhooks.create({ event: EVENT_TYPE, target_url: targetUrl });
+    client.webhooks.create({ event_type: EVENT_TYPE, target_url: targetUrl });
 
   let hook: ShipWebhook;
   try {

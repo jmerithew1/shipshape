@@ -59,7 +59,7 @@ export async function webhooksCreate(
   options: { event: string; url: string },
   deps: WebhooksDeps
 ): Promise<void> {
-  const hook = await client.webhooks.create({ event: options.event, target_url: options.url });
+  const hook = await client.webhooks.create({ event_type: options.event, target_url: options.url });
   deps.write(`subscription ${hook.id}  ${subscriptionEvent(hook)} → ${hook.target_url}`);
   const secret = signingSecretOf(hook);
   if (secret !== undefined) {

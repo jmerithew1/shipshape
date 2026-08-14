@@ -55,7 +55,9 @@ export interface ShipSprint {
 
 export interface ShipWebhook {
   id: string;
-  event: string;
+  /** The API returns `event_type`; `event` kept optional for older readers. */
+  event_type: string;
+  event?: string;
   target_url: string;
   active?: boolean;
   created_at: string;
@@ -65,9 +67,14 @@ export interface ShipWebhook {
 
 export interface ShipWebhookDelivery {
   id: string;
-  webhook_id: string;
-  event: string;
+  subscription_id?: string;
+  webhook_id?: string;
+  event_id?: string;
+  /** The API returns `event_type`; `event` kept optional for older readers. */
+  event_type: string;
+  event?: string;
   status: string;
+  attempt_number?: number;
   attempt?: number;
   response_status?: number | null;
   created_at: string;
@@ -131,6 +138,10 @@ export type CreateDocumentInput = {
 };
 
 export type CreateWebhookInput = {
-  event: string;
+  // Must be `event_type` — that is the field the API's create schema validates.
+  // The SDK forwards this object verbatim as the request body, so a mismatch
+  // here is silently a 400 at subscribe time (it was `event`, which the server
+  // rejected as a missing required `event_type`).
+  event_type: string;
   target_url: string;
 };

@@ -1,12 +1,21 @@
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { verifyWebhook } from './webhook.js';
 
 const SECRET = 'whsec_test_5f4dcc3b5aa765d61d8327deb882cf99';
 const BODY = JSON.stringify({ event: 'document.created', data: { id: 'doc_123' } });
 
+/** The signing key Ship actually uses: sha256(rawSecret) = signing_secret_hash. */
+function signingKey(secret: string): string {
+  return createHash('sha256').update(secret).digest('hex');
+}
+
 function sign(body: string, secret: string, atSeconds: number): string {
-  const mac = createHmac('sha256', secret).update(`${atSeconds}.${body}`).digest('hex');
+  // Sign exactly as the SERVER does — with the DERIVED key, not the raw secret.
+  // The old helper signed with the raw secret, the same key verifyWebhook then
+  // (wrongly) used, so they agreed with each other but not with real Ship
+  // deliveries. Deriving here makes this a real contract test.
+  const mac = createHmac('sha256', signingKey(secret)).update(`${atSeconds}.${body}`).digest('hex');
   return `t=${atSeconds},v1=${mac}`;
 }
 

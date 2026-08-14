@@ -26,7 +26,7 @@
  * `rawBody` must be the exact bytes received. Verifying `JSON.stringify(req.body)`
  * cannot work: key order and whitespace will not survive the round trip.
  */
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 export const SHIP_SIGNATURE_HEADER = 'Ship-Signature';
 
@@ -95,7 +95,13 @@ export function verifyWebhook(
   const skew = Math.abs(Math.floor(Date.now() / 1000) - issuedAt);
   if (skew > toleranceSec) return false;
 
-  const expected = createHmac('sha256', secret)
+  // Ship signs deliveries with the DERIVED key — sha256(rawSecret), the value
+  // it stores as signing_secret_hash — NOT the raw secret it showed you once.
+  // So the verifier must derive the same key first; HMAC-ing with the raw
+  // secret never matches a real Ship delivery. (The server's signing note says
+  // "the SDK's one-call verifier does this for them" — this is that step.)
+  const signingKey = createHash('sha256').update(secret, 'utf8').digest('hex');
+  const expected = createHmac('sha256', signingKey)
     .update(timestamp)
     .update('.')
     .update(rawBody)

@@ -144,7 +144,7 @@ describe('webhooks', () => {
         async create(): Promise<ShipWebhook> {
           return {
             id: 'sub_1',
-            event: 'document.created',
+            event_type: 'document.created',
             target_url: 'https://example.com/hook',
             created_at: '2026-08-12T00:00:00.000Z',
             secret: 'whsec_abc123',
@@ -186,7 +186,7 @@ describe('webhooks', () => {
         async create(): Promise<ShipWebhook> {
           return {
             id: 'sub_1',
-            event: 'document.created',
+            event_type: 'document.created',
             target_url: 'https://example.com/hook',
             created_at: '2026-08-12T00:00:00.000Z',
           };

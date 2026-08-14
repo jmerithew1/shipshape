@@ -144,7 +144,7 @@ describe('ShipClient resource clients', () => {
       return json(
         {
           id: 'wh_1',
-          event: 'document.created',
+          event_type: 'document.created',
           target_url: 'https://hooks.example.com/ship',
           created_at: '2026-08-12T00:00:00Z',
           secret: 'whsec_once',
@@ -155,10 +155,12 @@ describe('ShipClient resource clients', () => {
 
     const ship = new ShipClient({ token: 't', baseUrl: BASE_URL, fetch: fetchImpl });
     const webhook = await ship.webhooks.create({
-      event: 'document.created',
+      event_type: 'document.created',
       target_url: 'https://hooks.example.com/ship',
     });
 
+    // The body field the API validates is `event_type`, not `event`.
+    expect(JSON.parse(String(seen[0]?.body))).toMatchObject({ event_type: 'document.created' });
     expect(seen[0]?.method).toBe('POST');
     expect(seen[0]?.url).toBe('https://ship.example.com/api/v1/webhooks');
     expect(webhook.secret).toBe('whsec_once');

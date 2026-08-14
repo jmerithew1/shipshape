@@ -66,7 +66,7 @@ async function exerciseEveryMethod(): Promise<Hit[]> {
   await collect(ship.sprints.iterate());
 
   await ship.webhooks.list();
-  await ship.webhooks.create({ event: 'document.created', target_url: 'https://x.test/hook' });
+  await ship.webhooks.create({ event_type: 'document.created', target_url: 'https://x.test/hook' });
   await ship.webhooks.delete('wh_1');
   await ship.webhooks.deliveries();
   await collect(ship.webhooks.iterateDeliveries());

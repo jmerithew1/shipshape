@@ -36,16 +36,10 @@ export interface DeliveryRecord extends Partial<ShipWebhookDelivery> {
   signature?: unknown;
   signature_header?: unknown;
   headers?: unknown;
-  // The public webhook routes name three fields differently from the SDK's
-  // declared `ShipWebhookDelivery` (`event_type`/`subscription_id`/
-  // `attempt_number` against `event`/`webhook_id`/`attempt`). That is a
-  // contract mismatch for the SDK and the API to settle between them; until
-  // they do, the CLI reads BOTH rather than printing "unknown.event" over a
-  // perfectly good delivery. Reading tolerantly is cheap; writing tolerantly
-  // would be the CLI quietly forking the contract, so it does not.
-  event_type?: unknown;
-  subscription_id?: unknown;
-  attempt_number?: unknown;
+  // `ShipWebhookDelivery` now carries the API's real field names (`event_type`/
+  // `subscription_id`/`attempt_number`) alongside the older `event`/`attempt`,
+  // so the tolerant readers below inherit both from the SDK type — no local
+  // re-declaration needed.
 }
 
 /** The event type, under either name. */
