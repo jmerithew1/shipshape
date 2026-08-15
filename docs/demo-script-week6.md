@@ -34,7 +34,9 @@ extra: the **green CI run** at github.com/jmerithew1/shipshape/actions.)*
 **Show:** the app (`/`), logged in.
 **Say:** "For five weeks, Ship was this — a documents-and-projects app. This week
 it became a platform other people can build on."
-**Show:** `/api-docs` (Swagger UI). Expand `POST /api/v1/webhooks`.
+**Show:** `/api/docs/` (Swagger UI — note the trailing slash; `/api-docs` is NOT
+the mount path and falls through to the SPA, rendering a blank page). Expand
+`POST /api/v1/webhooks`.
 **Say:** "Here's the public, versioned API — and these docs are generated from the
 routes themselves, so the contract can't drift from what the server does."
 
