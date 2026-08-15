@@ -152,8 +152,16 @@ async function v1Get<T>(path: string): Promise<T> {
   return readV1<T>(res);
 }
 
-/** The one place the public webhook surface is named. */
-export const WEBHOOK_BASE = '/api/v1/webhooks';
+/**
+ * The one place the portal's webhook surface is named.
+ *
+ * Points at the SESSION-AUTHED alias, not `/api/v1/webhooks`. The v1 surface is
+ * bearer-token only, and this portal holds no token — pointed there, every
+ * subscription and delivery call returned `401 Missing bearer token`. The alias
+ * (`api/src/platform/webhooks/portal-routes.ts`) delegates to the same service
+ * functions with the same response shapes, so only this constant had to move.
+ */
+export const WEBHOOK_BASE = '/api/devportal/webhooks';
 
 // ── OAuth apps (internal, session-authed) ───────────────────────────────────
 

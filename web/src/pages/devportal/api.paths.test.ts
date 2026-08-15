@@ -31,8 +31,15 @@ const SOURCE = path.join(here, 'api.ts');
 // devportal -> pages -> src -> web -> repo root
 const SPEC = path.join(here, '..', '..', '..', '..', 'docs', 'openapi.json');
 
-/** The v1 prefix the server mounts the public router under. */
-const V1_PREFIX = '/api/v1';
+/**
+ * The portal calls the session-authed alias, which deliberately MIRRORS the v1
+ * surface path-for-path (see api/src/platform/webhooks/portal-routes.ts). So
+ * the parity check still holds against the published v1 spec: strip the alias
+ * prefix and every remaining path must be one the spec publishes. That keeps
+ * the alias honest — if it ever grows a route v1 does not have, or v1 renames
+ * one, this fails.
+ */
+const PORTAL_PREFIX = '/api/devportal';
 
 /**
  * Pull every `${WEBHOOK_BASE}...` template literal — plus bare uses of the
@@ -63,18 +70,20 @@ describe('dev portal public-API paths match the published spec', () => {
 
   const base = source.match(/export const WEBHOOK_BASE = '([^']+)'/)?.[1];
 
-  it('names the public webhook surface in exactly one place', () => {
-    expect(base).toBe(`${V1_PREFIX}/webhooks`);
+  it('names the webhook surface in exactly one place, on the session-authed alias', () => {
+    // NOT /api/v1/webhooks: that surface is bearer-token only and the portal
+    // has no token, so pointing here was a 401 on every call.
+    expect(base).toBe(`${PORTAL_PREFIX}/webhooks`);
   });
 
-  it('calls only paths the spec publishes', () => {
+  it('calls only paths the spec publishes (alias mirrors v1)', () => {
     const called = portalPaths(source, base!);
 
     // Guard against the regex silently matching nothing and the test passing
     // vacuously — the failure mode that would make this whole file useless.
     expect(called.length).toBeGreaterThanOrEqual(4);
 
-    const unpublished = called.filter((p) => !specPaths.includes(p.slice(V1_PREFIX.length)));
-    expect(unpublished, `paths not in docs/openapi.json: ${unpublished.join(', ')}`).toEqual([]);
+    const unpublished = called.filter((p) => !specPaths.includes(p.slice(PORTAL_PREFIX.length)));
+    expect(unpublished, `paths not mirrored in docs/openapi.json: ${unpublished.join(', ')}`).toEqual([]);
   });
 });

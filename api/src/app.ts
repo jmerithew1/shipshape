@@ -42,6 +42,7 @@ import oauthAppsRoutes from './routes/oauth-apps.js';
 import { createOAuthRouter } from './platform/oauth/routes.js';
 import { auditTrail } from './platform/audit/middleware.js';
 import { createAuditRouter } from './platform/audit/routes.js';
+import { createPortalWebhookRouter } from './platform/webhooks/portal-routes.js';
 import { authMiddleware } from './middleware/auth.js';
 
 // Validate SESSION_SECRET in production
@@ -360,6 +361,12 @@ export function createApp(corsOrigin: string = 'http://localhost:5173'): express
 
   // Developer-portal read surfaces (session-authed, like app registration).
   app.use('/api/devportal', conditionalCsrf, createAuditRouter({ auth: authMiddleware }));
+  // Webhook management for the portal: the same service calls and response
+  // shapes as the /api/v1 handlers, but session-authed, because the portal is
+  // the operator's own dashboard and holds no bearer token. See
+  // platform/webhooks/portal-routes.ts for why the v1 token gate was NOT
+  // taught to accept cookies instead.
+  app.use('/api/devportal', conditionalCsrf, createPortalWebhookRouter({ auth: authMiddleware }));
 
   // Claude context routes - read-only GET endpoints for Claude skills
   app.use('/api/claude', claudeRoutes);
