@@ -43,4 +43,29 @@ describe('public envelope survives pre-router failures', () => {
     expect(res.status).toBe(200);
     expect(res.body.openapi).toMatch(/^3\.1\./);
   });
+
+  // Regression: the v1 spec used to be reachable ONLY as raw JSON, and the demo
+  // script pointed at /api/docs (the INTERNAL app API) expecting to find the
+  // platform routes there. Two different specs — so the platform contract had
+  // no rendered documentation at all.
+  //
+  // Asserting on the BODY, not just the status: every unmatched path falls
+  // through to the SPA catch-all, which answers 200 with index.html. A
+  // status-only check passes even when the page is completely wrong — which is
+  // exactly how this was missed the first time.
+  it('renders a docs UI for the v1 platform spec (not the internal API docs)', async () => {
+    const res = await request(app).get('/api/v1/docs/');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('swagger-ui');
+    expect(res.text).toContain('Ship Platform API v1');
+    // Must not be the SPA fallback wearing a 200.
+    expect(res.text).not.toContain('<div id="root">');
+
+    // swagger-ui-express emits the config into a separate init script rather
+    // than inlining it, so the "which spec does this UI actually load" check
+    // belongs there — that is the assertion with teeth.
+    const init = await request(app).get('/api/v1/docs/swagger-ui-init.js');
+    expect(init.status).toBe(200);
+    expect(init.text).toContain('/api/v1/openapi.json');
+  });
 });
