@@ -242,7 +242,7 @@ export function useSubscriptions(appId: string | null) {
     queryKey: devPortalKeys.subscriptions(appId),
     queryFn: () =>
       v1Get<CursorPage<WebhookSubscription>>(
-        `${WEBHOOK_BASE}/subscriptions?app_id=${encodeURIComponent(appId ?? '')}`
+        `${WEBHOOK_BASE}?app_id=${encodeURIComponent(appId ?? '')}`
       ),
     enabled: !!appId,
     retry: false,
@@ -279,7 +279,7 @@ export function useCreateSubscription() {
   return useMutation<CreatedSubscription, Error, CreateSubscriptionInput>({
     mutationFn: async (input) => {
       const body = await readV1<RawCreateResponse & WebhookSubscription>(
-        await apiPost(`${WEBHOOK_BASE}/subscriptions`, input)
+        await apiPost(WEBHOOK_BASE, input)
       );
       return {
         subscription: body.subscription ?? body,
@@ -296,7 +296,7 @@ export function useDeleteSubscription(appId: string | null) {
   const queryClient = useQueryClient();
   return useMutation<void, Error, string>({
     mutationFn: async (subscriptionId) => {
-      const res = await apiDelete(`${WEBHOOK_BASE}/subscriptions/${subscriptionId}`);
+      const res = await apiDelete(`${WEBHOOK_BASE}/${subscriptionId}`);
       if (!res.ok) await readV1<unknown>(res);
     },
     onSuccess: () =>
