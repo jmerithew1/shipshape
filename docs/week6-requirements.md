@@ -6,7 +6,7 @@ House rule: never let a claim outlive the code — a row only moves to MET with 
 
 Updated at the end of every slice. This ledger is the anchor of the week's deviation-check loop: any change of plan is checked against these rows before it lands.
 
-**Companion:** [`week6-traceability.md`](week6-traceability.md) traces all 93 requirements from the brief to their evidence and adds the column this ledger lacked — **how and when each was verified** (re-run today / asserted against the live deployment / cited from a dated artifact). A row that cannot say how it was checked is how a hard gate went MET on one measurement out of five.
+**Companion:** [`week6-traceability.md`](week6-traceability.md) traces all 105 requirements from the brief to their evidence and adds the column this ledger lacked — **how and when each was verified** (re-run today / asserted against the live deployment / cited from a dated artifact). A row that cannot say how it was checked is how a hard gate went MET on one measurement out of five.
 
 ## A. MVP hard gate (all required to pass — Tue Aug 12, 11:59 PM CT)
 

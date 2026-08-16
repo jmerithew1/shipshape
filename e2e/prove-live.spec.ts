@@ -39,9 +39,19 @@ test('live verification walk', async ({ page, request }) => {
   const ops = Object.values(spec.paths as Record<string, Record<string, { operationId?: string }>>)
     .flatMap((i) => Object.values(i)).filter((o) => o.operationId).map((o) => o.operationId!);
   await shot('c1_openapi-spec-live');
-  results.push(['c1', 'OpenAPI 3.1 spec served live, generated from routes',
-    `openapi=${spec.openapi}, ${Object.keys(spec.paths).length} paths, ${ops.length} operations`,
-    'c1_openapi-spec-live.png', spec.openapi.startsWith('3.1') && ops.length === 13 ? 'MET' : 'PARTIAL']);
+  // Compared against the COMMITTED spec, not a hardcoded 13. The magic number
+  // made this a tripwire: adding a route to the v1 surface would turn c1
+  // PARTIAL and red the deploy job for a spec change rather than a production
+  // fault. What actually matters here is drift — that the operations prod
+  // serves are the operations the repo says it serves.
+  const committed = JSON.parse(fs.readFileSync('docs/openapi.json', 'utf8'));
+  const committedOps = Object.values(committed.paths as Record<string, Record<string, unknown>>)
+    .flatMap((entry) => Object.keys(entry)).length;
+  results.push(['c1', 'OpenAPI 3.1 spec served live, matching the committed spec',
+    `openapi=${spec.openapi}, ${Object.keys(spec.paths).length} paths, ${ops.length} operations ` +
+      `(committed: ${committedOps})`,
+    'c1_openapi-spec-live.png',
+    spec.openapi.startsWith('3.1') && ops.length === committedOps ? 'MET' : 'PARTIAL']);
 
   // c2 — ApiError envelope on an unauthenticated public call
   await page.goto(`${BASE}/api/v1/me`, { waitUntil: 'networkidle' });
@@ -103,21 +113,34 @@ test('live verification walk', async ({ page, request }) => {
     const tokenRes = await request.post(`${BASE}/oauth/token`, {
       form: {
         grant_type: 'client_credentials',
-        client_id: 'ship_app_ttfe_drill',
+        // Configurable: hardcoding the drill app made this branch untestable
+        // anywhere but prod, so it had never once executed.
+        client_id: process.env.SHIP_CLIENT_ID ?? 'ship_app_ttfe_drill',
         client_secret: drillSecret,
         scope: 'documents:read',
       },
     });
     const token = (await tokenRes.json()).access_token as string | undefined;
-    const r3 = await request.get(`${BASE}/api/v1/me`, {
-      headers: token ? { authorization: `Bearer ${token}` } : {},
-    });
-    const xs = Object.keys(r3.headers())
-      .filter((k) => k.toLowerCase().startsWith('x-ratelimit'))
-      .sort();
-    results.push(['c7', 'Authenticated public responses carry X-RateLimit-* headers',
-      `status=${r3.status()} present=${xs.join(',')}`,
-      'c2_apierror-envelope.png', xs.length >= 3 ? 'MET' : 'MISSING']);
+    if (!token) {
+      // Failing to MINT a token is not evidence about rate-limit headers — it
+      // is the check being unable to run, same as having no secret at all.
+      // Reporting MISSING here would red the deploy for a credential problem
+      // while claiming the API had dropped a header it never got asked for.
+      results.push(['c7', 'Authenticated public responses carry X-RateLimit-* headers',
+        `SKIPPED — token exchange returned ${tokenRes.status()}, so no authenticated ` +
+        `request could be made. Check SHIP_CLIENT_ID/SHIP_CLIENT_SECRET, not the API`,
+        'c2_apierror-envelope.png', 'SKIPPED']);
+    } else {
+      const r3 = await request.get(`${BASE}/api/v1/me`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const xs = Object.keys(r3.headers())
+        .filter((k) => k.toLowerCase().startsWith('x-ratelimit'))
+        .sort();
+      results.push(['c7', 'Authenticated public responses carry X-RateLimit-* headers',
+        `status=${r3.status()} present=${xs.join(',')}`,
+        'c2_apierror-envelope.png', xs.length >= 3 ? 'MET' : 'MISSING']);
+    }
   } else {
     const r3 = await request.get(`${BASE}/api/v1/me`);
     const pre = Object.keys(r3.headers())

@@ -37,7 +37,16 @@ import { registerApp, rotateAppSecret } from '../platform/oauth/service.js';
 
 config({ path: join(dirname(fileURLToPath(import.meta.url)), '../../.env.local') });
 
-const DRILL_APP_NAME = 'TTFE Drill (first-party M2M)';
+/**
+ * DELIBERATELY DIFFERENT from migration 043's `'TTFE Drill (first-party M2M)'`.
+ *
+ * This script matches an existing app on (workspace_id, name) and ROTATES its
+ * secret. Sharing 043's name would mean running it against production silently
+ * invalidates the `SHIP_CLIENT_SECRET` repo secret that both the deploy-time
+ * TTFE drill and prove-live's c7 depend on — a red `main` with no obvious cause.
+ * A distinct name makes the CI-seeded app its own object.
+ */
+const DRILL_APP_NAME = 'TTFE Drill (CI-seeded)';
 
 /**
  * Exactly what the five drill stages touch, and nothing else:

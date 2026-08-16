@@ -255,8 +255,10 @@ jobs:
           # ONE invocation: re-running the seed ROTATES the secret, so calling it
           # twice would print an id from one app state and a secret from another.
           out=$(pnpm --silent --filter @ship/api seed:drill-app)
-          client=$(echo "$out" | grep -oE 'ship_app_[a-f0-9]+' | head -1)
-          secret=$(echo "$out" | grep -oE 'ship_sec_[a-f0-9]+' | head -1)
+          # `|| true`: under `set -e` a non-matching grep aborts the step, which
+          # would skip the explicit error below and leave only an exit code.
+          client=$(echo "$out" | grep -oE 'ship_app_[a-f0-9]+' | head -1 || true)
+          secret=$(echo "$out" | grep -oE 'ship_sec_[a-f0-9]+' | head -1 || true)
           if [ -z "$client" ] || [ -z "$secret" ]; then
             echo "::error::drill app seed printed no credentials"; exit 1
           fi

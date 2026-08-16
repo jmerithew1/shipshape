@@ -69,14 +69,14 @@ This is the part most worth being able to explain out loud.
 + `_version`, and `random_password.db` — the password is generated and never declared in
 a variable, a `.tfvars`, or this file.
 
+**`deletion_protection = true` is set on exactly one resource in the stack, and it is
+`aws_db_instance.postgres`** (`main.tf`). The destroy-and-redeploy exercise proves the
+*config* is the source of truth; data is the one thing the config cannot re-derive.
+
 ### Logs (1)
 
 `aws_cloudwatch_log_group.app`, 30-day retention, and the only log resource the task role
 can write to.
-
-**`deletion_protection = true` is set on exactly one resource, and it is this one.** The
-destroy-and-redeploy exercise proves the *config* is the source of truth; data is the one
-thing the config cannot re-derive.
 
 ### Networking (14) and security groups (2)
 

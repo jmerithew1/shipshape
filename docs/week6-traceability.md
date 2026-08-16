@@ -22,14 +22,19 @@ Counts, **computed from this file's own tables** (105 requirement rows, sections
 
 | | |
 | --- | --: |
-| MET | **92** |
-| PARTIAL — stated, not hidden | **9** |
+| MET | **94** |
+| PARTIAL — stated, not hidden | **7** |
 | OWED — blocked on the owner | **3** |
 | ACCRUING — needs elapsed CI runs, not effort | **1** |
 | MISSING | **0** |
 
 **The PARTIAL count went UP on 2026-08-16, from 2 to 9, and that is the honest
-direction.** An independent coverage audit was run against this file with one
+direction.** It has since come back to 7 — not by rewording rows, but because two of
+them were **stale**: the Epic-7 flag-both-ways clause and TTFE's clean-container install
+had both been closed with real work hours earlier and the rows were never re-scored.
+That is the same defect this document exists to catch, committed inside the document
+itself, and it was caught by `scripts/check-traceability.mjs` refusing the edit rather
+than by anyone re-reading. An independent coverage audit was run against this file with one
 instruction: falsify the claim that it traces everything. It did, on three counts, all
 verified before acting:
 
@@ -171,7 +176,7 @@ so the count is genuinely derivable.
 
 | Metric | Target | Status | Result | Verified |
 | --- | --- | --- | --- | --- |
-| TTFE | ≤30 min; CI <60 s | **PARTIAL** | ~1.4–2 s in CI against prod. **The "clean container, `pnpm install @ship/sdk`" clause is NOT exercised** — the drill's own install stage reports **1 ms**, which is workspace resolution, not an install, and CI runs it against live prod rather than a clean container | CITED |
+| TTFE | ≤30 min; CI <60 s | MET | ~1.4–2 s in CI against prod. The "clean container, `pnpm install @ship/sdk`" clause is now exercised: the `drill-pr` job packs the SDK, installs the tarball into an empty directory outside the workspace (`--ignore-workspace`), times it, and feeds the result in via `SHIP_DRILL_INSTALL_MS` (`ci.yml:267,305`), so stage 1 reports a real install instead of a **1 ms** module resolve. Simulated locally end-to-end before wiring: **1,303 ms**, package imports cleanly from a clean dir | RAN |
 | PKCE round-trip P95 | <3 s | **PARTIAL** | The cited "8-spec file completes in 18.4 s serial" is a **file duration, not a P95**, and is 6× the target on its face. No percentile is computed anywhere. The round-trip is almost certainly well under 3 s, but that is an inference, not a measurement | CITED |
 | OpenAPI spec parity | 100% | MET | `sdk-parity.test.ts`, both directions, with an explicit anti-vacuous guard | RAN |
 | Webhook delivery P95 (first attempt) | <2 s | **PARTIAL** | 573 ms — but that is **one sample** (the drill's single `receive` stage), not a P95. Comfortably inside the bound; still N=1 | CITED |
@@ -249,7 +254,7 @@ Found 2026-08-16 by an independent coverage audit. All satisfied; none was trace
 | Technical Stack: **TypeScript strict mode required** | MET | `tsconfig.json:13` `"strict": true`, inherited by every workspace package | RAN |
 | Technical Stack: **Zod for request/response schemas**, feeding OpenAPI generation | MET | Zod schemas adjacent to each v1 handler; `OpenApiGeneratorV31` walks them — this is why the spec is generated rather than written | RAN |
 | CLI subcommands: `ship login`, `ship docs ls/get/create`, `ship webhooks tail` | MET | `integrations/cli/` — 76 tests; `tail.test.ts` covers the streaming verifier | RAN |
-| Agent rewire behind a flag so **Part 2's tests pass with the flag on AND off** | **PARTIAL** | `ship-data.test.ts` exercises both branches of `resolveShipData`, but CI does not run the Part-2 suite twice with `FLEETGRAPH_VIA_SDK` set and unset. Both-ways coverage is unit-level, not suite-level | OPEN |
+| Agent rewire behind a flag so **Part 2's tests pass with the flag on AND off** | MET | Closed 2026-08-16. `Test (api)` covers flag-OFF (the default); a second step runs the **whole** api suite with `FLEETGRAPH_VIA_SDK: 'true'` (`ci.yml:115`) — locally **880/880 green** with the flag set. Previously the two branches of `resolveShipData` were unit-tested but no suite ever ran twice, which is the difference between testing the seam and testing the system on both sides of it | RAN |
 | `@ship/sdk` **npm-publish documented** (explicitly *not required*) | MET | Install path documented via the committed pack tarball; publishing is out of scope by the brief's own wording | CITED |
 | Interview preparation — 6 technical + 4 mindset topics | MET | `docs/defense-week6.md` + speaker notes + terraform blast-radius map; defense held 2026-08-11 | CITED |
 
