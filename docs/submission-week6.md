@@ -17,7 +17,7 @@ deliverable goes missing on submission day.
 | Demo video, 3–5 min | beat-by-beat script + fallback playbook — [`demo-script-week6.md`](demo-script-week6.md) | record it |
 | Social post (@GauntletAI) | two drafts — [`week6-social-post.md`](week6-social-post.md) | post it, with the `ship webhooks tail` screenshot showing a verified signed event arriving |
 | C2 IAM least-privilege | policy + verification commands drafted — [`week6-iam-least-privilege.md`](week6-iam-least-privilege.md) | apply against the real AWS identity; capture allow-works / deny-fails |
-| Open + merge the six PRs | branches pushed to both remotes; descriptions written — [`week6-pull-requests.md`](week6-pull-requests.md) | open each in the web UI and merge bottom-up |
+| ~~Open + merge the seven slice branches~~ | **CLOSED 2026-08-16** — merged to `main` bottom-up as annotated `--no-ff` merge commits, each naming its slice's criterion; descriptions preserved in [`week6-pull-requests.md`](week6-pull-requests.md) | — |
 
 ## Closed on 2026-08-16 — each by doing the work, not rewording the row
 
