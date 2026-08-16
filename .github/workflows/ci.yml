@@ -271,7 +271,11 @@ jobs:
           end=$(date +%s%3N)
           ms=$((end - start))
           echo "real @ship/sdk install: ${ms} ms"
-          node -e "require.resolve('@ship/sdk')" && echo "package resolves from a clean dir"
+          # ESM check, not require.resolve: @ship/sdk is "type": "module" with an
+          # exports map, so a CJS resolve is the wrong probe for it. A dynamic
+          # import proves the package actually LOADS from a clean directory,
+          # which is what stage 1 of the drill claims.
+          node --input-type=module -e "await import('@ship/sdk'); console.log('package imports cleanly from a clean dir')"
           echo "ms=$ms" >> "$GITHUB_OUTPUT"
 
       - name: Boot Ship from this PR
@@ -304,21 +308,6 @@ jobs:
           # to prevent.
           exit $code
 
-      # The two Playwright specs that guard THIS PR's own code. Without them,
-      # e2e/devportal-replay.spec.ts — the test that caught the Replay button
-      # 400ing on every click — ran in no CI job at all, so reintroducing that
-      # bug tomorrow would produce a fully green pipeline. A regression test
-      # nothing executes is a comment.
-      #
-      # Runs against the Ship booted above, not prod, so it belongs here rather
-      # than in verify-deployment.
-      - name: Playwright — platform specs against this PR's Ship
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-        run: |
-          pnpm exec playwright install --with-deps chromium
-          pnpm exec playwright test e2e/devportal-replay.spec.ts e2e/oauth-pkce.spec.ts --workers=1
-
       - name: Stop Ship
         if: always()
         run: kill "$(cat api.pid)" 2>/dev/null || true
@@ -332,6 +321,47 @@ jobs:
             ttfe-pr-result.json
             api.log
           retention-days: 30
+
+  # The Playwright specs that guard the PLATFORM surface, as opposed to the
+  # inherited product suite. Without this job, e2e/devportal-replay.spec.ts —
+  # the test that caught the dev-portal Replay button returning 400 on every
+  # click — ran in no CI job at all, so reintroducing that bug would have
+  # produced a fully green pipeline. A regression test nothing executes is a
+  # comment.
+  #
+  # Its own job, NOT a step inside drill-pr: these specs bring their own stack
+  # via e2e/fixtures/isolated-env.ts (a Postgres testcontainer plus an API and
+  # preview server per worker). They neither use nor need the Ship that drill-pr
+  # boots on :3000, and running both at once invites a port collision. An
+  # earlier revision put them there with a PLAYWRIGHT_BASE_URL that nothing
+  # reads and a comment claiming they targeted the booted instance — a claim the
+  # code did not support.
+  e2e-platform:
+    name: Playwright (platform specs, self-contained stack)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Recursive build in dependency order: the specs compile against
+      # @ship/sdk, and the fixture serves a built web bundle.
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Platform e2e (dev portal replay, OAuth PKCE)
+        run: pnpm exec playwright test e2e/devportal-replay.spec.ts e2e/oauth-pkce.spec.ts --workers=1
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-platform-${{ github.sha }}
+          path: playwright-report/
+          retention-days: 14
 
   secret-scan:
     runs-on: ubuntu-latest
