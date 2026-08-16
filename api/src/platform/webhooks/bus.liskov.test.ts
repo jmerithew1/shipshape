@@ -103,9 +103,12 @@ class NaiveQueueBus implements IEventBus {
 }
 
 beforeAll(async () => {
+  // Global setup disables webhook publication (setup.ts); webhook suites
+  // re-enable it explicitly, same as bus.test.ts.
+  process.env.WEBHOOKS_ENABLED = 'true';
   const ws = await pool.query<{ id: string }>(
-    `INSERT INTO workspaces (name, slug) VALUES ('Liskov WS', $1) RETURNING id`,
-    [`liskov-${crypto.randomUUID().slice(0, 8)}`]
+    `INSERT INTO workspaces (name) VALUES ($1) RETURNING id`,
+    [`Liskov WS ${crypto.randomUUID().slice(0, 8)}`]
   );
   workspaceId = ws.rows[0]!.id;
   const app = await pool.query<{ id: string }>(
@@ -121,6 +124,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  process.env.WEBHOOKS_ENABLED = 'false';
   await pool.query(`DELETE FROM webhook_subscriptions WHERE workspace_id = $1`, [workspaceId]);
   await pool.query(`DELETE FROM oauth_apps WHERE workspace_id = $1`, [workspaceId]);
   await pool.query(`DELETE FROM workspaces WHERE id = $1`, [workspaceId]);
