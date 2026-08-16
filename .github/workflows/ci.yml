@@ -73,6 +73,20 @@ jobs:
       - name: Test (sdk)
         run: pnpm --filter @ship/sdk test
 
+      # cli and slack were NOT run here until 2026-08-16, and that is exactly
+      # how 21 failures sat under a "all suites green" claim for four days:
+      # 914afaf moved verifyWebhook to the derived signing key and updated the
+      # SDK's own test helper, but the two integration harnesses kept signing
+      # with the raw secret. Nothing in CI executed them, so nothing said so.
+      # Both consume @ship/sdk, so they are the suites most exposed to exactly
+      # this kind of contract drift — which makes their absence the worst of
+      # the three to have had.
+      - name: Test (cli)
+        run: pnpm --filter @ship/cli test
+
+      - name: Test (slack)
+        run: pnpm --filter @ship/slack test
+
       # Coverage re-runs all 59 api suites a second time under v8
       # instrumentation. It has NO thresholds — its output is an uploaded
       # report, not a gate — while `Test (api)` above is the actual
