@@ -31,7 +31,7 @@
     [
       "c5",
       "Device Authorization Grant issues a user code",
-      "status=200 user_code=EGG8-2YEF interval=5",
+      "status=200 user_code=7VCH-2FHP interval=5",
       "c5_device-code.png",
       "MET"
     ],
@@ -44,10 +44,10 @@
     ],
     [
       "c7",
-      "Public responses carry X-RateLimit-* headers",
-      "present=",
+      "Authenticated public responses carry X-RateLimit-* headers",
+      "SKIPPED — no SHIP_CLIENT_SECRET, so no token could be minted. Unauthenticated control: status=401 x-ratelimit=[] (expected empty: per-app/per-token limits, authn precedes the limiter)",
       "c2_apierror-envelope.png",
-      "MISSING"
+      "SKIPPED"
     ],
     [
       "c8",
