@@ -18,11 +18,43 @@ adds the column that would have caught it: *how it was verified, and when*.
 | **CITED** | Backed by a committed artifact from an earlier dated run; not re-executed today. |
 | **OPEN** | Not satisfied. The gap is stated in the row. |
 
-Counts, **computed from this file's own tables rather than asserted** (93 requirement
-rows across sections A–K):
+Counts, **computed from this file's own tables** (105 requirement rows, sections A–L):
 
 | | |
 | --- | --: |
+| MET | **92** |
+| PARTIAL — stated, not hidden | **9** |
+| OWED — blocked on the owner | **3** |
+| ACCRUING — needs elapsed CI runs, not effort | **1** |
+| MISSING | **0** |
+
+**The PARTIAL count went UP on 2026-08-16, from 2 to 9, and that is the honest
+direction.** An independent coverage audit was run against this file with one
+instruction: falsify the claim that it traces everything. It did, on three counts, all
+verified before acting:
+
+1. **Twelve brief clauses had no row here at all** — including the `< 1 ms` webhook
+   signature-verification target, the Event Bus's Liskov clause, the delivery-log field
+   list, TypeScript strict mode, Zod as the schema source, Slack's `issue.assigned`, and
+   the architecture doc's "1–2 pages". Sections J, K and L exist because of that sweep.
+   A clause with no row can never come back MISSING; that is the same structural defect
+   as the gate this file was created to close, found again inside the fix for it.
+2. **Section E had no Status column**, so a script counting this file *inferred* MET for
+   nine rows. "Computed, not asserted" was therefore weaker than it read. Fixed.
+3. **Several rows were softer than the brief.** PKCE "P95 < 3 s" cited a file duration,
+   not a percentile. Webhook "P95 < 2 s" cited a single sample. TTFE's "clean container,
+   `pnpm install`" is contradicted by the drill's own `install = 1 ms`. Each is now
+   PARTIAL with the reason, rather than MET with a number that does not mean what the
+   row says it means.
+
+One audit finding was **refuted** and is recorded so the correction is not lost: the
+`evidence/2026-08-12/c5`/`c6` citation is not a dead path — `c6` is a check inside
+`results.json` (`first=authorization_pending immediate-repoll=slow_down`) sharing c5's
+screenshot. Verified before acting.
+
+Nothing here is marked MET without a file, test name, measured number, or URL.
+
+--- | --: |
 | MET | **87** |
 | PARTIAL — stated, not hidden | **2** |
 | OWED — blocked on the owner | **3** |
@@ -97,6 +129,7 @@ early pass read 64 instead of 46.
 | Public routes only at `/api/v1/*`; lint rule fails the build on cross-import | MET | `eslint.config.mjs:97,117` `no-restricted-imports` at **error**; verified non-vacuously by planting an import | RAN — lint 0 errors |
 | Consistent error shape, fitness-verified | MET | `contract.fitness.test.ts` | RAN |
 | Cursor pagination `{data,next_cursor}`, stable across reordering | MET | Opaque base64 over `{id,timestamp}`; stability is discovery #2 | RAN |
+| **OpenAPI 3.1 Spec** (the feature-table row, distinct from MVP A7) — generated in-process, served, schema-validated, parity asserted | MET | `openapi/v1-registry.ts` + route factory; `contract.fitness.test.ts`; `sdk-parity.test.ts`. **Untraced here until 2026-08-16** — the brief's table has 10 rows, this section had 9 | RAN |
 
 ### Webhooks — signing, retries, replay (7)
 
@@ -104,11 +137,13 @@ early pass read 64 instead of 46.
 | --- | --- | --- | --- |
 | Event registry as data, Zod schema per type | MET | `webhooks/events.ts` | RAN |
 | `IEventBus`; domain layer publishes, never the route layer | MET | `webhooks/bus.ts` | RAN |
+| In-process bus must-ship; **queue-backed impl is a Liskov-substitutable drop-in** | **PARTIAL** | The interface and a Postgres-outbox implementation exist behind `IEventBus`, so substitution is structural. But **no queue-backed implementation has been written or swapped in**, so Liskov-substitutability is argued, not demonstrated. Untraced here until 2026-08-16 | OPEN |
 | Per-app per-event subscriptions via `/api/v1/webhooks` (`webhooks:manage`) | MET | `platform/webhooks/` | RAN |
 | HMAC-SHA256 `Ship-Signature: t=…,v1=…`; SDK rejects >5 min | MET | `signature.ts`; **all three clients of the contract now derive `sha256(secret)`** — see the 2026-08-16 fix | RAN — cli 76, slack 64 |
 | Retry 1s/4s/16s/1m/5m/30m with jitter; 4xx permanent | MET | `deliverer.test.ts` — injected clock, zero sleeps | RAN |
 | 6 failures → DLQ in the portal; manual replay carries the original key | MET | `drills/idempotency.drill.test.ts` + dedupe-disabled control | RAN |
-| `webhook_deliveries` log; `/replay` re-emits with `Idempotency-Key` | MET | `replay_of_id` asserted | RAN |
+| `webhook_deliveries` log records `subscription_id, event_id, attempt_number, response_status, response_excerpt, latency_ms`; **queryable per app** | MET | All six columns exist in migration 040 and are selected by `service.ts` (`d.last_error, d.replay_of_id, …`); the portal's Deliveries tab queries them per app. Field list untraced here until 2026-08-16 | RAN |
+| `/replay` re-emits with the original `Idempotency-Key` | MET | `replay_of_id` + original key asserted at the API (`idempotency.drill.test.ts`) **and through the portal button** (`devportal-replay.spec.ts`) | RAN |
 
 ### SDK, rate limiting, developer portal (8)
 
@@ -151,19 +186,25 @@ early pass read 64 instead of 46.
 
 ---
 
-## E. Performance targets (7)
+## E. Performance targets (10)
 
-| Metric | Target | Result | Verified |
-| --- | --- | --- | --- |
-| TTFE | ≤30 min; CI <60 s | ~1.4–2 s in CI against prod | CITED |
-| PKCE round-trip P95 | <3 s | 8-spec file completes in 18.4 s serial | CITED |
-| OpenAPI spec parity | 100% | `sdk-parity.test.ts`, zero drift | RAN |
-| Webhook delivery P95 (first attempt) | <2 s | 573 ms measured | CITED |
-| Retry success after transient 5xx | 100% | `deliverer.test.ts` | RAN |
-| Rate-limit headers on public responses | 100% | **MET.** Middleware emission unit-tested; `Retry-After` never-zero guarded. The live `c7` probe was **unauthenticated and so could never pass** — the brief's own wording ("**per-app and per-token** token-bucket limits") means a request with no identity has no bucket, and 401s before the limiter runs. Fixed 2026-08-16: `c7` now mints a client-credentials token first, and records SKIPPED rather than MISSING when no secret is available. The check was wrong, not the API | RAN |
-| Telemetry vs Part-1 baseline | ≤+10% P95 / bundle / queries | All five query flows −7.0% to −32.8%; bundle +1.21%/+2.43%; P95 −41% to −79% | RAN |
-| SDK install size | <250 KB | 14.3 KB gzip | RAN |
-| Drill flake rate | 0% over 20 CI runs | **ACCRUING** — needs 20 pushes | OPEN |
+**This section had no Status column until 2026-08-16.** A counting script that reads
+this file therefore *inferred* MET for every row here — which made the "computed, not
+asserted" claim at the top of this file weaker than it sounded. Status is now explicit
+so the count is genuinely derivable.
+
+| Metric | Target | Status | Result | Verified |
+| --- | --- | --- | --- | --- |
+| TTFE | ≤30 min; CI <60 s | **PARTIAL** | ~1.4–2 s in CI against prod. **The "clean container, `pnpm install @ship/sdk`" clause is NOT exercised** — the drill's own install stage reports **1 ms**, which is workspace resolution, not an install, and CI runs it against live prod rather than a clean container | CITED |
+| PKCE round-trip P95 | <3 s | **PARTIAL** | The cited "8-spec file completes in 18.4 s serial" is a **file duration, not a P95**, and is 6× the target on its face. No percentile is computed anywhere. The round-trip is almost certainly well under 3 s, but that is an inference, not a measurement | CITED |
+| OpenAPI spec parity | 100% | MET | `sdk-parity.test.ts`, both directions, with an explicit anti-vacuous guard | RAN |
+| Webhook delivery P95 (first attempt) | <2 s | **PARTIAL** | 573 ms — but that is **one sample** (the drill's single `receive` stage), not a P95. Comfortably inside the bound; still N=1 | CITED |
+| Retry success after transient 5xx | 100% | MET | `deliverer.test.ts` — 500×3 then 200, waits asserted on an injected clock | RAN |
+| Rate-limit headers on public responses | 100% | MET | Middleware emission unit-tested; `Retry-After` never-zero guarded. The live `c7` probe was **unauthenticated and so could never pass** — the brief's own wording ("**per-app and per-token** token-bucket limits") means a request with no identity has no bucket, and 401s before the limiter runs. Fixed 2026-08-16: `c7` now mints a client-credentials token first, and records SKIPPED rather than MISSING when no secret is available. The check was wrong, not the API | RAN |
+| Telemetry vs Part-1 baseline | ≤+10% P95 / bundle / queries | MET | All five query flows −7.0% to −32.8%; bundle +1.21%/+2.43%; P95 −41% to −79% | RAN |
+| SDK install size | <250 KB | MET | 14.3 KB gzip, zero runtime deps | RAN |
+| Drill flake rate | 0% over 20 CI runs | **ACCRUING** | Needs 20 CI runs to exist; not compressible by effort | OPEN |
+| **Webhook signature verification (SDK)** | **< 1 ms per call** | MET | 1000-iteration timing assertion in `sdk/src/webhook.test.ts`. **This target had no row here until 2026-08-16** — one of ten in the brief's perf tables against nine rows, so it could never have come back MISSING | RAN — sdk 82 |
 
 ---
 
@@ -178,20 +219,20 @@ early pass read 64 instead of 46.
 
 ---
 
-## G. Integrations — "at least 5 of 7" (5 shipped)
+## G. Integrations — "at least 5 of 7" (6 rows: 5 picks + the not-selected pair)
 
 | Pick | Status | Evidence | Verified |
 | --- | --- | --- | --- |
 | CLI with device flow (**must-ship**) | MET | `integrations/cli/`, **76 tests green** | RAN |
-| Slack — signed webhooks → channel posts | MET (install flow unexercised vs real Slack) | `integrations/slack/`, **64 tests green** — 18 were failing under a green claim until 2026-08-16 | RAN |
+| Slack — signed webhooks → channel posts, **`document.created` AND `issue.assigned`**, via Slack OAuth | MET (install flow unexercised vs real Slack) | `integrations/slack/`, **64 tests green** — 18 were failing under a green claim until 2026-08-16. Both event types handled: `events.ts:49` `HANDLED_EVENT_TYPES = ['document.created','issue.assigned']`, formatted at `slack.ts:254`, asserted in `server.test.ts`. **`issue.assigned` appeared in neither doc until 2026-08-16** | RAN |
 | Refresh-token rotation drill | MET | `refresh-rotation.drill.test.ts` | RAN |
 | Idempotency-Key end-to-end drill | MET | `idempotency.drill.test.ts` + control | RAN |
-| Browser SDK demo (PKCE SPA) | MET (built, never browser-driven) | `integrations/browser-demo/` | OPEN |
+| Browser SDK demo (PKCE SPA listing the user's documents) | **PARTIAL — and this row carries a hard count** | `integrations/browser-demo/` implements PKCE via Web Crypto, `LocalStorageTokenStore`, and a document list; it type-checks and builds. It has **never been driven in a real browser**, because Ship has no rendered consent screen for `/oauth/authorize` to land on. The brief says *implement*, which this does — but it is one of the five counted toward "at least 5 of 7", and a never-executed row carrying a gate is worth stating plainly rather than absorbing into a MET | OPEN |
 | *GitHub integration* · *plugin runtime* | Not selected — the brief requires 5 of 7 | — | — |
 
 ---
 
-## H. Submission deliverables (9)
+## H. Submission deliverables (13)
 
 | Deliverable | Status | Evidence |
 | --- | --- | --- |
@@ -203,6 +244,8 @@ early pass read 64 instead of 46.
 | AI cost analysis with the 3 named assumptions | MET | `docs/week6-cost-analysis.md` |
 | Per-epic write-up; **E7's proof = agent audit-log rows from OAuth auth** | **MET** | E1–E6 met, E6's proof delivered. **E7's proof captured 2026-08-16** — `evidence/2026-08-16/epic7/agent-audit-rows.txt`: agent given a first-party OAuth identity, boot line flips `reads via pool` → `reads via sdk`, and `public_audit_log` records its own `client_id` on `GET /api/v1/issues` (`issues:read`) ×20 and `GET /api/v1/me` ×1, all 200 — rows impossible while it held a `pg.Pool`. **Caveat:** local stack; wiring the same three vars into `terraform/render/` so *production* runs the SDK path is not applied |
 | Three discoveries | MET | `docs/week6-discoveries.md` |
+| Architecture doc **1–2 pages** | **PARTIAL** | All 9 mandated sections present, but `docs/architecture.md` is **1,939 words / 274 lines** — roughly 4–5 pages. The length clause is not met; it was untraced here until 2026-08-16 rather than assessed and failed |
+| AI cost analysis: confirm the **Epic-7 rewire does not change token volume** | MET | Proven by construction — the rewire swaps only the data-access transport behind the `ShipData` port; prompt-building and model invocation sit downstream of the seam and are untouched by the flag. Untraced here until 2026-08-16 |
 | Deployed app + grader app + README credentials | MET | Verified live; note the grader path is the **device flow** — `client_credentials` is correctly restricted to first-party apps |
 | Social post tagging @GauntletAI with the `webhooks tail` screenshot | **OWED** | Two drafts ready |
 
@@ -218,6 +261,21 @@ early pass read 64 instead of 46.
 | One LLM call per agent turn; platform never invokes the LLM | MET | Platform is LLM-free | — |
 | `integrations/` imports only `@ship/sdk` | MET | Lint rule verified non-vacuously | RAN |
 | TTFE drill in CI from Day 5 | MET | Every push to `main`, plus every PR since 2026-08-16 (`drill-pr`) | RAN |
+
+---
+
+## L. Technical stack and other brief clauses with no prior row
+
+Found 2026-08-16 by an independent coverage audit. All satisfied; none was traced.
+
+| Brief clause | Status | Evidence | Verified |
+| --- | --- | --- | --- |
+| Technical Stack: **TypeScript strict mode required** | MET | `tsconfig.json:13` `"strict": true`, inherited by every workspace package | RAN |
+| Technical Stack: **Zod for request/response schemas**, feeding OpenAPI generation | MET | Zod schemas adjacent to each v1 handler; `OpenApiGeneratorV31` walks them — this is why the spec is generated rather than written | RAN |
+| CLI subcommands: `ship login`, `ship docs ls/get/create`, `ship webhooks tail` | MET | `integrations/cli/` — 76 tests; `tail.test.ts` covers the streaming verifier | RAN |
+| Agent rewire behind a flag so **Part 2's tests pass with the flag on AND off** | **PARTIAL** | `ship-data.test.ts` exercises both branches of `resolveShipData`, but CI does not run the Part-2 suite twice with `FLEETGRAPH_VIA_SDK` set and unset. Both-ways coverage is unit-level, not suite-level | OPEN |
+| `@ship/sdk` **npm-publish documented** (explicitly *not required*) | MET | Install path documented via the committed pack tarball; publishing is out of scope by the brief's own wording | CITED |
+| Interview preparation — 6 technical + 4 mindset topics | MET | `docs/defense-week6.md` + speaker notes + terraform blast-radius map; defense held 2026-08-11 | CITED |
 
 ---
 
@@ -254,42 +312,47 @@ Also unrowed until 2026-08-16.
 
 ## A citation is only evidence if the grader can open it
 
-`evidence/` is gitignored (`.gitignore:49`); its files are in the repo only because
-they were force-added. 21 are tracked. **Seven cited files are on disk but not in
-git**, so a grader cloning the repo hits a dead citation:
-
-| Path | Cited for | State |
-| --- | --- | --- |
-| `evidence/2026-08-12/results.json` | D3 device flow, `c7` rate-limit | on disk, untracked |
-| `evidence/2026-08-12/c1…c5_*.png` (5 files) | live-walk screenshots | on disk, untracked |
-| `evidence/2026-08-16/e2e-full-single-worker-SUMMARY.txt` | A9 regression clause | on disk, untracked |
-
-The same class of defect closed the Pre-Search row: its artifact lived in `.claude/plans/`,
-outside the repo entirely. **A path only the author can open is not a citation.**
-
-Fix before the submission commit:
-
-```bash
-git add -f evidence/2026-08-12 evidence/2026-08-16
-```
-
-Every other cited path was checked and **is** tracked — verified by resolving each
+`evidence/` is gitignored (`.gitignore:49`); its files are in the repo only because they
+were force-added. **All cited evidence is now tracked** — verified by resolving every
 `evidence/...` string in this file, the ledger and the submission index against
 `git ls-files`.
+
+This section previously listed seven files as "on disk but not in git". They were
+force-added on 2026-08-16 and the section was not updated — stale in the safe direction,
+but presented as a current finding, which is its own small version of the defect this
+document is about.
+
+One citation is shorthand rather than a path, and is worth reading correctly:
+`evidence/2026-08-12/c5`/`c6` refers to **checks c5 and c6 inside `results.json`**, not
+to files named `c5` and `c6`. Only `c1_*.png` … `c5_*.png` exist as images; c6 shares
+c5's screenshot. An audit flagged it as a dead citation; it is not, but the shorthand
+invited the reading.
+
+The same class of defect closed the Pre-Search row: its artifact lived in
+`.claude/plans/`, outside the repo entirely. **A path only the author can open is not a
+citation.**
 
 ## Open items, consolidated
 
 **OWED — only the owner can close (3).** Demo video · social post + screenshot ·
 C2's IAM apply against the real AWS identity.
 
-*(The Pre-Search transcript left this list on 2026-08-16 — it was never actually
-missing. The artifact existed from 2026-08-10 but lived outside the repo, so the
-citation resolved to nothing for a grader. Copied in, both clauses now MET.)*
+**PARTIAL — stated, not hidden (9).**
 
-**PARTIAL — stated, not hidden (2).** A9's regression clause (see below) and the
-per-slice-PR clause, which can only be satisfied going forward: all four pre-existing
-branches have **0 commits not in `main`**, so no PR can be opened from them. The work
-done on 2026-08-16 ships as five separate slice branches, each with a PR description
-naming its acceptance criterion and its fitness test.
+| Row | What is short | Closable by |
+| --- | --- | --- |
+| A9 regression clause | Every test executes and none fails on its own merits, but no single uninterrupted green whole-suite run on this hardware | A quiet machine |
+| Per-slice PRs | Seven branches pushed and in sync; PRs not opened — no `gh`/`glab` CLI and no token here | Owner, or a token |
+| TTFE "clean container" | The drill's `install` stage is 1 ms — workspace resolution, not `pnpm install` | A real install step in the PR-time drill |
+| PKCE round-trip P95 | A file duration is cited, not a percentile | Measuring it |
+| Webhook delivery P95 | One sample (573 ms), not a distribution | Measuring it |
+| Event bus Liskov clause | Substitution is structural; no queue-backed implementation exists to swap in | Writing one |
+| Architecture doc "1–2 pages" | 1,939 words ≈ 4–5 pages. Sections all present; length clause not met | Trimming, or a 1-page summary |
+| Browser SDK demo | Built and type-checked, never driven in a browser — no rendered consent screen to land on. **Counts toward "at least 5 of 7"** | Driving it, or a consent screen |
+| Flag both-ways CI | `resolveShipData` branches unit-tested; CI does not run the Part-2 suite with the flag both set and unset | A CI matrix step |
 
 **ACCRUING (1).** Drill flake rate over 20 CI runs — time, not effort.
+
+*(The Pre-Search transcript left the OWED list on 2026-08-16 — it was never actually
+missing. The artifact existed from 2026-08-10 but lived outside the repo, so the
+citation resolved to nothing for a grader. Copied in, both clauses now MET.)*
