@@ -59,6 +59,12 @@ jobs:
       - name: Type-check
         run: pnpm type-check
 
+      # The traceability doc claims its counts are computed, not asserted. That
+      # claim drifted three times in one day. Arithmetic invariants belong in a
+      # check, not in a careful reader.
+      - name: Traceability invariants (docs/week6-traceability.md)
+        run: node scripts/check-traceability.mjs
+
       - name: Prepare test database schema
         run: pnpm --filter @ship/api exec tsx src/db/migrate.ts
 

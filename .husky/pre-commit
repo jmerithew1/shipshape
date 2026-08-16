@@ -57,3 +57,13 @@ else
   echo "Your commit will proceed, but please install comply for future commits."
   echo ""
 fi
+
+# The traceability doc's whole claim is that its numbers are computed, not
+# asserted. They drifted three times in one day — a summary written from memory,
+# section headings left behind when rows were added, and an edit that left a
+# second superseded summary table contradicting the first. Each was caught by a
+# human reading carefully, which is the wrong mechanism for arithmetic.
+if printf '%s\n' "$STAGED" | grep -q '^docs/week6-traceability\.md$'; then
+  echo "▸ traceability invariants"
+  node scripts/check-traceability.mjs || exit 1
+fi

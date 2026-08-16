@@ -92,7 +92,7 @@ early pass read 64 instead of 46.
 
 ## B. Core technical requirements
 
-### OAuth + public API contract (9)
+### OAuth + public API contract (10)
 
 | Requirement | Status | Evidence | Verified |
 | --- | --- | --- | --- |
@@ -107,7 +107,7 @@ early pass read 64 instead of 46.
 | Cursor pagination `{data,next_cursor}`, stable across reordering | MET | Opaque base64 over `{id,timestamp}`; stability is discovery #2 | RAN |
 | **OpenAPI 3.1 Spec** (the feature-table row, distinct from MVP A7) — generated in-process, served, schema-validated, parity asserted | MET | `openapi/v1-registry.ts` + route factory; `contract.fitness.test.ts`; `sdk-parity.test.ts`. **Untraced here until 2026-08-16** — the brief's table has 10 rows, this section had 9 | RAN |
 
-### Webhooks — signing, retries, replay (7)
+### Webhooks — signing, retries, replay (9)
 
 | Requirement | Status | Evidence | Verified |
 | --- | --- | --- | --- |
@@ -208,7 +208,7 @@ so the count is genuinely derivable.
 
 ---
 
-## H. Submission deliverables (13)
+## H. Submission deliverables (12)
 
 | Deliverable | Status | Evidence |
 | --- | --- | --- |
