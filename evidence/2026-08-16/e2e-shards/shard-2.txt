@@ -1,0 +1,977 @@
+npm notice run ship@0.0.0 npx
+npm notice run playwright test --shard=2/4 --workers=1 --reporter=line
+
+[Memory] Total: 31.7GB, Available: 9.6GB
+
+Building API for tests...
+
+> ship@0.0.0 build:api C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/api build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/api@0.0.0 build C:\dev\shipshape\api
+> tsc && node scripts/copy-db-assets.mjs
+
+[copy-db-assets] schema.sql + 48 migrations -> dist/db
+✓ API build complete
+
+Building Web for tests (enables lightweight preview servers)...
+
+> ship@0.0.0 build:web C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/web build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/web@0.0.0 build C:\dev\shipshape\web
+> tsc && cross-env VITE_API_URL= vite build
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m✓[39m 992 modules transformed.
+rendering chunks...
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/services/upload.ts is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx, C:/dev/shipshape/web/src/components/editor/ImageUpload.tsx, dynamic import will not move module into another chunk.
+[39m
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/Editor.tsx, dynamic import will not move module into another chunk.
+[39m
+computing gzip size...
+[2mdist/[22m[32mindex.html                                      [39m[1m[2m  4.62 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+[2mdist/[22m[35massets/PropertyRow-BHH8rdGj.css                 [39m[1m[2m  1.41 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[2mdist/[22m[35massets/index-dh9xpZHs.css                       [39m[1m[2m 67.65 kB[22m[1m[22m[2m │ gzip:  13.11 kB[22m
+[2mdist/[22m[36massets/WeekStandupsTab-D_8-THNN.js              [39m[1m[2m  0.20 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
+[2mdist/[22m[36massets/arrow_drop_down-HVNFDeuO.js              [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/arrow_drop_up-mIl70Tyz.js                [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/remove-DEbZ6HGh.js                       [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/drag_handle-BdVTBwtn.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_rewind-BWs8GGxs.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_forward-CD42DXLI.js                 [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/add-DgX1JCzH.js                          [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/file_download-DdEwT8EH.js                [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/home-B_b62FoP.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/flag-uvBf-jHq.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/file_upload-BdRy4-UN.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/send-D-amHORC.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/menu-CHTCcyUs.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/filter_list-BoZmj4kh.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/format_quote-jbW-uJQE.js                 [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/format_size-C_T0x8eD.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/near_me-Hw4FYHWf.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/warning-CTTT7Ikx.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/expand_more-Cnjzllt3.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/text_fields-CCybwO5p.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/expand_less-DC8fCbY-.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_before-CBgAFLRU.js              [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_next-D6DhJHMC.js                [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/check-r9feVqoy.js                        [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/park-6YxrQIih.js                         [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_upward-BynEgwti.js                 [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_forward-BJVxqi-r.js                [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_back-Phbsxpm0.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_downward-DYcR2sDG.js               [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/bookmark-Cine3fvV.js                     [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/first_page-Dr-XSaAq.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/last_page-Cq5c_gDp.js                    [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/priority_high-Dl809KxB.js                [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/shield-BXzdirjH.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/school-Be5b-zH5.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/store-DzoxMFgu.js                        [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/account_balance-C1gye20j.js              [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/trending_down-ChWnoqQE.js                [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/trending_up-BZckwBDM.js                  [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/delete-Bhtqu_fp.js                       [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/code-CAcOzaI4.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/list-B5xQOLZq.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/remove_circle-hg7utHja.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/statusColors-CQb8KAr2.js                 [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2mdist/[22m[36massets/navigate_far_before-C7kwX5el.js          [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/folder-BoEZMxuF.js                       [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_parking-BG6gmFRn.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/check_box_outline_blank-TvJTs9li.js      [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/star-ChonzwAR.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/navigate_far_next-DkxhCRJf.js            [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/error-CWPthUJE.js                        [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/info-CmIW1Jxe.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/add_circle-BZ1c63_L.js                   [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/announcement-McqbrGkC.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/local_pharmacy-DUdf2kcY.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/chevron_left-B5xJpPa8.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/close-CJwhkv57.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/chevron_right-BFHK7-gz.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/login-C5gOj0E6.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/unfold_more-CfytoPsn.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/folder_open-D3zAfjOA.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hospital-BqIkUbIt.js                     [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/verified_user-BWFtWtP5.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail-DGmHLULD.js                         [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/unfold_less-BGZ8Vneq.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/calendar_today-DM4UmJXb.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/logout-gPXlODTL.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/person-BqDJGNOg.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/chat-7I4As458.js                         [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/comment-Ds1cRs90.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hotel-DwpM3xHa.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/check_circle-CTPLQylL.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/image-CulV63M8.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_cafe-BlQXSmWp.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/save_alt-B0ay32tO.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/flight-AXdpWfi8.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/location_on-W9nSeJSK.js                  [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/assessment-DRfHBcjc.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/clothes-obs4JLMV.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail_outline-f7Ng5i5T.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/security-nQQJgQAg.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/sort_arrow-CaHoCAx7.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_hospital-DMgap8mu.js               [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/grid_view-CgiszwpP.js                    [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/credit_card-Ddd_4gY1.js                  [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/topic-DAb2_9O5.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/camping-DwDlMrw-.js                      [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/backpack-IsXxUZ-A.js                     [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/content_copy-DtCaTb3X.js                 [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/label-CMMbgKQ0.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/launch-eQhsZ_4E.js                       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/forum-DlN_1LVI.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/radio_button_unchecked-B69J1Xvv.js       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/event-Dlskbv6g.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/toggle_on-BNiJLM6i.js                    [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/edit-0xVQvdqw.js                         [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hourglass_empty-Bs7IplZ3.js              [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/toggle_off-DOWUqp4P.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/restaurant-DAVZm8dw.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/spellcheck-8mDY6Tgu.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/star_half-BPZB1sfU.js                    [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/filter_alt-CtCeImWu.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/print-2wjDZAvX.js                        [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/undo-Bf4I8qZJ.js                         [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/more_vert-KZPEZGFs.js                    [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_police-Cs44ph0a.js                 [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/location_city-CT2BTe79.js                [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/more_horiz-rIlv_l8G.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/report-CToTlRzF.js                       [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/accessibility_new-2_9wcfLm.js            [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/cloud-DEyK6KmR.js                        [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/work-CGfLbhcc.js                         [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/science-C2iuLo6j.js                      [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/push_pin-C1cDLiAb.js                     [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/notifications-4ROxefkl.js                [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/add_circle_outline-D_IQrT1E.js           [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/lightbulb-BtYEI1VB.js                    [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/upload_file-DARvbIRt.js                  [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/wifi-B-LccDhE.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/deck-CRHWAhiV.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/device_thermostat-D9ds-dRX.js            [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/medical_services-CtMS_o7F.js             [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/favorite-CvKEN40e.js                     [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/cancel-DjmNQuz5.js                       [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/error_outline-chFlUWLq.js                [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/timer-DHR9XhkY.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/build-xhPytrp3.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/check_circle_outline-BqN3gON7.js         [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/local_library-Bja4tA6A.js                [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/map-DqotMf3p.js                          [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/star_outline-C4fUcNiH.js                 [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/x-eUfb2cHv.js                            [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/tornado-BudLmZLE.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/directions-Au34SIwP.js                   [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/military_tech-D8_tJPDy.js                [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/search-BfrOFeDG.js                       [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/contact_page-FffUUGDS.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/rss_feed-Bkwsac_E.js                     [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/history-BWqa5Eod.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/photo_camera-DM1Y0_bY.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/notifications_none-Ckkp4yBT.js           [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/zoom_out_map-D6cqgz7b.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/attach_file-txXckhnC.js                  [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/info_outline-L6tsmkvz.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/zoom_out-D4EFr-wN.js                     [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/directions_walk-BZcCWjks.js              [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/visibility-DrqphPDL.js                   [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/link-CGVlLRgk.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/eco-Bc_TE6LC.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/ProjectIssuesTab-B7yC8VHG.js             [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/api-V00hMNUq.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/schedule-6ykn7Yz_.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/loop-znwFc4Wb.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/lock-Cat4m7r9.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/keyboard-CX0v0PAJ.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/facebook-zKgN81l6.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/rain-5G_n6muO.js                         [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/alarm-CuOhoako.js                        [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_open-CtWLHOK-.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/account_circle-CUsvABGa.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/autorenew-D41IbE9J.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/highlight_off-CVJ1S_cr.js                [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/do_not_disturb-Bgjo7Ltw.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/phone-BPpLl4Qt.js                        [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/verified-D4jKgAnd.js                     [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/local_offer-OmZZkrxc.js                  [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/checkroom-C7r_ailD.js                    [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/help_outline-U_5alNn7.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/severe_weather-bzbvx40v.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/emoji_events-BEdAYJHf.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/file_present-Co63CSbw.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/thumb_down_alt-BU7Dl9z5.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/account_box-B3pmrouV.js                  [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/thumb_up_alt-DerxXXCj.js                 [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/zoom_in-BqwmaDDJ.js                      [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/identification-DhnxzcbP.js               [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/shopping_basket-2mVSlas_.js              [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/help-CW5ls_NZ.js                         [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/my_location-QjJCMWcV.js                  [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/translate-Dhxw0EFz.js                    [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/people-DncbrfWt.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/update-7nosyWQv.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/closed_caption-BjNB5Hin.js               [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/sentiment_neutral-rAoAE8eK.js            [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_outline-B6hhO_D3.js                 [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/public-CMnMg48j.js                       [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/safety_divider-Bmq7wOZs.js               [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/local_grocery_store-CZL-6wCG.js          [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/accessible_forward-DLLfLH6l.js           [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/group_add-DPAUwY3c.js                    [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/hurricane-BN6AaP3S.js                    [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/link_off-BeSMh4T9.js                     [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_laundry_service-BAn3K2J7.js        [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/social_distance-ClMmhBwP.js              [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/directions_bus-VVvXT4oN.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/volume_off-X3uhIskJ.js                   [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/directions_car-CrEoXR11.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/lightbulb_outline-D9WgzbEF.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/notifications_off-CWuxLPT3.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_gas_station-DlQkPlwM.js            [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/local_taxi-DNkuqsvm.js                   [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/alternate_email-CV0abM4e.js              [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/flickr-Bo9yBI_x.js                       [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/favorite_border-BFiJfqmF.js              [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/fax-BK5rgUDE.js                          [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/sanitizer-D0rUbfOx.js                    [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/campaign-C1XorLs4.js                     [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/attach_money-CqaMMkrB.js                 [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_very_dissatisfied-CGxZMsBb.js  [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/electrical_services-BfPDf2ta.js          [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/share-BgtWBYNr.js                        [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/bedding-DVipDxWn.js                      [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/bug_report-88VHEfqa.js                   [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/ProgramIssuesTab-iaK4RL2x.js             [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/youtube-DNSht_ch.js                      [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/notifications_active-Dvme-6L9.js         [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied-CAp04Nyu.js          [39m[1m[2m  0.58 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/connect_without_contact-mV2RPinY.js      [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_dissatisfied-DzwR6nxs.js       [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_fire_department-BSRVp49H.js        [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/clean_hands-Camj5idT.js                  [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/construction-BLD26QbF.js                 [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/bathtub-OpNLsd2Q.js                      [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/construction_worker-CQFRjYxT.js          [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/support_agent-D0k6H5rq.js                [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/support-wiypqTZ7.js                      [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied_alt-BTCzQ1-o.js      [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/wash-C5wZbHUo.js                         [39m[1m[2m  0.66 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/linkedin-C1ON9p4g.js                     [39m[1m[2m  0.67 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/directions_bike-DuRrfEmI.js              [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/insights-CF773tYo.js                     [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/github-Crqf1KnE.js                       [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/visibility_off-BGiEMayU.js               [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/hearing-CRA1CFkX.js                      [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/groups-CEQLamN4.js                       [39m[1m[2m  0.70 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/twitter-CmKss-yG.js                      [39m[1m[2m  0.72 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/snow-allbJEoV.js                         [39m[1m[2m  0.74 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/pets-BT19Jb_F.js                         [39m[1m[2m  0.76 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/do_not_touch-B8rem3kC.js                 [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/flooding-CIa5ERVN.js                     [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/masks-D9FTmR9t.js                        [39m[1m[2m  0.82 kB[22m[1m[22m[2m │ gzip:   0.51 kB[22m
+[2mdist/[22m[36massets/soap-BSk75tvj.js                         [39m[1m[2m  0.83 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/settings-DgbESV0h.js                     [39m[1m[2m  0.89 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
+[2mdist/[22m[36massets/reduce_capacity-BoPAbttF.js              [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/language-oi_BR4SI.js                     [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/WeekIssuesTab-t6xShfqg.js                [39m[1m[2m  1.32 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[2mdist/[22m[36massets/coronavirus-COlOJ77r.js                  [39m[1m[2m  1.62 kB[22m[1m[22m[2m │ gzip:   0.65 kB[22m
+[2mdist/[22m[36massets/instagram-4rJo0E1l.js                    [39m[1m[2m  1.67 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
+[2mdist/[22m[36massets/fingerprint-C1gEwuvm.js                  [39m[1m[2m  1.80 kB[22m[1m[22m[2m │ gzip:   0.94 kB[22m
+[2mdist/[22m[36massets/ProgramOverviewTab-JjLIPuAJ.js           [39m[1m[2m  1.82 kB[22m[1m[22m[2m │ gzip:   0.88 kB[22m
+[2mdist/[22m[36massets/WeekOverviewTab-B8IK1ah8.js              [39m[1m[2m  1.98 kB[22m[1m[22m[2m │ gzip:   0.97 kB[22m
+[2mdist/[22m[36massets/WeekPlanningTab-oea2-io0.js              [39m[1m[2m  2.99 kB[22m[1m[22m[2m │ gzip:   1.49 kB[22m
+[2mdist/[22m[36massets/ProjectDetailsTab-Cf83Cf_f.js            [39m[1m[2m  3.69 kB[22m[1m[22m[2m │ gzip:   1.53 kB[22m
+[2mdist/[22m[36massets/ProgramProjectsTab-N8tJICCv.js           [39m[1m[2m  4.40 kB[22m[1m[22m[2m │ gzip:   1.55 kB[22m
+[2mdist/[22m[36massets/PersonEditor-C514u6G0.js                 [39m[1m[2m  5.50 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
+[2mdist/[22m[36massets/ProjectWeeksTab-YTin2a_W.js              [39m[1m[2m  6.65 kB[22m[1m[22m[2m │ gzip:   2.31 kB[22m
+[2mdist/[22m[36massets/ProjectRetroTab-BYDeEOA0.js              [39m[1m[2m  9.08 kB[22m[1m[22m[2m │ gzip:   2.42 kB[22m
+[2mdist/[22m[36massets/StandupFeed-CDPzZj-k.js                  [39m[1m[2m  9.69 kB[22m[1m[22m[2m │ gzip:   2.91 kB[22m
+[2mdist/[22m[36massets/WeekReviewTab-CwFyLrvk.js                [39m[1m[2m 12.68 kB[22m[1m[22m[2m │ gzip:   3.69 kB[22m
+[2mdist/[22m[36massets/ProgramWeeksTab-BpInwLGX.js              [39m[1m[2m 16.83 kB[22m[1m[22m[2m │ gzip:   5.56 kB[22m
+[2mdist/[22m[36massets/UnifiedDocumentPage-B8OXGasE.js          [39m[1m[2m136.49 kB[22m[1m[22m[2m │ gzip:  36.39 kB[22m
+[2mdist/[22m[36massets/emoji-picker-react.esm-BG5lA7kT.js       [39m[1m[2m271.11 kB[22m[1m[22m[2m │ gzip:  64.10 kB[22m
+[2mdist/[22m[36massets/PropertyRow-DDYTJw1S.js                  [39m[1m[33m836.84 kB[39m[22m[2m │ gzip: 261.99 kB[22m
+[2mdist/[22m[36massets/index-mr73hY3O.js                        [39m[1m[33m863.55 kB[39m[22m[2m │ gzip: 235.48 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 10.10s[39m
+✓ Web build complete
+
+✓ Global setup complete. Starting tests...
+
+
+Running 223 tests using 1 worker, shard 2 of 4
+
+[1A[2K[1/223] [chromium] › e2e\bulk-selection.spec.ts:2051:7 › Bulk Selection - Accessibility › checkboxes have accessible labels
+[1A[2K[2/223] [chromium] › e2e\bulk-selection.spec.ts:2065:7 › Bulk Selection - Accessibility › bulk action bar is announced to screen readers
+[1A[2K[3/223] [chromium] › e2e\bulk-selection.spec.ts:2081:7 › Bulk Selection - Accessibility › selection count announced when selection changes
+[1A[2K[4/223] [chromium] › e2e\bulk-selection.spec.ts:2112:7 › Bulk Selection - Accessibility › focus is visible on keyboard navigation
+[1A[2K[5/223] [chromium] › e2e\bulk-selection.spec.ts:2129:7 › Bulk Selection - Accessibility › bulk actions are keyboard accessible
+[1A[2K[6/223] [chromium] › e2e\bulk-selection.spec.ts:2160:7 › Bulk Selection - Performance › selecting many items remains responsive
+[1A[2K[7/223] [chromium] › e2e\bulk-selection.spec.ts:2193:7 › Bulk Selection - Performance › bulk action on many items shows loading state
+[1A[2K[8/223] [chromium] › e2e\changes-requested-notifications.spec.ts:91:7 › Changes Requested Notifications › action-items includes changes_requested_plan after requesting plan changes
+[1A[2K[9/223] [chromium] › e2e\changes-requested-notifications.spec.ts:143:7 › Changes Requested Notifications › action-items includes changes_requested_retro after requesting retro changes
+[1A[2K[10/223] [chromium] › e2e\changes-requested-notifications.spec.ts:192:7 › Changes Requested Notifications › changes_requested action items have correct structure
+[1A[2K[11/223] [chromium] › e2e\changes-requested-notifications.spec.ts:229:7 › Changes Requested Notifications › requesting changes persists feedback in sprint properties
+[1A[2K[12/223] [chromium] › e2e\check-aria.spec.ts:22:5 › check aria-expanded elements
+[1A[2K[chromium] › e2e\check-aria.spec.ts:22:5 › check aria-expanded elements
+Sidebar visible: [33mtrue[39m
+
+[1A[2KHas expandable item: [33mtrue[39m
+
+[1A[2KExpandable item: { tag: [32m'LI'[39m, role: [32m'treeitem'[39m, text: [32m'Welcome to Ship'[39m }
+
+[1A[2KInitial aria-expanded: false
+
+[1A[2KExpander visible: [33mtrue[39m
+
+[1A[2KExpander count: [33m1[39m
+
+[1A[2KClicked expander
+
+[1A[2KChild doc count: [33m1[39m
+
+[1A[2KChild href: /documents/056e8ff8-6281-467d-b9fa-5ea354706051
+
+[1A[2KExpanded parent count: [33m0[39m
+
+[1A[2KAll aria-expanded elements: [
+  {
+    "tag": "LI",
+    "role": "treeitem",
+    "expanded": "false",
+    "text": "Welcome to Ship"
+  },
+  {
+    "tag": "DIV",
+    "role": null,
+    "expanded": "false",
+    "text": "Ship helps your team track wor"
+  },
+  {
+    "tag": "BUTTON",
+    "role": null,
+    "expanded": "false",
+    "text": "DUDev User"
+  },
+  {
+    "tag": "BUTTON",
+    "role": null,
+    "expanded": "false",
+    "text": "Workspace"
+  }
+]
+
+[1A[2K[13/223] [chromium] › e2e\content-caching.spec.ts:14:7 › Content Caching - High Performance Navigation › toggling between two documents shows no blank flash
+[1A[2K[14/223] [chromium] › e2e\content-caching.spec.ts:68:7 › WebSocket Connection Reliability › WebSocket connects successfully on document load
+[1A[2K[15/223] [chromium] › e2e\content-caching.spec.ts:91:7 › WebSocket Connection Reliability › sync status shows status indicator after WebSocket connects
+[1A[2K[16/223] [chromium] › e2e\content-caching.spec.ts:112:7 › WebSocket Connection Reliability › no console errors about WebSocket connection failures
+[1A[2K[17/223] [chromium] › e2e\context-menus.spec.ts:13:9 › Context Menus - Sidebar › Wiki Documents › three-dot menu opens context menu
+[1A[2K[18/223] [chromium] › e2e\context-menus.spec.ts:38:9 › Context Menus - Sidebar › Wiki Documents › right-click opens context menu
+[1A[2K[19/223] [chromium] › e2e\context-menus.spec.ts:57:9 › Context Menus - Sidebar › Programs › three-dot menu opens context menu for program
+[1A[2K[20/223] [chromium] › e2e\context-menus.spec.ts:81:9 › Context Menus - Sidebar › Issues Sidebar › three-dot menu opens context menu for issue
+[1A[2K[21/223] [chromium] › e2e\context-menus.spec.ts:114:7 › Context Menus - Team Directory › right-click on team member shows context menu
+[1A[2K[22/223] [chromium] › e2e\context-menus.spec.ts:130:7 › Context Menus - Team Directory › three-dot menu on team member card opens context menu
+[1A[2K[23/223] [chromium] › e2e\context-menus.spec.ts:161:7 › Context Menus - Kanban Board › right-click on kanban card shows context menu
+[1A[2K[24/223] [chromium] › e2e\context-menus.spec.ts:180:7 › Context Menus - Kanban Board › three-dot menu on kanban card opens context menu
+[1A[2K[25/223] [chromium] › e2e\critical-blockers.spec.ts:31:7 › Critical Blocker: Ticket Number Uniqueness › concurrent issue creation produces unique ticket numbers
+[1A[2K[26/223] [chromium] › e2e\critical-blockers.spec.ts:77:7 › Critical Blocker: Ticket Number Uniqueness › sequential issue creation increments ticket numbers correctly
+[1A[2K[27/223] [chromium] › e2e\critical-blockers.spec.ts:118:7 › Critical Blocker: Session Timeout Enforcement › API returns 401 for expired session cookie
+[1A[2K[28/223] [chromium] › e2e\critical-blockers.spec.ts:126:7 › Critical Blocker: Session Timeout Enforcement › API returns 401 when no session cookie provided
+[1A[2K[29/223] [chromium] › e2e\critical-blockers.spec.ts:143:9 › Critical Blocker: Consistent Auth Across Routes › GET /api/documents returns consistent 401 format
+[1A[2K[30/223] [chromium] › e2e\critical-blockers.spec.ts:143:9 › Critical Blocker: Consistent Auth Across Routes › GET /api/issues returns consistent 401 format
+[1A[2K[31/223] [chromium] › e2e\critical-blockers.spec.ts:143:9 › Critical Blocker: Consistent Auth Across Routes › GET /api/programs returns consistent 401 format
+[1A[2K[32/223] [chromium] › e2e\critical-blockers.spec.ts:143:9 › Critical Blocker: Consistent Auth Across Routes › GET /api/auth/me returns consistent 401 format
+[1A[2K[33/223] [chromium] › e2e\critical-blockers.spec.ts:162:7 › Critical Blocker: WebSocket Rate Limiting › WebSocket connections work normally under limit
+[1A[2K[34/223] [chromium] › e2e\data-integrity.spec.ts:65:7 › Data Integrity - Document Persistence › document saves completely with all formatting
+[1A[2K[35/223] [chromium] › e2e\data-integrity.spec.ts:65:7 › Data Integrity - Document Persistence › document saves completely with all formatting (retry #1)
+[1A[2K  1) [chromium] › e2e\data-integrity.spec.ts:65:7 › Data Integrity - Document Persistence › document saves completely with all formatting 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.ProseMirror')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('.ProseMirror')[22m
+
+
+      122 |     // Hard reload
+      123 |     await page.goto(docUrl)
+    > 124 |     await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 5000 })
+          |                                                ^
+      125 |
+      126 |     // Wait for content to load from server
+      127 |     await page.waitForTimeout(1000)
+        at C:\dev\shipshape\e2e\data-integrity.spec.ts:124:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\data-integrity-Data-Integr-1add5-pletely-with-all-formatting-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[1A[2K[36/223] [chromium] › e2e\data-integrity.spec.ts:139:7 › Data Integrity - Document Persistence › document with complex nested structure persists
+[1A[2K[37/223] [chromium] › e2e\data-integrity.spec.ts:174:7 › Data Integrity - Document Persistence › empty document saves correctly
+[1A[2K[38/223] [chromium] › e2e\data-integrity.spec.ts:211:7 › Data Integrity - Images › images persist after page reload
+[1A[2K[39/223] [chromium] › e2e\data-integrity.spec.ts:261:7 › Data Integrity - Images › multiple images persist in correct order
+[1A[2K[40/223] [chromium] › e2e\data-integrity.spec.ts:328:7 › Data Integrity - Mentions › mentions survive document reload
+[1A[2K[41/223] [chromium] › e2e\data-integrity.spec.ts:361:7 › Data Integrity - Mentions › multiple mentions persist correctly
+[1A[2K[42/223] [chromium] › e2e\data-integrity.spec.ts:412:7 › Data Integrity - Undo/Redo › undo/redo preserves formatting
+[1A[2K[43/223] [chromium] › e2e\data-integrity.spec.ts:462:7 › Data Integrity - Undo/Redo › undo/redo works across multiple operations
+[1A[2K[44/223] [chromium] › e2e\data-integrity.spec.ts:520:7 › Data Integrity - Copy/Paste › copy/paste preserves structure
+[1A[2K[45/223] [chromium] › e2e\data-integrity.spec.ts:572:7 › Data Integrity - Copy/Paste › paste from external source preserves basic formatting
+[1A[2K[46/223] [chromium] › e2e\debug-create.spec.ts:3:5 › debug document creation
+[1A[2K[chromium] › e2e\debug-create.spec.ts:3:5 › debug document creation
+Initial document count: [33m11[39m
+
+[1A[2KSidebar create button visible: [33mtrue[39m
+
+[1A[2KClicked sidebar button
+
+[1A[2KCurrent URL after click: http://localhost:10101/documents/7941645c-8203-45e0-a483-ebcd42e269ab
+
+[1A[2KNew document count: [33m11[39m
+
+[1A[2K
+=== Browser console messages ===
+
+[1A[2K[log] [Schema] Initialized schema version: 2
+
+[1A[2K[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[error] [RealtimeEvents] Error: Event
+
+[1A[2K[log] [RealtimeEvents] Disconnected
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[error] [RealtimeEvents] Error: Event
+
+[1A[2K[log] [RealtimeEvents] Disconnected
+
+[1A[2K[log] [Editor] IndexedDB synced for wiki:7941645c-8203-45e0-a483-ebcd42e269ab
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/collaboration/wiki:7941645c-8203-45e0-a483-ebcd42e269ab' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[log] [Editor] WebSocket status: connecting for wiki:7941645c-8203-45e0-a483-ebcd42e269ab
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/collaboration/wiki:7941645c-8203-45e0-a483-ebcd42e269ab' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[log] [Editor] WebSocket status: connecting for wiki:7941645c-8203-45e0-a483-ebcd42e269ab
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/collaboration/wiki:7941645c-8203-45e0-a483-ebcd42e269ab' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[log] [Editor] WebSocket status: connecting for wiki:7941645c-8203-45e0-a483-ebcd42e269ab
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/collaboration/wiki:7941645c-8203-45e0-a483-ebcd42e269ab' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[log] [RealtimeEvents] Reconnecting...
+
+[1A[2K[error] WebSocket connection to 'ws://localhost:10101/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[error] [RealtimeEvents] Error: Event
+
+[1A[2K[log] [RealtimeEvents] Disconnected
+
+[1A[2K=== End console messages ===
+
+
+[1A[2K[47/223] [chromium] › e2e\devportal-replay.spec.ts:32:7 › Developer portal — Replay › clicking Replay re-sends a dead-lettered delivery with the original idempotency key
+[1A[2K[48/223] [chromium] › e2e\docs-mode.spec.ts:15:7 › Docs Mode (Phase 3) › can navigate to Docs mode via icon rail
+[1A[2K[49/223] [chromium] › e2e\docs-mode.spec.ts:26:7 › Docs Mode (Phase 3) › shows document list or empty state
+[1A[2K[50/223] [chromium] › e2e\docs-mode.spec.ts:38:7 › Docs Mode (Phase 3) › can create a new wiki document
+[1A[2K[51/223] [chromium] › e2e\docs-mode.spec.ts:58:7 › Docs Mode (Phase 3) › new document appears in sidebar list
+[1A[2K[52/223] [chromium] › e2e\docs-mode.spec.ts:83:7 › Docs Mode (Phase 3) › can edit document title
+[1A[2K[53/223] [chromium] › e2e\docs-mode.spec.ts:114:7 › Docs Mode (Phase 3) › can navigate between documents using sidebar
+[1A[2K[54/223] [chromium] › e2e\docs-mode.spec.ts:146:7 › Docs Mode (Phase 3) › editor shows save status indicator
+[1A[2K[55/223] [chromium] › e2e\document-isolation.spec.ts:61:7 › Document Isolation - Critical Data Integrity › content typed in one document does NOT appear in another document
+[1A[2K[56/223] [chromium] › e2e\document-isolation.spec.ts:124:7 › Document Isolation - Critical Data Integrity › rapid navigation between documents does not cause content contamination
+[1A[2K[57/223] [chromium] › e2e\document-isolation.spec.ts:195:7 › Document Isolation - Critical Data Integrity › editing while rapidly switching documents stays isolated
+[1A[2K[58/223] [chromium] › e2e\document-workflows.spec.ts:67:7 › Issue Program Assignment › user creates issue and assigns to program via dropdown
+[1A[2K[59/223] [chromium] › e2e\document-workflows.spec.ts:98:7 › Issue Week Assignment › user assigns issue to sprint via properties panel
+[1A[2K[60/223] [chromium] › e2e\document-workflows.spec.ts:143:7 › Issue to Project Conversion › user converts issue to project and sees in projects list
+[1A[2K[61/223] [chromium] › e2e\document-workflows.spec.ts:196:7 › Week Planning Board › sprint planning board displays issues
+[1A[2K[62/223] [chromium] › e2e\documents.spec.ts:15:7 › Documents › can view document list
+[1A[2K[63/223] [chromium] › e2e\documents.spec.ts:23:7 › Documents › can create a new document
+[1A[2K[64/223] [chromium] › e2e\documents.spec.ts:36:7 › Documents › can edit document title
+[1A[2K[65/223] [chromium] › e2e\documents.spec.ts:60:7 › Documents › document list updates when new document created
+[1A[2K[66/223] [chromium] › e2e\drag-handle.spec.ts:133:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle appears on hover over paragraph
+[1A[2K[67/223] [chromium] › e2e\drag-handle.spec.ts:148:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle appears on hover over heading
+[1A[2K[68/223] [chromium] › e2e\drag-handle.spec.ts:164:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle stays visible when moving cursor to it
+[1A[2K[chromium] › e2e\drag-handle.spec.ts:164:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle stays visible when moving cursor to it
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-8ff6-76ec-8159-e2f17b2bc43a; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86e5-776b-a804-0e0adb031672; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86e1-73eb-be42-d7f389f22167; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-8664-7179-92a1-3326c0b206ab
+
+[1A[2K[69/223] [chromium] › e2e\drag-handle.spec.ts:180:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle hides when mouse leaves editor area
+[1A[2K[chromium] › e2e\drag-handle.spec.ts:180:9 › Drag Handle - Block Reordering › Drag Handle Visibility › drag handle hides when mouse leaves editor area
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-8664-7179-92a1-3326c0b206ab; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-868e-7491-b26e-e39df8d4e54d; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86af-7088-b36c-b0d9b1ae9140; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86bf-76b3-9d06-c9a8ccabbade; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86c0-7198-a82b-7630eaeb7fa7; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86c0-7198-a82b-7986984cb095; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86cb-7074-9446-010b85f5eaf2; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86dd-70bd-a6f0-77dff9e5eb64; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86e1-73eb-be42-d7f389f22167; trace=01a00baa-8664-7179-92a1-3326c0b206ab,id=01a00baa-86e5-776b-a804-0e0adb031672
+
+[1A[2K[70/223] [chromium] › e2e\drag-handle.spec.ts:200:9 › Drag Handle - Block Reordering › Block Selection via Click › clicking drag handle selects the paragraph
+[1A[2K[71/223] [chromium] › e2e\drag-handle.spec.ts:215:9 › Drag Handle - Block Reordering › Block Selection via Click › clicking drag handle on second block selects that block
+[1A[2K[72/223] [chromium] › e2e\drag-handle.spec.ts:231:9 › Drag Handle - Block Reordering › Paragraph Reordering › can drag first paragraph to end
+[1A[2K[73/223] [chromium] › e2e\drag-handle.spec.ts:247:9 › Drag Handle - Block Reordering › Paragraph Reordering › can drag last paragraph to beginning
+[1A[2K[74/223] [chromium] › e2e\drag-handle.spec.ts:276:9 › Drag Handle - Block Reordering › Paragraph Reordering › can drag middle paragraph down
+[1A[2K[75/223] [chromium] › e2e\drag-handle.spec.ts:287:9 › Drag Handle - Block Reordering › Paragraph Reordering › can drag middle paragraph up
+[1A[2K[76/223] [chromium] › e2e\drag-handle.spec.ts:300:9 › Drag Handle - Block Reordering › Content Preservation › drag preserves full paragraph content
+[1A[2K[77/223] [chromium] › e2e\drag-handle.spec.ts:314:9 › Drag Handle - Block Reordering › Content Preservation › drag preserves markdown-style heading
+[1A[2K[78/223] [chromium] › e2e\drag-handle.spec.ts:375:9 › Drag Handle - Block Reordering › Heading Reordering › can drag heading block
+[1A[2K[79/223] [chromium] › e2e\drag-handle.spec.ts:442:9 › Drag Handle - Block Reordering › Document Embed Reordering › can drag document embed block
+[1A[2K[chromium] › e2e\drag-handle.spec.ts:442:9 › Drag Handle - Block Reordering › Document Embed Reordering › can drag document embed block
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd4a-7545-8974-540917ac0de2; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd4e-761d-9aff-e6db57d8cb00; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd53-73d4-b3ba-24a067bf8a33; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd58-7705-bd1d-68c6b60d2e3e; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd58-7705-bd1d-6f71cd68d92d; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd59-75ea-a240-4b112cd879a8; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd64-707b-a082-e459bc97c3f8; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd77-749b-b3e6-240a3ee6c031; trace=01a00baa-fd4a-7545-8974-540917ac0de2,id=01a00baa-fd7b-72e0-a903-0038727d6130
+
+[1A[2K[80/223] [chromium] › e2e\drag-handle.spec.ts:442:9 › Drag Handle - Block Reordering › Document Embed Reordering › can drag document embed block (retry #1)
+[1A[2K  2) [chromium] › e2e\drag-handle.spec.ts:442:9 › Drag Handle - Block Reordering › Document Embed Reordering › can drag document embed block 
+
+    [31mTest timeout of 60000ms exceeded while running "beforeEach" hook.[39m
+
+      126 |   }
+      127 |
+    > 128 |   test.beforeEach(async ({ page }) => {
+          |        ^
+      129 |     await login(page)
+      130 |   })
+      131 |
+        at C:\dev\shipshape\e2e\drag-handle.spec.ts:128:8
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('textbox', { name: /email/i })[22m
+
+
+      12 |   async function login(page: Page) {
+      13 |     await page.goto('/login')
+    > 14 |     await page.getByRole('textbox', { name: /email/i }).fill('dev@ship.local')
+         |                                                         ^
+      15 |     await page.getByRole('textbox', { name: /password/i }).fill('admin123')
+      16 |     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+      17 |     await expect(page).not.toHaveURL('/login', { timeout: 5000 })
+        at login (C:\dev\shipshape\e2e\drag-handle.spec.ts:14:57)
+        at C:\dev\shipshape\e2e\drag-handle.spec.ts:129:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\drag-handle-Drag-Handle----96d5e-n-drag-document-embed-block-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[1A[2K[81/223] [chromium] › e2e\drag-handle.spec.ts:608:9 › Drag Handle - Block Reordering › Multiple Drag Operations › can perform multiple sequential drags
+[1A[2K[82/223] [chromium] › e2e\drag-handle.spec.ts:633:9 › Drag Handle - Block Reordering › Persistence › reordered content persists after page reload
+[1A[2K[83/223] [chromium] › e2e\drag-handle.spec.ts:666:9 › Drag Handle - Block Reordering › Edge Cases › dragging to same position does nothing
+[1A[2K[84/223] [chromium] › e2e\drag-handle.spec.ts:714:9 › Drag Handle - Block Reordering › Edge Cases › handles single block document
+[1A[2K[85/223] [chromium] › e2e\drag-handle.spec.ts:729:9 › Drag Handle - Block Reordering › Edge Cases › handles empty paragraphs
+[1A[2K[86/223] [chromium] › e2e\edge-cases.spec.ts:58:7 › Edge Cases › handles very long document titles (500+ characters)
+[1A[2K[87/223] [chromium] › e2e\edge-cases.spec.ts:105:7 › Edge Cases › handles empty document gracefully
+[1A[2K[88/223] [chromium] › e2e\edge-cases.spec.ts:126:7 › Edge Cases › rapid typing does not lose characters
+[1A[2K[89/223] [chromium] › e2e\edge-cases.spec.ts:144:7 › Edge Cases › rapid undo/redo operations
+[1A[2K[90/223] [chromium] › e2e\edge-cases.spec.ts:187:7 › Edge Cases › pasting large content (10KB+ text)
+[1A[2K[91/223] [chromium] › e2e\edge-cases.spec.ts:221:7 › Edge Cases › handles many mentions in one document (20+ mentions)
+[1A[2K[92/223] [chromium] › e2e\edge-cases.spec.ts:254:7 › Edge Cases › handles deeply nested content (lists within lists)
+[1A[2K[93/223] [chromium] › e2e\edge-cases.spec.ts:298:7 › Edge Cases › handles special characters in titles
+[1A[2K[94/223] [chromium] › e2e\edge-cases.spec.ts:320:7 › Edge Cases › handles Unicode content (emoji, CJK characters)
+[1A[2K[95/223] [chromium] › e2e\edge-cases.spec.ts:346:7 › Edge Cases › handles simultaneous formatting operations
+[1A[2K[96/223] [chromium] › e2e\edge-cases.spec.ts:378:7 › Edge Cases › handles switching document types rapidly
+[1A[2K[97/223] [chromium] › e2e\emoji.spec.ts:31:7 › Emoji Picker › typing : shows emoji picker
+[1A[2K[98/223] [chromium] › e2e\emoji.spec.ts:46:7 › Emoji Picker › typing filters emoji list
+[1A[2K[99/223] [chromium] › e2e\emoji.spec.ts:70:7 › Emoji Picker › can select emoji with Enter key
+[1A[2K[100/223] [chromium] › e2e\emoji.spec.ts:94:7 › Emoji Picker › can select emoji with click
+[1A[2K[101/223] [chromium] › e2e\emoji.spec.ts:122:7 › Emoji Picker › emoji renders correctly in document
+[1A[2K[102/223] [chromium] › e2e\emoji.spec.ts:153:7 › Emoji Picker › emoji persists after save and reload
+[1A[2K[103/223] [chromium] › e2e\emoji.spec.ts:200:7 › Emoji Picker › can navigate emoji picker with arrow keys
+[1A[2K[104/223] [chromium] › e2e\emoji.spec.ts:237:7 › Emoji Picker › pressing Escape closes emoji picker
+[1A[2K[105/223] [chromium] › e2e\emoji.spec.ts:259:7 › Emoji Picker › typing non-matching text shows no results
+[1A[2K[106/223] [chromium] › e2e\emoji.spec.ts:290:7 › Emoji Picker › can insert multiple emojis in same document
+[1A[2K[107/223] [chromium] › e2e\error-handling.spec.ts:47:7 › Error Handling › handles API 500 error gracefully
+[1A[2K[108/223] [chromium] › e2e\error-handling.spec.ts:71:7 › Error Handling › handles network disconnect gracefully
+[1A[2K[109/223] [chromium] › e2e\error-handling.spec.ts:98:7 › Error Handling › handles mention search failure gracefully
+[1A[2K[110/223] [chromium] › e2e\error-handling.spec.ts:127:7 › Error Handling › handles websocket reconnection
+[1A[2K[111/223] [chromium] › e2e\error-handling.spec.ts:154:7 › Error Handling › editor remains usable after error
+[1A[2K[112/223] [chromium] › e2e\error-handling.spec.ts:187:7 › Error Handling › handles CSRF token expiration
+[1A[2K[113/223] [chromium] › e2e\error-handling.spec.ts:216:7 › Error Handling › handles concurrent API errors
+[1A[2K[114/223] [chromium] › e2e\error-handling.spec.ts:240:7 › Error Handling › recovers from temporary network failure
+[1A[2K[115/223] [chromium] › e2e\existing-user-invite.spec.ts:38:7 › Existing User Invite Flow › team grid users have valid user_id (not null)
+[1A[2K[116/223] [chromium] › e2e\existing-user-invite.spec.ts:62:7 › Existing User Invite Flow › team people endpoint returns users with valid user_id
+[1A[2K[117/223] [chromium] › e2e\existing-user-invite.spec.ts:79:7 › Existing User Invite Flow › assignment API rejects null userId with 400 error
+[1A[2K[118/223] [chromium] › e2e\existing-user-invite.spec.ts:107:7 › Existing User Invite Flow › assignment API rejects empty string userId with 400 error
+[1A[2K[119/223] [chromium] › e2e\existing-user-invite.spec.ts:131:7 › Existing User Invite Flow › user with valid user_id can be assigned to sprint
+[1A[2K[120/223] [chromium] › e2e\existing-user-invite.spec.ts:177:7 › Existing User Invite Flow › inviting existing user adds them as member directly
+[1A[2K[121/223] [chromium] › e2e\existing-user-invite.spec.ts:204:7 › Existing User Invite Flow › team grid can be scrolled and shows valid users
+[1A[2K[122/223] [chromium] › e2e\existing-user-invite.spec.ts:221:7 › Existing User Invite Flow › clicking cell opens program selector for valid user
+[1A[2K[123/223] [chromium] › e2e\existing-user-invite.spec.ts:255:7 › Existing User Invite Flow › accountability endpoint returns users with valid ids
+[1A[2K[124/223] [chromium] › e2e\features-real.spec.ts:78:7 › TIER 1: @Mentions - REAL TESTS › typing @ shows dropdown with actual workspace users
+[1A[2K[125/223] [chromium] › e2e\features-real.spec.ts:94:7 › TIER 1: @Mentions - REAL TESTS › typing @name filters to matching users
+[1A[2K[chromium] › e2e\features-real.spec.ts:94:7 › TIER 1: @Mentions - REAL TESTS › typing @name filters to matching users
+[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-39a4-736f-923c-9e36252a1f0f; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3072-7269-a4d4-f60c9f338e05; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-306d-734e-9298-9901c2a0464e; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-2fe2-76eb-8bb5-753ebd879808
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-2fe2-76eb-8bb5-753ebd879808; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3006-72d7-aa9a-7425482af339; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3010-7569-b6b6-c71fd28f959d; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3017-7425-b690-8b412d6387aa; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3018-7037-ad10-6f5035d67762; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3018-7037-ad10-72027d40419e; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3032-7061-a70c-1a4710bd595e; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-306a-740d-88bc-040d4d6d3679; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-306d-734e-9298-9901c2a0464e; trace=01a00bae-2fe2-76eb-8bb5-753ebd879808,id=01a00bae-3072-7269-a4d4-f60c9f338e05
+
+[1A[2K[126/223] [chromium] › e2e\features-real.spec.ts:109:7 › TIER 1: @Mentions - REAL TESTS › selecting mention inserts clickable link
+[1A[2K[127/223] [chromium] › e2e\features-real.spec.ts:139:7 › TIER 1: @Mentions - REAL TESTS › can @mention documents (not just users)
+[1A[2K[128/223] [chromium] › e2e\features-real.spec.ts:156:7 › TIER 1: Image Upload - REAL TESTS › can upload image via /image command
+[1A[2K[129/223] [chromium] › e2e\features-real.spec.ts:185:7 › TIER 1: Image Upload - REAL TESTS › uploaded image persists after page reload
+[1A[2K[130/223] [chromium] › e2e\features-real.spec.ts:218:7 › TIER 1: Image Upload - REAL TESTS › image is not blocked by CORS (no console errors)
+[1A[2K[131/223] [chromium] › e2e\features-real.spec.ts:258:7 › TIER 2: File Attachments - REAL TESTS › can attach PDF via /file command
+[1A[2K[132/223] [chromium] › e2e\features-real.spec.ts:292:7 › TIER 2: Tables - REAL TESTS › can create table via /table command
+[1A[2K[133/223] [chromium] › e2e\features-real.spec.ts:305:7 › TIER 2: Tables - REAL TESTS › can type in table cells
+[1A[2K[134/223] [chromium] › e2e\features-real.spec.ts:331:7 › TIER 2: Tables - REAL TESTS › table persists after reload
+[1A[2K[135/223] [chromium] › e2e\features-real.spec.ts:365:7 › TIER 2: Toggle/Collapsible - REAL TESTS › can create toggle via /toggle command
+[1A[2K[136/223] [chromium] › e2e\features-real.spec.ts:378:7 › TIER 2: Toggle/Collapsible - REAL TESTS › toggle expands and collapses
+[1A[2K[137/223] [chromium] › e2e\features-real.spec.ts:417:7 › TIER 2: Inline Code - REAL TESTS › backticks create inline code
+[1A[2K[138/223] [chromium] › e2e\features-real.spec.ts:429:7 › TIER 2: Inline Code - REAL TESTS › inline code has distinct styling
+[1A[2K[139/223] [chromium] › e2e\features-real.spec.ts:452:7 › TIER 3: Syntax Highlighting - REAL TESTS › code block has syntax highlighting
+[1A[2K[140/223] [chromium] › e2e\features-real.spec.ts:482:7 › TIER 3: Syntax Highlighting - REAL TESTS › can select language for code block
+[1A[2K[141/223] [chromium] › e2e\features-real.spec.ts:498:7 › TIER 3: Emoji - REAL TESTS › :emoji: syntax inserts emoji
+[1A[2K[142/223] [chromium] › e2e\features-real.spec.ts:514:7 › TIER 3: Emoji - REAL TESTS › emoji picker shows when typing :
+[1A[2K[143/223] [chromium] › e2e\features-real.spec.ts:530:7 › TIER 3: Backlinks - REAL TESTS › backlinks API returns linking documents
+[1A[2K[144/223] [chromium] › e2e\features-real.spec.ts:549:7 › TIER 3: Backlinks - REAL TESTS › linking to document creates backlink
+[1A[2K[145/223] [chromium] › e2e\features-real.spec.ts:594:7 › API Health - REAL TESTS › mentions API does not return 500
+[1A[2K[146/223] [chromium] › e2e\features-real.spec.ts:603:7 › API Health - REAL TESTS › file upload API does not return 500
+[1A[2K[147/223] [chromium] › e2e\features-real.spec.ts:617:7 › API Health - REAL TESTS › backlinks API does not return 500
+[1A[2K[148/223] [chromium] › e2e\feedback-consolidation.spec.ts:52:7 › Issues List: Source Display › source column/badge shows "External" for external issues
+[1A[2K[149/223] [chromium] › e2e\feedback-consolidation.spec.ts:76:7 › Issues List: Needs Triage Filter › Needs Triage filter tab is present
+[1A[2K[150/223] [chromium] › e2e\feedback-consolidation.spec.ts:92:7 › Public Feedback Form › public form accessible without login
+[1A[2K[151/223] [chromium] › e2e\feedback-consolidation.spec.ts:108:7 › Public Feedback Form › submitting creates issue with source=external, state=triage
+[1A[2K[152/223] [chromium] › e2e\feedback-consolidation.spec.ts:159:7 › Public Feedback Form › shows confirmation message after submission
+[1A[2K[153/223] [chromium] › e2e\feedback-consolidation.spec.ts:176:7 › Public Feedback Form › does not show tracking link or status updates
+[1A[2K[154/223] [chromium] › e2e\feedback-consolidation.spec.ts:199:7 › Program View: Feedback Tab Removed › Feedback tab does not appear in Program tabs
+[1A[2K[155/223] [chromium] › e2e\feedback-consolidation.spec.ts:216:7 › Program View: Feedback Tab Removed › Issues tab shows all issues including external ones
+[1A[2K[156/223] [chromium] › e2e\feedback-consolidation.spec.ts:237:7 › Data Migration › existing feedback with status=submitted migrates to state=triage
+[1A[2K[157/223] [chromium] › e2e\feedback-consolidation.spec.ts:262:7 › Data Migration › existing feedback with rejection_reason migrates to state=cancelled
+[1A[2K[158/223] [chromium] › e2e\feedback-consolidation.spec.ts:282:7 › Data Migration › migrated feedback retains source=external (from source=feedback)
+[1A[2K[159/223] [chromium] › e2e\feedback-consolidation.spec.ts:295:7 › Data Migration › existing issues retain source=internal
+[1A[2K[160/223] [chromium] › e2e\feedback-consolidation.spec.ts:312:7 › API Changes › GET /api/issues returns both internal and external issues
+[1A[2K[161/223] [chromium] › e2e\feedback-consolidation.spec.ts:328:7 › API Changes › GET /api/issues?state=triage returns only triage items
+[1A[2K[162/223] [chromium] › e2e\feedback-consolidation.spec.ts:344:7 › API Changes › GET /api/issues?source=external returns only external items
+[1A[2K[163/223] [chromium] › e2e\feedback-consolidation.spec.ts:360:7 › API Changes › POST /api/feedback creates issue with state=triage, source=external
+[1A[2K[164/223] [chromium] › e2e\feedback-consolidation.spec.ts:380:7 › API Changes › POST /api/issues/:id/accept moves to backlog
+[1A[2K[165/223] [chromium] › e2e\feedback-consolidation.spec.ts:403:7 › API Changes › POST /api/issues/:id/reject moves to cancelled with reason
+[1A[2K[166/223] [chromium] › e2e\file-attachments.spec.ts:67:7 › File Attachments › should insert file attachment via slash command
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:67:7 › File Attachments › should insert file attachment via slash command
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-0489-742f-b6cd-9b82e1c54c9f; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-048c-7329-bda9-e3883a7e5b50; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-048f-74fb-9696-72cb191e3042; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-0493-77e3-8f05-f210e17c14b3; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-0493-77e3-8f05-f7a279863b17; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-0494-738f-895e-0f19b81fb928; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-049f-7159-99b5-2f150e2decde; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-04b3-70f9-b43c-70bae1ab49a1; trace=01a00bb0-0489-742f-b6cd-9b82e1c54c9f,id=01a00bb0-04b5-757e-8049-33cb80ab46db
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:02a1172a-48be-4101-86be-010a40fcb7ba' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:02a1172a-48be-4101-86be-010a40fcb7ba' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[167/223] [chromium] › e2e\file-attachments.spec.ts:100:7 › File Attachments › should show file upload progress
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:100:7 › File Attachments › should show file upload progress
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3e28ea9f-93d8-473c-88de-6787ed1ae7c5' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3e28ea9f-93d8-473c-88de-6787ed1ae7c5' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3e28ea9f-93d8-473c-88de-6787ed1ae7c5' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[168/223] [chromium] › e2e\file-attachments.spec.ts:128:7 › File Attachments › should show file download link after upload
+[1A[2K[169/223] [chromium] › e2e\file-attachments.spec.ts:161:7 › File Attachments › should validate file type
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:161:7 › File Attachments › should validate file type
+CONSOLE ERROR: File type blocked: {name: potentially-dangerous.exe, type: application/x-msdownload, extension: .exe}
+
+[1A[2K[170/223] [chromium] › e2e\file-attachments.spec.ts:193:7 › File Attachments › should persist file attachment after reload
+[1A[2K[171/223] [chromium] › e2e\file-attachments.spec.ts:239:7 › File Attachments › should display file icon based on type
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:239:7 › File Attachments › should display file icon based on type
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:d040fda4-dd59-45be-8a22-34bb559663c8' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[172/223] [chromium] › e2e\file-attachments.spec.ts:269:7 › File Attachments › should show file size in attachment
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:269:7 › File Attachments › should show file size in attachment
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3cce4d8a-2daa-4fcc-ac50-a8b8d24510d0' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3cce4d8a-2daa-4fcc-ac50-a8b8d24510d0' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3cce4d8a-2daa-4fcc-ac50-a8b8d24510d0' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3cce4d8a-2daa-4fcc-ac50-a8b8d24510d0' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:3cce4d8a-2daa-4fcc-ac50-a8b8d24510d0' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[173/223] [chromium] › e2e\file-attachments.spec.ts:304:7 › File Attachments › should upload Word document (.docx) successfully
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:304:7 › File Attachments › should upload Word document (.docx) successfully
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:01aafc63-aebb-4e45-93d6-0e0c178b5c4f' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:01aafc63-aebb-4e45-93d6-0e0c178b5c4f' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:01aafc63-aebb-4e45-93d6-0e0c178b5c4f' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:01aafc63-aebb-4e45-93d6-0e0c178b5c4f' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:01aafc63-aebb-4e45-93d6-0e0c178b5c4f' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[174/223] [chromium] › e2e\file-attachments.spec.ts:348:7 › File Attachments › should upload .doc file successfully
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:348:7 › File Attachments › should upload .doc file successfully
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:bf880a42-cf09-4611-96d2-43d52ef127bc' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:bf880a42-cf09-4611-96d2-43d52ef127bc' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:bf880a42-cf09-4611-96d2-43d52ef127bc' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:bf880a42-cf09-4611-96d2-43d52ef127bc' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:bf880a42-cf09-4611-96d2-43d52ef127bc' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[175/223] [chromium] › e2e\file-attachments.spec.ts:385:7 › File Attachments › should upload non-standard file types (.psd, .sketch, etc.)
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:385:7 › File Attachments › should upload non-standard file types (.psd, .sketch, etc.)
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:216cb934-4e65-4aee-9187-70870a8157f7' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:216cb934-4e65-4aee-9187-70870a8157f7' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:216cb934-4e65-4aee-9187-70870a8157f7' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:216cb934-4e65-4aee-9187-70870a8157f7' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2K[176/223] [chromium] › e2e\file-attachments.spec.ts:422:7 › File Attachments › should block dangerous executable files (.exe)
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:422:7 › File Attachments › should block dangerous executable files (.exe)
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:6c9f4da7-af75-467e-89d4-191613af3985' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:6c9f4da7-af75-467e-89d4-191613af3985' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:6c9f4da7-af75-467e-89d4-191613af3985' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: File type blocked: {name: malware.exe, type: application/x-msdownload, extension: .exe}
+
+[1A[2K[177/223] [chromium] › e2e\file-attachments.spec.ts:460:7 › File Attachments › should reject files exceeding 1GB size limit
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:460:7 › File Attachments › should reject files exceeding 1GB size limit
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:525a5c1e-c69f-4b1f-bcb0-604c4c4e0b6b' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:525a5c1e-c69f-4b1f-bcb0-604c4c4e0b6b' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:525a5c1e-c69f-4b1f-bcb0-604c4c4e0b6b' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[178/223] [chromium] › e2e\file-attachments.spec.ts:506:7 › File Attachments › should show navigation warning during active uploads
+[1A[2K[chromium] › e2e\file-attachments.spec.ts:506:7 › File Attachments › should show navigation warning during active uploads
+CONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:47a9441c-eca1-41d8-9056-81194ee22dcf' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:47a9441c-eca1-41d8-9056-81194ee22dcf' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:47a9441c-eca1-41d8-9056-81194ee22dcf' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/collaboration/wiki:47a9441c-eca1-41d8-9056-81194ee22dcf' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4f3-755e-be33-715aade225a6; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4f6-72fe-88e3-0d967338febd; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4f8-776a-bfe0-53452285fa6f; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4fa-711a-9616-dab59a126fca; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4fa-711a-9616-dc9f582246da; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c4fb-7435-9360-19c96f7490de; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c501-75bc-821f-aa12a5ec7293; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c50e-76fe-8518-8ec1ae248a4f; trace=01a00bb0-c4f3-755e-be33-715aade225a6,id=01a00bb0-c511-7177-99d0-243097e48402
+
+[1A[2KCONSOLE ERROR: WebSocket connection to 'ws://localhost:10201/events' failed: Error during WebSocket handshake: Unexpected response code: 429
+
+[1A[2KCONSOLE ERROR: [RealtimeEvents] Error: Event
+
+[1A[2K[179/223] [chromium] › e2e\file-upload-api.spec.ts:31:7 › File Upload API › requires authentication for upload endpoint
+[1A[2K[180/223] [chromium] › e2e\file-upload-api.spec.ts:50:7 › File Upload API › returns presigned upload URL when authenticated
+[1A[2K[181/223] [chromium] › e2e\file-upload-api.spec.ts:84:7 › File Upload API › confirms upload and returns CDN URL
+[1A[2K[182/223] [chromium] › e2e\icons.spec.ts:4:7 › Icons › renders icons on the login page
+[1A[2K[183/223] [chromium] › e2e\images.spec.ts:118:7 › Images › should show preview immediately after selecting image
+[1A[2K[184/223] [chromium] › e2e\images.spec.ts:129:7 › Images › should upload to CDN and update src
+[1A[2K[185/223] [chromium] › e2e\images.spec.ts:156:7 › Images › should work via /image slash command
+[1A[2K[186/223] [chromium] › e2e\images.spec.ts:173:7 › Images › should persist after page reload
+[1A[2K[187/223] [chromium] › e2e\images.spec.ts:214:7 › Images › should queue upload when offline
+[1A[2K[188/223] [chromium] › e2e\images.spec.ts:265:7 › Images › should clear IndexedDB after successful upload
+[1A[2K[189/223] [chromium] › e2e\images.spec.ts:314:7 › Images › should set alt text from filename
+[1A[2K[190/223] [chromium] › e2e\inline-code.spec.ts:50:7 › Inline Code › should create inline code with backtick wrapping
+[1A[2K[191/223] [chromium] › e2e\inline-code.spec.ts:69:7 › Inline Code › should toggle inline code with Cmd/Ctrl+E
+[1A[2K[192/223] [chromium] › e2e\inline-code.spec.ts:106:7 › Inline Code › should show inline code styling
+[1A[2K[193/223] [chromium] › e2e\inline-code.spec.ts:144:7 › Inline Code › should persist inline code after reload
+[1A[2K[194/223] [chromium] › e2e\inline-code.spec.ts:173:7 › Inline Code › should support multiple inline code elements in one line
+[1A[2K[195/223] [chromium] › e2e\inline-code.spec.ts:195:7 › Inline Code › should handle nested backticks
+[1A[2K[chromium] › e2e\inline-code.spec.ts:195:7 › Inline Code › should handle nested backticks
+[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d946-7768-9d72-22551096f054; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d947-715a-a536-95d91d2d4707; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d94b-7298-8876-a999e452b4d9; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d94f-75f4-8d4c-e12db155608e; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d94f-75f4-8d4c-e6e0ccf8b03f; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d950-71ee-b1ee-300c4b687d46; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d95b-77b0-bb01-ee9fd554577d; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d988-721e-b894-42742a030554; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d98d-710c-9c09-8b9a81422365; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d990-77a9-86b3-d6196f9bc197
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d65f-706e-873d-5f81613c2298; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d661-7558-bc41-399663d0aef1; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d664-713c-8713-388b7e13af78; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d668-725b-bd79-504d744729e4; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d669-747f-bd66-bc7c3edbe8fe; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d669-747f-bd66-c200aebb5f6f; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d674-7529-b804-43dd738a82fb; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d685-7109-a7d7-063ee3528e6c; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d688-73a8-b6e9-36bad2418955; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d68b-764f-9f27-e35dd5b91f12
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-e4aa-753e-90e7-3c8bdf3bfe44; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d68b-764f-9f27-e35dd5b91f12; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d688-73a8-b6e9-36bad2418955; trace=01a00bb1-d65f-706e-873d-5f81613c2298,id=01a00bb1-d65f-706e-873d-5f81613c2298
+
+[1A[2K[Worker 2] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-e747-733b-bfc6-75402c8e0985; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d990-77a9-86b3-d6196f9bc197; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d98d-710c-9c09-8b9a81422365; trace=01a00bb1-d946-7768-9d72-22551096f054,id=01a00bb1-d946-7768-9d72-22551096f054
+
+[1A[2K[196/223] [chromium] › e2e\inline-code.spec.ts:195:7 › Inline Code › should handle nested backticks (retry #1)
+[1A[2K  3) [chromium] › e2e\inline-code.spec.ts:195:7 › Inline Code › should handle nested backticks ─────
+
+    [31mTest timeout of 60000ms exceeded while running "beforeEach" hook.[39m
+
+      37 |
+      38 | test.describe('Inline Code', () => {
+    > 39 |   test.beforeEach(async ({ page }) => {
+         |        ^
+      40 |     // Login before each test
+      41 |     await page.goto('/login');
+      42 |     await page.locator('#email').fill('dev@ship.local');
+        at C:\dev\shipshape\e2e\inline-code.spec.ts:39:8
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('#email')[22m
+
+
+      40 |     // Login before each test
+      41 |     await page.goto('/login');
+    > 42 |     await page.locator('#email').fill('dev@ship.local');
+         |                                  ^
+      43 |     await page.locator('#password').fill('admin123');
+      44 |     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+      45 |
+        at C:\dev\shipshape\e2e\inline-code.spec.ts:42:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\inline-code-Inline-Code-should-handle-nested-backticks-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[1A[2K[197/223] [chromium] › e2e\inline-code.spec.ts:214:7 › Inline Code › should work in combination with other formatting
+[1A[2K[198/223] [chromium] › e2e\inline-comments.spec.ts:60:7 › Inline Comments › bubble menu shows Comment button on text selection
+[1A[2K[199/223] [chromium] › e2e\inline-comments.spec.ts:70:7 › Inline Comments › can create an inline comment via bubble menu
+[1A[2K[200/223] [chromium] › e2e\inline-comments.spec.ts:97:7 › Inline Comments › can create a comment via Cmd+Shift+M keyboard shortcut
+[1A[2K[201/223] [chromium] › e2e\inline-comments.spec.ts:118:7 › Inline Comments › canceling a comment removes the highlight
+[1A[2K[202/223] [chromium] › e2e\inline-comments.spec.ts:118:7 › Inline Comments › canceling a comment removes the highlight (retry #1)
+[1A[2K  4) [chromium] › e2e\inline-comments.spec.ts:118:7 › Inline Comments › canceling a comment removes the highlight 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).not.[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('.comment-highlight')
+    Expected: not visible
+    Received: visible
+    Timeout:  10000ms
+
+    Call log:
+    [2m  - Expect "not toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('.comment-highlight')[22m
+    [2m    14 × locator resolved to <span class="comment-highlight" data-comment-id="1f2b7250-6926-4985-867f-59db41a74f1c">comment that gets canceled</span>[22m
+    [2m       - unexpected value "visible"[22m
+
+
+      130 |
+      131 |     // Highlight should be removed (auto-retries until timeout)
+    > 132 |     await expect(page.locator('.comment-highlight')).not.toBeVisible({ timeout: 10000 })
+          |                                                          ^
+      133 |   })
+      134 |
+      135 |   test('inline comment card shows quoted text, author, and timestamp', async ({ page }) => {
+        at C:\dev\shipshape\e2e\inline-comments.spec.ts:132:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\inline-comments-Inline-Com-ba619-mment-removes-the-highlight-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\inline-comments-Inline-Com-ba619-mment-removes-the-highlight-chromium\error-context.md
+
+
+[1A[2K[203/223] [chromium] › e2e\inline-comments.spec.ts:135:7 › Inline Comments › inline comment card shows quoted text, author, and timestamp
+[1A[2K[204/223] [chromium] › e2e\inline-comments.spec.ts:161:7 › Inline Comments › can reply to an existing comment
+[1A[2K[205/223] [chromium] › e2e\inline-comments.spec.ts:189:7 › Inline Comments › resolving a comment collapses thread and removes highlight
+[1A[2K[chromium] › e2e\inline-comments.spec.ts:189:7 › Inline Comments › resolving a comment collapses thread and removes highlight
+[Worker 4] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae25-76fe-878e-53b2f6db3d92; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae49-709c-9931-f29bd1dda516; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae54-72da-9ffd-33fbec7ba028; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae61-743b-acf3-44f132c6df0f; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae61-743b-acf3-4b30280ad3e4; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae62-75ff-8445-e58ea2b9db0c; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae7f-71a3-bf7c-0edb08279234; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae93-75d4-8c4f-5969287978b1; trace=01a00bb3-ae25-76fe-878e-53b2f6db3d92,id=01a00bb3-ae97-7243-9cbf-afffa38dd944
+
+[1A[2K[206/223] [chromium] › e2e\inline-comments.spec.ts:225:7 › Inline Comments › un-resolving restores thread and highlight
+[1A[2K[207/223] [chromium] › e2e\inline-comments.spec.ts:259:7 › Inline Comments › comments persist across page reload
+[1A[2K[208/223] [chromium] › e2e\issue-display-id.spec.ts:15:7 › Issue Display IDs › displays issue with hash-number format (#N) in issues list
+[1A[2K[209/223] [chromium] › e2e\issue-display-id.spec.ts:32:7 › Issue Display IDs › displays issue with hash-number format (#N) in issue editor header
+[1A[2K[210/223] [chromium] › e2e\issue-display-id.spec.ts:47:7 › Issue Display IDs › new issue gets sequential ticket number
+[1A[2K[211/223] [chromium] › e2e\issue-display-id.spec.ts:66:7 › Issue Display IDs › issue display ID does not contain program prefix
+[1A[2K[212/223] [chromium] › e2e\issue-display-id.spec.ts:86:7 › Issue Display IDs › all issue display IDs use hash-number format
+[1A[2K[213/223] [chromium] › e2e\issue-display-id.spec.ts:116:7 › Issue Display IDs › program issues list shows hash-number format
+[1A[2K[214/223] [chromium] › e2e\issue-display-id.spec.ts:142:7 › Issue Display IDs › command palette shows issues with hash-number format (#N)
+[1A[2K[215/223] [chromium] › e2e\issue-estimates.spec.ts:24:9 › Issue Estimates › Estimate Field UI › shows estimate field in issue editor properties
+[1A[2K[216/223] [chromium] › e2e\issue-estimates.spec.ts:34:9 › Issue Estimates › Estimate Field UI › can enter estimate as free text number
+[1A[2K[217/223] [chromium] › e2e\issue-estimates.spec.ts:53:9 › Issue Estimates › Estimate Field UI › accepts decimal values (0.5 increments)
+[1A[2K[218/223] [chromium] › e2e\issue-estimates.spec.ts:67:9 › Issue Estimates › Estimate Field UI › shows hours label/hint next to estimate field
+[1A[2K[219/223] [chromium] › e2e\issue-estimates.spec.ts:79:9 › Issue Estimates › Week Assignment Validation › allows adding issue without estimate to backlog
+[1A[2K[220/223] [chromium] › e2e\issue-estimates.spec.ts:93:9 › Issue Estimates › Week Assignment Validation › requires estimate before adding issue to sprint
+[1A[2K[221/223] [chromium] › e2e\issue-estimates.spec.ts:136:9 › Issue Estimates › Week Assignment Validation › allows sprint assignment after estimate is set
+[1A[2K[222/223] [chromium] › e2e\issue-estimates.spec.ts:183:9 › Issue Estimates › Week Capacity Display › sprint header shows total estimated hours
+[1A[2K[223/223] [chromium] › e2e\issue-estimates.spec.ts:198:9 › Issue Estimates › Week Capacity Display › sprint timeline cards show estimate totals when issues have estimates
+[1A[2K[224/223] (retries) [chromium] › e2e\issue-estimates.spec.ts:228:7 › Progress Chart Integration › progress chart shows estimate-based metrics
+[1A[2K[225/223] (retries) [chromium] › e2e\issues-bulk-operations.spec.ts:25:7 › Issues - Bulk Operations › can right-click to open context menu
+[1A[2K[226/223] (retries) [chromium] › e2e\issues-bulk-operations.spec.ts:44:7 › Issues - Bulk Operations › can archive an issue via context menu
+[1A[2K[227/223] (retries) [chromium] › e2e\issues-bulk-operations.spec.ts:80:7 › Issues - Bulk Operations › context menu shows change status option
+[1A[2K  4 flaky
+    [chromium] › e2e\data-integrity.spec.ts:65:7 › Data Integrity - Document Persistence › document saves completely with all formatting 
+    [chromium] › e2e\drag-handle.spec.ts:442:9 › Drag Handle - Block Reordering › Document Embed Reordering › can drag document embed block 
+    [chromium] › e2e\inline-code.spec.ts:195:7 › Inline Code › should handle nested backticks ──────
+    [chromium] › e2e\inline-comments.spec.ts:118:7 › Inline Comments › canceling a comment removes the highlight 
+  9 skipped
+  210 passed (15.8m)
+SHARD_2_EXIT=0

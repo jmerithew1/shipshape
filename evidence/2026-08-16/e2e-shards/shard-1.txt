@@ -1,0 +1,775 @@
+npm notice run ship@0.0.0 npx
+npm notice run playwright test --shard=1/4 --workers=1 --reporter=line
+
+[Memory] Total: 31.7GB, Available: 10.1GB
+
+Building API for tests...
+
+> ship@0.0.0 build:api C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/api build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/api@0.0.0 build C:\dev\shipshape\api
+> tsc && node scripts/copy-db-assets.mjs
+
+[copy-db-assets] schema.sql + 48 migrations -> dist/db
+✓ API build complete
+
+Building Web for tests (enables lightweight preview servers)...
+
+> ship@0.0.0 build:web C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/web build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/web@0.0.0 build C:\dev\shipshape\web
+> tsc && cross-env VITE_API_URL= vite build
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m✓[39m 992 modules transformed.
+rendering chunks...
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/services/upload.ts is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx, C:/dev/shipshape/web/src/components/editor/ImageUpload.tsx, dynamic import will not move module into another chunk.
+[39m
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/Editor.tsx, dynamic import will not move module into another chunk.
+[39m
+computing gzip size...
+[2mdist/[22m[32mindex.html                                      [39m[1m[2m  4.62 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+[2mdist/[22m[35massets/PropertyRow-BHH8rdGj.css                 [39m[1m[2m  1.41 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[2mdist/[22m[35massets/index-dh9xpZHs.css                       [39m[1m[2m 67.65 kB[22m[1m[22m[2m │ gzip:  13.11 kB[22m
+[2mdist/[22m[36massets/WeekStandupsTab-D_8-THNN.js              [39m[1m[2m  0.20 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
+[2mdist/[22m[36massets/arrow_drop_down-HVNFDeuO.js              [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/arrow_drop_up-mIl70Tyz.js                [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/remove-DEbZ6HGh.js                       [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/drag_handle-BdVTBwtn.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_rewind-BWs8GGxs.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_forward-CD42DXLI.js                 [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/add-DgX1JCzH.js                          [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/file_download-DdEwT8EH.js                [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/home-B_b62FoP.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/flag-uvBf-jHq.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/file_upload-BdRy4-UN.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/send-D-amHORC.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/menu-CHTCcyUs.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/filter_list-BoZmj4kh.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/format_quote-jbW-uJQE.js                 [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/format_size-C_T0x8eD.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/near_me-Hw4FYHWf.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/warning-CTTT7Ikx.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/expand_more-Cnjzllt3.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/text_fields-CCybwO5p.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/expand_less-DC8fCbY-.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_before-CBgAFLRU.js              [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_next-D6DhJHMC.js                [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/check-r9feVqoy.js                        [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/park-6YxrQIih.js                         [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_upward-BynEgwti.js                 [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_forward-BJVxqi-r.js                [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_back-Phbsxpm0.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_downward-DYcR2sDG.js               [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/bookmark-Cine3fvV.js                     [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/first_page-Dr-XSaAq.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/last_page-Cq5c_gDp.js                    [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/priority_high-Dl809KxB.js                [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/shield-BXzdirjH.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/school-Be5b-zH5.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/store-DzoxMFgu.js                        [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/account_balance-C1gye20j.js              [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/trending_down-ChWnoqQE.js                [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/trending_up-BZckwBDM.js                  [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/delete-Bhtqu_fp.js                       [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/code-CAcOzaI4.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/list-B5xQOLZq.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/remove_circle-hg7utHja.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/statusColors-CQb8KAr2.js                 [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2mdist/[22m[36massets/navigate_far_before-C7kwX5el.js          [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/folder-BoEZMxuF.js                       [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_parking-BG6gmFRn.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/check_box_outline_blank-TvJTs9li.js      [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/star-ChonzwAR.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/navigate_far_next-DkxhCRJf.js            [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/error-CWPthUJE.js                        [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/info-CmIW1Jxe.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/add_circle-BZ1c63_L.js                   [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/announcement-McqbrGkC.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/local_pharmacy-DUdf2kcY.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/chevron_left-B5xJpPa8.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/close-CJwhkv57.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/chevron_right-BFHK7-gz.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/login-C5gOj0E6.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/unfold_more-CfytoPsn.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/folder_open-D3zAfjOA.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hospital-BqIkUbIt.js                     [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/verified_user-BWFtWtP5.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail-DGmHLULD.js                         [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/unfold_less-BGZ8Vneq.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/calendar_today-DM4UmJXb.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/logout-gPXlODTL.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/person-BqDJGNOg.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/chat-7I4As458.js                         [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/comment-Ds1cRs90.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hotel-DwpM3xHa.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/check_circle-CTPLQylL.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/image-CulV63M8.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_cafe-BlQXSmWp.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/save_alt-B0ay32tO.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/flight-AXdpWfi8.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/location_on-W9nSeJSK.js                  [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/assessment-DRfHBcjc.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/clothes-obs4JLMV.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail_outline-f7Ng5i5T.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/security-nQQJgQAg.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/sort_arrow-CaHoCAx7.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_hospital-DMgap8mu.js               [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/grid_view-CgiszwpP.js                    [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/credit_card-Ddd_4gY1.js                  [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/topic-DAb2_9O5.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/camping-DwDlMrw-.js                      [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/backpack-IsXxUZ-A.js                     [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/content_copy-DtCaTb3X.js                 [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/label-CMMbgKQ0.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/launch-eQhsZ_4E.js                       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/forum-DlN_1LVI.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/radio_button_unchecked-B69J1Xvv.js       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/event-Dlskbv6g.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/toggle_on-BNiJLM6i.js                    [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/edit-0xVQvdqw.js                         [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hourglass_empty-Bs7IplZ3.js              [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/toggle_off-DOWUqp4P.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/restaurant-DAVZm8dw.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/spellcheck-8mDY6Tgu.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/star_half-BPZB1sfU.js                    [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/filter_alt-CtCeImWu.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/print-2wjDZAvX.js                        [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/undo-Bf4I8qZJ.js                         [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/more_vert-KZPEZGFs.js                    [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_police-Cs44ph0a.js                 [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/location_city-CT2BTe79.js                [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/more_horiz-rIlv_l8G.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/report-CToTlRzF.js                       [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/accessibility_new-2_9wcfLm.js            [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/cloud-DEyK6KmR.js                        [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/work-CGfLbhcc.js                         [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/science-C2iuLo6j.js                      [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/push_pin-C1cDLiAb.js                     [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/notifications-4ROxefkl.js                [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/add_circle_outline-D_IQrT1E.js           [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/lightbulb-BtYEI1VB.js                    [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/upload_file-DARvbIRt.js                  [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/wifi-B-LccDhE.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/deck-CRHWAhiV.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/device_thermostat-D9ds-dRX.js            [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/medical_services-CtMS_o7F.js             [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/favorite-CvKEN40e.js                     [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/cancel-DjmNQuz5.js                       [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/error_outline-chFlUWLq.js                [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/timer-DHR9XhkY.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/build-xhPytrp3.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/check_circle_outline-BqN3gON7.js         [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/local_library-Bja4tA6A.js                [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/map-DqotMf3p.js                          [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/star_outline-C4fUcNiH.js                 [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/x-eUfb2cHv.js                            [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/tornado-BudLmZLE.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/directions-Au34SIwP.js                   [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/military_tech-D8_tJPDy.js                [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/search-BfrOFeDG.js                       [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/contact_page-FffUUGDS.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/rss_feed-Bkwsac_E.js                     [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/history-BWqa5Eod.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/photo_camera-DM1Y0_bY.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/notifications_none-Ckkp4yBT.js           [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/zoom_out_map-D6cqgz7b.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/attach_file-txXckhnC.js                  [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/info_outline-L6tsmkvz.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/zoom_out-D4EFr-wN.js                     [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/directions_walk-BZcCWjks.js              [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/visibility-DrqphPDL.js                   [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/link-CGVlLRgk.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/eco-Bc_TE6LC.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/ProjectIssuesTab-B7yC8VHG.js             [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/api-V00hMNUq.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/schedule-6ykn7Yz_.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/loop-znwFc4Wb.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/lock-Cat4m7r9.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/keyboard-CX0v0PAJ.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/facebook-zKgN81l6.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/rain-5G_n6muO.js                         [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/alarm-CuOhoako.js                        [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_open-CtWLHOK-.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/account_circle-CUsvABGa.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/autorenew-D41IbE9J.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/highlight_off-CVJ1S_cr.js                [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/do_not_disturb-Bgjo7Ltw.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/phone-BPpLl4Qt.js                        [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/verified-D4jKgAnd.js                     [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/local_offer-OmZZkrxc.js                  [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/checkroom-C7r_ailD.js                    [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/help_outline-U_5alNn7.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/severe_weather-bzbvx40v.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/emoji_events-BEdAYJHf.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/file_present-Co63CSbw.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/thumb_down_alt-BU7Dl9z5.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/account_box-B3pmrouV.js                  [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/thumb_up_alt-DerxXXCj.js                 [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/zoom_in-BqwmaDDJ.js                      [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/identification-DhnxzcbP.js               [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/shopping_basket-2mVSlas_.js              [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/help-CW5ls_NZ.js                         [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/my_location-QjJCMWcV.js                  [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/translate-Dhxw0EFz.js                    [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/people-DncbrfWt.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/update-7nosyWQv.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/closed_caption-BjNB5Hin.js               [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/sentiment_neutral-rAoAE8eK.js            [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_outline-B6hhO_D3.js                 [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/public-CMnMg48j.js                       [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/safety_divider-Bmq7wOZs.js               [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/local_grocery_store-CZL-6wCG.js          [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/accessible_forward-DLLfLH6l.js           [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/group_add-DPAUwY3c.js                    [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/hurricane-BN6AaP3S.js                    [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/link_off-BeSMh4T9.js                     [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_laundry_service-BAn3K2J7.js        [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/social_distance-ClMmhBwP.js              [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/directions_bus-VVvXT4oN.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/volume_off-X3uhIskJ.js                   [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/directions_car-CrEoXR11.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/lightbulb_outline-D9WgzbEF.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/notifications_off-CWuxLPT3.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_gas_station-DlQkPlwM.js            [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/local_taxi-DNkuqsvm.js                   [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/alternate_email-CV0abM4e.js              [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/flickr-Bo9yBI_x.js                       [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/favorite_border-BFiJfqmF.js              [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/fax-BK5rgUDE.js                          [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/sanitizer-D0rUbfOx.js                    [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/campaign-C1XorLs4.js                     [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/attach_money-CqaMMkrB.js                 [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_very_dissatisfied-CGxZMsBb.js  [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/electrical_services-BfPDf2ta.js          [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/share-BgtWBYNr.js                        [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/bedding-DVipDxWn.js                      [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/bug_report-88VHEfqa.js                   [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/ProgramIssuesTab-iaK4RL2x.js             [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/youtube-DNSht_ch.js                      [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/notifications_active-Dvme-6L9.js         [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied-CAp04Nyu.js          [39m[1m[2m  0.58 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/connect_without_contact-mV2RPinY.js      [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_dissatisfied-DzwR6nxs.js       [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_fire_department-BSRVp49H.js        [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/clean_hands-Camj5idT.js                  [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/construction-BLD26QbF.js                 [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/bathtub-OpNLsd2Q.js                      [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/construction_worker-CQFRjYxT.js          [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/support_agent-D0k6H5rq.js                [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/support-wiypqTZ7.js                      [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied_alt-BTCzQ1-o.js      [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/wash-C5wZbHUo.js                         [39m[1m[2m  0.66 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/linkedin-C1ON9p4g.js                     [39m[1m[2m  0.67 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/directions_bike-DuRrfEmI.js              [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/insights-CF773tYo.js                     [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/github-Crqf1KnE.js                       [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/visibility_off-BGiEMayU.js               [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/hearing-CRA1CFkX.js                      [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/groups-CEQLamN4.js                       [39m[1m[2m  0.70 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/twitter-CmKss-yG.js                      [39m[1m[2m  0.72 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/snow-allbJEoV.js                         [39m[1m[2m  0.74 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/pets-BT19Jb_F.js                         [39m[1m[2m  0.76 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/do_not_touch-B8rem3kC.js                 [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/flooding-CIa5ERVN.js                     [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/masks-D9FTmR9t.js                        [39m[1m[2m  0.82 kB[22m[1m[22m[2m │ gzip:   0.51 kB[22m
+[2mdist/[22m[36massets/soap-BSk75tvj.js                         [39m[1m[2m  0.83 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/settings-DgbESV0h.js                     [39m[1m[2m  0.89 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
+[2mdist/[22m[36massets/reduce_capacity-BoPAbttF.js              [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/language-oi_BR4SI.js                     [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/WeekIssuesTab-t6xShfqg.js                [39m[1m[2m  1.32 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[2mdist/[22m[36massets/coronavirus-COlOJ77r.js                  [39m[1m[2m  1.62 kB[22m[1m[22m[2m │ gzip:   0.65 kB[22m
+[2mdist/[22m[36massets/instagram-4rJo0E1l.js                    [39m[1m[2m  1.67 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
+[2mdist/[22m[36massets/fingerprint-C1gEwuvm.js                  [39m[1m[2m  1.80 kB[22m[1m[22m[2m │ gzip:   0.94 kB[22m
+[2mdist/[22m[36massets/ProgramOverviewTab-JjLIPuAJ.js           [39m[1m[2m  1.82 kB[22m[1m[22m[2m │ gzip:   0.88 kB[22m
+[2mdist/[22m[36massets/WeekOverviewTab-B8IK1ah8.js              [39m[1m[2m  1.98 kB[22m[1m[22m[2m │ gzip:   0.97 kB[22m
+[2mdist/[22m[36massets/WeekPlanningTab-oea2-io0.js              [39m[1m[2m  2.99 kB[22m[1m[22m[2m │ gzip:   1.49 kB[22m
+[2mdist/[22m[36massets/ProjectDetailsTab-Cf83Cf_f.js            [39m[1m[2m  3.69 kB[22m[1m[22m[2m │ gzip:   1.53 kB[22m
+[2mdist/[22m[36massets/ProgramProjectsTab-N8tJICCv.js           [39m[1m[2m  4.40 kB[22m[1m[22m[2m │ gzip:   1.55 kB[22m
+[2mdist/[22m[36massets/PersonEditor-C514u6G0.js                 [39m[1m[2m  5.50 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
+[2mdist/[22m[36massets/ProjectWeeksTab-YTin2a_W.js              [39m[1m[2m  6.65 kB[22m[1m[22m[2m │ gzip:   2.31 kB[22m
+[2mdist/[22m[36massets/ProjectRetroTab-BYDeEOA0.js              [39m[1m[2m  9.08 kB[22m[1m[22m[2m │ gzip:   2.42 kB[22m
+[2mdist/[22m[36massets/StandupFeed-CDPzZj-k.js                  [39m[1m[2m  9.69 kB[22m[1m[22m[2m │ gzip:   2.91 kB[22m
+[2mdist/[22m[36massets/WeekReviewTab-CwFyLrvk.js                [39m[1m[2m 12.68 kB[22m[1m[22m[2m │ gzip:   3.69 kB[22m
+[2mdist/[22m[36massets/ProgramWeeksTab-BpInwLGX.js              [39m[1m[2m 16.83 kB[22m[1m[22m[2m │ gzip:   5.56 kB[22m
+[2mdist/[22m[36massets/UnifiedDocumentPage-B8OXGasE.js          [39m[1m[2m136.49 kB[22m[1m[22m[2m │ gzip:  36.39 kB[22m
+[2mdist/[22m[36massets/emoji-picker-react.esm-BG5lA7kT.js       [39m[1m[2m271.11 kB[22m[1m[22m[2m │ gzip:  64.10 kB[22m
+[2mdist/[22m[36massets/PropertyRow-DDYTJw1S.js                  [39m[1m[33m836.84 kB[39m[22m[2m │ gzip: 261.99 kB[22m
+[2mdist/[22m[36massets/index-mr73hY3O.js                        [39m[1m[33m863.55 kB[39m[22m[2m │ gzip: 235.48 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 8.25s[39m
+✓ Web build complete
+
+✓ Global setup complete. Starting tests...
+
+
+Running 223 tests using 1 worker, shard 1 of 4
+
+[1A[2K[1/223] [chromium] › e2e\accessibility-remediation.spec.ts:51:9 › Phase 1: Critical Violations › 1.1 Color-Only State Indicators (WCAG 1.4.1) › status indicators have icons not just colors
+[1A[2K[2/223] [chromium] › e2e\accessibility-remediation.spec.ts:71:9 › Phase 1: Critical Violations › 1.1 Color-Only State Indicators (WCAG 1.4.1) › screen readers can identify issue state without color
+[1A[2K[3/223] [chromium] › e2e\accessibility-remediation.spec.ts:93:9 › Phase 1: Critical Violations › 1.2 Keyboard Navigation for Drag-and-Drop (WCAG 2.1.1) › kanban board has keyboard instructions
+[1A[2K[4/223] [chromium] › e2e\accessibility-remediation.spec.ts:116:9 › Phase 1: Critical Violations › 1.3 Status Messages Announced (WCAG 4.1.3) › sync status has aria-live region
+[1A[2K[5/223] [chromium] › e2e\accessibility-remediation.spec.ts:145:9 › Phase 1: Critical Violations › 1.4 Combobox ARIA Attributes (WCAG 4.1.2) › combobox has required ARIA attributes
+[1A[2K[6/223] [chromium] › e2e\accessibility-remediation.spec.ts:182:9 › Phase 1: Critical Violations › 1.5 Focus Indicators (WCAG 2.4.7) › focus indicators are visible with sufficient contrast
+[1A[2K[7/223] [chromium] › e2e\accessibility-remediation.spec.ts:208:9 › Phase 1: Critical Violations › 1.6 Skip Navigation Links (WCAG 2.4.1) › skip links exist and become visible on focus
+[1A[2K[8/223] [chromium] › e2e\accessibility-remediation.spec.ts:228:9 › Phase 1: Critical Violations › 1.6 Skip Navigation Links (WCAG 2.4.1) › skip link targets exist and work
+[1A[2K[9/223] [chromium] › e2e\accessibility-remediation.spec.ts:262:9 › Phase 1: Critical Violations › 1.7 SVG Icon Accessibility (WCAG 4.1.2) › decorative icons are hidden from screen readers
+[1A[2K[10/223] [chromium] › e2e\accessibility-remediation.spec.ts:283:9 › Phase 1: Critical Violations › 1.8 Form Error Identification (WCAG 3.3.1) › form errors have aria-describedby linking to error message
+[1A[2K[11/223] [chromium] › e2e\accessibility-remediation.spec.ts:311:9 › Phase 1: Critical Violations › 1.8 Form Error Identification (WCAG 3.3.1) › form errors are associated with specific fields
+[1A[2K[12/223] [chromium] › e2e\accessibility-remediation.spec.ts:333:9 › Phase 1: Critical Violations › 1.9 Focus Not Obscured (WCAG 2.4.11) › focused elements are not hidden by overlays
+[1A[2K[13/223] [chromium] › e2e\accessibility-remediation.spec.ts:358:9 › Phase 1: Critical Violations › 1.10 Image Alt Text (WCAG 1.1.1) › images have alt attributes
+[1A[2K[14/223] [chromium] › e2e\accessibility-remediation.spec.ts:376:9 › Phase 1: Critical Violations › 1.11 Page Heading Structure (WCAG 2.4.6) › login page has descriptive h1
+[1A[2K[15/223] [chromium] › e2e\accessibility-remediation.spec.ts:386:9 › Phase 1: Critical Violations › 1.11 Page Heading Structure (WCAG 2.4.6) › pages have logical heading hierarchy
+[1A[2K[16/223] [chromium] › e2e\accessibility-remediation.spec.ts:409:9 › Phase 1: Critical Violations › 1.12 Hover Controls on Focus (WCAG 1.4.13) › controls shown on hover are also shown on focus
+[1A[2K[17/223] [chromium] › e2e\accessibility-remediation.spec.ts:467:9 › Phase 2: Serious Violations › 2.1 Command Palette Modal (WCAG 4.1.2) › command palette opens and has proper dialog role
+[1A[2K[18/223] [chromium] › e2e\accessibility-remediation.spec.ts:492:9 › Phase 2: Serious Violations › 2.1 Command Palette Modal (WCAG 4.1.2) › command palette traps focus
+[1A[2K[19/223] [chromium] › e2e\accessibility-remediation.spec.ts:523:9 › Phase 2: Serious Violations › 2.2 Target Size Minimum (WCAG 2.5.8) › interactive elements meet 24px minimum target size
+[1A[2K[20/223] [chromium] › e2e\accessibility-remediation.spec.ts:549:9 › Phase 2: Serious Violations › 2.3 Link Purpose (WCAG 2.4.4) › links have accessible names describing destination
+[1A[2K[21/223] [chromium] › e2e\accessibility-remediation.spec.ts:571:9 › Phase 2: Serious Violations › 2.4 Labels and Instructions (WCAG 3.3.2) › form inputs have visible labels
+[1A[2K[22/223] [chromium] › e2e\accessibility-remediation.spec.ts:595:9 › Phase 2: Serious Violations › 2.5 Select Label Association (WCAG 1.3.1) › select elements have associated labels
+[1A[2K[23/223] [chromium] › e2e\accessibility-remediation.spec.ts:624:9 › Phase 2: Serious Violations › 2.6 Tab Component ARIA (WCAG 4.1.2) › tab components have proper ARIA roles
+[1A[2K[24/223] [chromium] › e2e\accessibility-remediation.spec.ts:672:9 › Phase 2: Serious Violations › 2.7 Auto-save Notification (WCAG 3.2.2) › auto-save has status announcement
+[1A[2K[25/223] [chromium] › e2e\accessibility-remediation.spec.ts:695:9 › Phase 2: Serious Violations › 2.8 Keyboard Escape from Resize (WCAG 2.1.2) › Escape key deselects image in editor
+[1A[2K[26/223] [chromium] › e2e\accessibility-remediation.spec.ts:738:9 › Phase 2: Serious Violations › 2.9 Color Contrast (WCAG 1.4.3) › no color contrast violations on main pages
+[1A[2K[27/223] [chromium] › e2e\accessibility-remediation.spec.ts:756:9 › Phase 2: Serious Violations › 2.10 Error Suggestions (WCAG 3.3.3) › login errors provide recovery suggestions
+[1A[2K[28/223] [chromium] › e2e\accessibility-remediation.spec.ts:775:9 › Phase 2: Serious Violations › 2.11 Landmark Regions (WCAG 1.3.6) › page has proper landmark structure matching 4-panel layout
+[1A[2K[29/223] [chromium] › e2e\accessibility-remediation.spec.ts:806:9 › Phase 2: Serious Violations › 2.11 Landmark Regions (WCAG 1.3.6) › landmarks appear in correct DOM order for screen readers
+[1A[2K[30/223] [chromium] › e2e\accessibility-remediation.spec.ts:846:9 › Phase 2: Serious Violations › 2.12 Properties Sidebar Audit › properties sidebar forms have proper labels
+[1A[2K[31/223] [chromium] › e2e\accessibility-remediation.spec.ts:889:9 › Phase 2: Serious Violations › 2.12 Properties Sidebar Audit › properties sidebar works with keyboard only
+[1A[2K[32/223] [chromium] › e2e\accessibility-remediation.spec.ts:922:9 › Phase 2: Serious Violations › 2.13 Auto-Expand Tree to Current Document › navigating to nested document auto-expands tree ancestors
+[1A[2K[33/223] [chromium] › e2e\accessibility-remediation.spec.ts:969:9 › Phase 2: Serious Violations › 2.13 Auto-Expand Tree to Current Document › current document is visually highlighted in tree
+[1A[2K[34/223] [chromium] › e2e\accessibility-remediation.spec.ts:998:9 › Phase 2: Serious Violations › 2.14-2.18 Additional Serious Fixes › issue lists use semantic list markup
+[1A[2K[35/223] [chromium] › e2e\accessibility-remediation.spec.ts:1032:9 › Phase 2: Serious Violations › 2.14-2.18 Additional Serious Fixes › loading indicators have aria-live
+[1A[2K[36/223] [chromium] › e2e\accessibility-remediation.spec.ts:1048:9 › Phase 2: Serious Violations › 2.14-2.18 Additional Serious Fixes › document tree updates are announced
+[1A[2K[37/223] [chromium] › e2e\accessibility-remediation.spec.ts:1076:9 › Phase 2: Serious Violations › 2.14-2.18 Additional Serious Fixes › related form fields are grouped with fieldset
+[1A[2K[38/223] [chromium] › e2e\accessibility-remediation.spec.ts:1102:9 › Phase 2: Serious Violations › 2.14-2.18 Additional Serious Fixes › dialogs have close instructions
+[1A[2K[39/223] [chromium] › e2e\accessibility-remediation.spec.ts:1132:9 › Phase 3: Moderate Violations › 3.1 Section Headings (WCAG 2.4.10) › major sections have headings
+[1A[2K[40/223] [chromium] › e2e\accessibility-remediation.spec.ts:1156:9 › Phase 3: Moderate Violations › 3.2 Input Purpose (WCAG 1.3.5) › login form inputs have appropriate autocomplete attributes
+[1A[2K[41/223] [chromium] › e2e\accessibility-remediation.spec.ts:1180:9 › Phase 3: Moderate Violations › 3.3 Page Titles (WCAG 2.4.2) › each page has a descriptive title
+[1A[2K[42/223] [chromium] › e2e\accessibility-remediation.spec.ts:1194:9 › Phase 3: Moderate Violations › 3.4 Text Spacing (WCAG 1.4.12) › content remains readable with increased text spacing
+[1A[2K[43/223] [chromium] › e2e\accessibility-remediation.spec.ts:1235:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › no nested interactive elements
+[1A[2K[44/223] [chromium] › e2e\accessibility-remediation.spec.ts:1235:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › no nested interactive elements (retry #1)
+[1A[2K  1) [chromium] › e2e\accessibility-remediation.spec.ts:1235:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › no nested interactive elements 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('button', { name: /create admin account/i }).or(getByRole('button', { name: 'Sign in', exact: true }))
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByRole('button', { name: /create admin account/i }).or(getByRole('button', { name: 'Sign in', exact: true }))[22m
+
+
+      22 |
+      23 |   // Wait for either button to be visible
+    > 24 |   await expect(setupButton.or(signInButton)).toBeVisible({ timeout: 10000 })
+         |                                              ^
+      25 |
+      26 |   // If setup button is visible, complete setup first
+      27 |   if (await setupButton.isVisible()) {
+        at login (C:\dev\shipshape\e2e\accessibility-remediation.spec.ts:24:46)
+        at C:\dev\shipshape\e2e\accessibility-remediation.spec.ts:1236:7
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\accessibility-remediation--38d20-nested-interactive-elements-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[1A[2K[45/223] [chromium] › e2e\accessibility-remediation.spec.ts:1244:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › html element has lang attribute
+[1A[2K[46/223] [chromium] › e2e\accessibility-remediation.spec.ts:1252:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › no empty buttons or links
+[1A[2K[47/223] [chromium] › e2e\accessibility-remediation.spec.ts:1270:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › tooltips shown on hover also appear on focus
+[1A[2K[48/223] [chromium] › e2e\accessibility-remediation.spec.ts:1308:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › images do not have redundant alt text
+[1A[2K[49/223] [chromium] › e2e\accessibility-remediation.spec.ts:1334:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › focus maintained during sidebar transitions
+[1A[2K[50/223] [chromium] › e2e\accessibility-remediation.spec.ts:1362:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › content works in portrait and landscape orientations
+[1A[2K[51/223] [chromium] › e2e\accessibility-remediation.spec.ts:1398:9 › Phase 4: Minor Violations › 4.1 Language of Code Blocks (WCAG 3.1.2) › code blocks have language indication
+[1A[2K[52/223] [chromium] › e2e\accessibility-remediation.spec.ts:1419:9 › Phase 4: Minor Violations › 4.2-4.5 Additional Minor Fixes › abbreviations have expansion
+[1A[2K[53/223] [chromium] › e2e\accessibility-remediation.spec.ts:1434:9 › Phase 4: Minor Violations › 4.2-4.5 Additional Minor Fixes › navigation order is consistent
+[1A[2K[54/223] [chromium] › e2e\accessibility-remediation.spec.ts:1458:9 › Phase 4: Minor Violations › 4.2-4.5 Additional Minor Fixes › no redundant title and aria-label pairs
+[1A[2K[55/223] [chromium] › e2e\accessibility-remediation.spec.ts:1477:9 › Phase 4: Minor Violations › 4.2-4.5 Additional Minor Fixes › form fields have contextual help where needed
+[1A[2K[56/223] [chromium] › e2e\accessibility-remediation.spec.ts:1518:7 › Automated axe-core Full Scan › login page has no WCAG 2.2 AA violations
+[1A[2K[57/223] [chromium] › e2e\accessibility-remediation.spec.ts:1533:7 › Automated axe-core Full Scan › documents page has no WCAG 2.2 AA violations
+[1A[2K[58/223] [chromium] › e2e\accessibility-remediation.spec.ts:1549:7 › Automated axe-core Full Scan › issues page has no WCAG 2.2 AA violations
+[1A[2K[59/223] [chromium] › e2e\accessibility.spec.ts:14:7 › Accessibility - axe-core audit › login page has no critical accessibility violations
+[1A[2K[60/223] [chromium] › e2e\accessibility.spec.ts:34:7 › Accessibility - axe-core audit › main app shell has no critical accessibility violations
+[1A[2K[61/223] [chromium] › e2e\accessibility.spec.ts:53:7 › Accessibility - axe-core audit › docs mode has no critical accessibility violations
+[1A[2K[62/223] [chromium] › e2e\accessibility.spec.ts:80:7 › Accessibility - axe-core audit › programs mode has no critical accessibility violations
+[1A[2K[63/223] [chromium] › e2e\accessibility.spec.ts:108:7 › Accessibility - Keyboard Navigation › can navigate login form with keyboard only
+[1A[2K[64/223] [chromium] › e2e\accessibility.spec.ts:148:7 › Accessibility - Keyboard Navigation › can navigate main app with keyboard - full flow from login to create issue
+[1A[2K[65/223] [chromium] › e2e\accessibility.spec.ts:175:7 › Accessibility - Keyboard Navigation › focus is visible on all interactive elements
+[1A[2K[66/223] [chromium] › e2e\accessibility.spec.ts:196:7 › Accessibility - Keyboard Navigation › tab order is logical on login page
+[1A[2K[67/223] [chromium] › e2e\accessibility.spec.ts:213:7 › Accessibility - Screen Reader Announcements › login errors are announced via aria-live or role=alert
+[1A[2K[68/223] [chromium] › e2e\accessibility.spec.ts:232:7 › Accessibility - Screen Reader Announcements › form fields have accessible labels
+[1A[2K[69/223] [chromium] › e2e\accessibility.spec.ts:257:7 › Accessibility - Loading States › login button shows loading state during submission
+[1A[2K[70/223] [chromium] › e2e\accountability-banner-urgency.spec.ts:23:7 › Accountability Banner Urgency › API response includes has_overdue and has_due_today flags
+[1A[2K[71/223] [chromium] › e2e\accountability-banner-urgency.spec.ts:38:7 › Accountability Banner Urgency › banner is red when overdue items exist
+[1A[2K[72/223] [chromium] › e2e\accountability-banner-urgency.spec.ts:63:7 › Accountability Banner Urgency › urgency flags correctly reflect item days_overdue values
+[1A[2K[73/223] [chromium] › e2e\accountability-banner-urgency.spec.ts:85:7 › Accountability Banner Urgency › clicking banner opens the action items modal
+[1A[2K[74/223] [chromium] › e2e\accountability-owner-change.spec.ts:26:7 › Accountability Owner Change › sprint owner change immediately removes action items from inference
+[1A[2K[75/223] [chromium] › e2e\accountability-owner-change.spec.ts:102:7 › Accountability Owner Change › action items API returns valid response shape
+[1A[2K[76/223] [chromium] › e2e\accountability-standup.spec.ts:33:7 › Standup Accountability Flow › standup action items respect business day rules
+[1A[2K[77/223] [chromium] › e2e\accountability-standup.spec.ts:113:7 › Standup Accountability Flow › creating standup removes action item on business days
+[1A[2K[78/223] [chromium] › e2e\accountability-standup.spec.ts:218:7 › Standup Accountability Flow › user without assigned issues does not see standup action item
+[1A[2K[79/223] [chromium] › e2e\accountability-week.spec.ts:24:7 › Week Accountability Flow › allocated person without weekly_plan shows action item, creating plan removes it
+[1A[2K[80/223] [chromium] › e2e\accountability-week.spec.ts:122:7 › Week Accountability Flow › sprint not started shows action item, starting sprint removes it
+[1A[2K[81/223] [chromium] › e2e\accountability-week.spec.ts:200:7 › Week Accountability Flow › sprint without issues shows action item, adding issue removes it
+[1A[2K[82/223] [chromium] › e2e\accountability-week.spec.ts:280:7 › Week Accountability Flow › sprint in future does not show action items
+[1A[2K[83/223] [chromium] › e2e\admin-workspace-members.spec.ts:18:7 › Admin Workspace Detail Page › can navigate to workspace detail by clicking workspace name
+[1A[2K[84/223] [chromium] › e2e\admin-workspace-members.spec.ts:31:7 › Admin Workspace Detail Page › workspace detail page shows members table
+[1A[2K[85/223] [chromium] › e2e\admin-workspace-members.spec.ts:42:7 › Admin Workspace Detail Page › workspace detail page shows pending invites section
+[1A[2K[86/223] [chromium] › e2e\admin-workspace-members.spec.ts:50:7 › Admin Workspace Detail Page › workspace detail page shows add existing user section
+[1A[2K[87/223] [chromium] › e2e\admin-workspace-members.spec.ts:60:7 › Admin Workspace Detail Page › workspace detail page shows invite form
+[1A[2K[88/223] [chromium] › e2e\admin-workspace-members.spec.ts:70:7 › Admin Workspace Detail Page › back button returns to admin dashboard
+[1A[2K[89/223] [chromium] › e2e\admin-workspace-members.spec.ts:87:7 › Admin Workspace Member Management › can change member role
+[1A[2K[90/223] [chromium] › e2e\admin-workspace-members.spec.ts:106:7 › Admin Workspace Member Management › can send invite to new email
+[1A[2K[91/223] [chromium] › e2e\admin-workspace-members.spec.ts:121:7 › Admin Workspace Member Management › can revoke invite
+[1A[2K[92/223] [chromium] › e2e\admin-workspace-members.spec.ts:139:7 › Admin Workspace Member Management › can copy invite link
+[1A[2K[93/223] [chromium] › e2e\admin-workspace-members.spec.ts:162:7 › Admin User Search › user search shows results when typing
+[1A[2K[94/223] [chromium] › e2e\admin-workspace-members.spec.ts:188:7 › Admin User Search › selecting user from search enables Add User button
+[1A[2K[95/223] [chromium] › e2e\admin-workspace-members.spec.ts:212:7 › Admin User Search › can add existing user to workspace
+[1A[2K[96/223] [chromium] › e2e\admin-workspace-members.spec.ts:242:7 › Admin Workspace Access Control › non-super-admin cannot access workspace detail
+[1A[2K[97/223] [chromium] › e2e\ai-analysis-api.spec.ts:67:7 › AI Status API › GET /api/ai/status returns availability object
+[1A[2K[98/223] [chromium] › e2e\ai-analysis-api.spec.ts:78:7 › AI Status API › GET /api/ai/status requires authentication
+[1A[2K[99/223] [chromium] › e2e\ai-analysis-api.spec.ts:87:7 › AI Analyze Plan API › POST /api/ai/analyze-plan returns 400 when content is missing
+[1A[2K[100/223] [chromium] › e2e\ai-analysis-api.spec.ts:100:7 › AI Analyze Plan API › POST /api/ai/analyze-plan accepts valid content
+[1A[2K[chromium] › e2e\ai-analysis-api.spec.ts:100:7 › AI Analyze Plan API › POST /api/ai/analyze-plan accepts valid content
+[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async provider (C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:39:13)
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@smithy+core@3.22.1\node_modules\[4m@smithy\core[24m\dist-cjs\index.js:62:23
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+middleware-logger@3.972.3\node_modules\[4m@aws-sdk\middleware-logger[24m\dist-cjs\index.js:5:26
+    at async callBedrock [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:200:22[90m)[39m
+    at async analyzePlan [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:229:30[90m)[39m
+    at async [90mfile:///C:/dev/shipshape/api/[39mdist/routes/ai.js:30:24 {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[101/223] [chromium] › e2e\ai-analysis-api.spec.ts:124:7 › AI Analyze Plan API › POST /api/ai/analyze-plan requires authentication
+[1A[2K[102/223] [chromium] › e2e\ai-analysis-api.spec.ts:135:7 › AI Analyze Retro API › POST /api/ai/analyze-retro returns 400 when retro_content is missing
+[1A[2K[103/223] [chromium] › e2e\ai-analysis-api.spec.ts:148:7 › AI Analyze Retro API › POST /api/ai/analyze-retro returns 400 when plan_content is missing
+[1A[2K[104/223] [chromium] › e2e\ai-analysis-api.spec.ts:161:7 › AI Analyze Retro API › POST /api/ai/analyze-retro returns 400 when both fields are missing
+[1A[2K[105/223] [chromium] › e2e\ai-analysis-api.spec.ts:172:7 › AI Analyze Retro API › POST /api/ai/analyze-retro accepts valid content
+[1A[2K[chromium] › e2e\ai-analysis-api.spec.ts:172:7 › AI Analyze Retro API › POST /api/ai/analyze-retro accepts valid content
+[Worker 1] API ERROR: Retro analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async provider (C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:39:13)
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@smithy+core@3.22.1\node_modules\[4m@smithy\core[24m\dist-cjs\index.js:62:23
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+middleware-logger@3.972.3\node_modules\[4m@aws-sdk\middleware-logger[24m\dist-cjs\index.js:5:26
+    at async callBedrock [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:200:22[90m)[39m
+    at async analyzeRetro [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:285:30[90m)[39m
+    at async [90mfile:///C:/dev/shipshape/api/[39mdist/routes/ai.js:56:24 {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[106/223] [chromium] › e2e\ai-analysis-api.spec.ts:195:7 › AI Analyze Retro API › POST /api/ai/analyze-retro requires authentication
+[1A[2K[107/223] [chromium] › e2e\ai-analysis-api.spec.ts:209:7 › AI Rate Limiting › POST /api/ai/analyze-plan returns 429 after 10 rapid requests
+[1A[2K[chromium] › e2e\ai-analysis-api.spec.ts:209:7 › AI Rate Limiting › POST /api/ai/analyze-plan returns 429 after 10 rapid requests
+[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async provider (C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:39:13)
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@smithy+core@3.22.1\node_modules\[4m@smithy\core[24m\dist-cjs\index.js:62:23
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+middleware-logger@3.972.3\node_modules\[4m@aws-sdk\middleware-logger[24m\dist-cjs\index.js:5:26
+    at async callBedrock [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:200:22[90m)[39m
+    at async analyzePlan [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:229:30[90m)[39m
+    at async [90mfile:///C:/dev/shipshape/api/[39mdist/routes/ai.js:30:24 {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[Worker 1] API ERROR: Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+Plan analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[108/223] [chromium] › e2e\auth.spec.ts:9:7 › Authentication › shows login page when not authenticated
+[1A[2K[109/223] [chromium] › e2e\auth.spec.ts:21:7 › Authentication › shows validation error with empty credentials
+[1A[2K[110/223] [chromium] › e2e\auth.spec.ts:32:7 › Authentication › shows error with invalid credentials
+[1A[2K[111/223] [chromium] › e2e\auth.spec.ts:44:7 › Authentication › successful login redirects to app
+[1A[2K[112/223] [chromium] › e2e\auth.spec.ts:59:7 › Authentication › logout returns to login page
+[1A[2K[113/223] [chromium] › e2e\auth.spec.ts:77:7 › Authentication › protected route redirects to login when not authenticated
+[1A[2K[114/223] [chromium] › e2e\auth.spec.ts:85:7 › Authentication › login is case-insensitive for email
+[1A[2K[115/223] [chromium] › e2e\authorization.spec.ts:52:7 › Authorization - Super Admin Access Control › non-super-admin cannot access /admin when logged in
+[1A[2K[116/223] [chromium] › e2e\authorization.spec.ts:66:7 › Authorization - Super Admin Access Control › super-admin CAN access /admin
+[1A[2K[117/223] [chromium] › e2e\authorization.spec.ts:75:7 › Authorization - Super Admin Access Control › non-super-admin cannot toggle super-admin status via API
+[1A[2K[chromium] › e2e\authorization.spec.ts:75:7 › Authorization - Super Admin Access Control › non-super-admin cannot toggle super-admin status via API
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06d9-7311-8383-dd36806562f6; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06ea-75c8-a116-963aacccff51; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06ee-74f2-a1dc-90f3df4a842c; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06f3-72ad-a485-b0c1f56a0446; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06f3-72ad-a485-b7798e1d84fa; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06f3-72ad-a485-b94c779ec7a9; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-06fa-717c-9a93-b0b52593551f; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-0703-776c-a3ae-c57deba8cdc2; trace=01a00ba3-06d9-7311-8383-dd36806562f6,id=01a00ba3-0705-708c-98bc-7fdfbe8cf2ed
+
+[1A[2K[118/223] [chromium] › e2e\authorization.spec.ts:95:7 › Authorization - Workspace Admin Access Control › workspace member cannot access /settings
+[1A[2K[119/223] [chromium] › e2e\authorization.spec.ts:106:7 › Authorization - Workspace Admin Access Control › workspace admin CAN access /settings
+[1A[2K[120/223] [chromium] › e2e\authorization.spec.ts:116:7 › Authorization - Workspace Admin Access Control › workspace member cannot change another user role via API
+[1A[2K[121/223] [chromium] › e2e\authorization.spec.ts:132:7 › Authorization - Workspace Admin Access Control › workspace member cannot send invites via API
+[1A[2K[122/223] [chromium] › e2e\authorization.spec.ts:150:7 › Authorization - Cross-Workspace Isolation › cannot access document from another workspace via direct URL
+[1A[2K[123/223] [chromium] › e2e\authorization.spec.ts:167:7 › Authorization - Cross-Workspace Isolation › API rejects document access for wrong workspace
+[1A[2K[124/223] [chromium] › e2e\authorization.spec.ts:182:7 › Authorization - Cross-Workspace Isolation › cannot list documents from another workspace
+[1A[2K[125/223] [chromium] › e2e\authorization.spec.ts:202:7 › Authorization - API Route Protection › unauthenticated requests to protected API routes fail
+[1A[2K[126/223] [chromium] › e2e\authorization.spec.ts:217:7 › Authorization - API Route Protection › cannot create workspace without super-admin
+[1A[2K[127/223] [chromium] › e2e\authorization.spec.ts:231:7 › Authorization - API Route Protection › cannot archive workspace without super-admin
+[1A[2K[128/223] [chromium] › e2e\authorization.spec.ts:246:7 › Authorization - Impersonation Controls › non-super-admin cannot impersonate users
+[1A[2K[129/223] [chromium] › e2e\authorization.spec.ts:260:7 › Authorization - Impersonation Controls › super-admin CAN impersonate users
+[1A[2K[130/223] [chromium] › e2e\authorization.spec.ts:286:7 › Authorization - Audit Log Access › non-super-admin cannot view global audit logs
+[1A[2K[131/223] [chromium] › e2e\authorization.spec.ts:299:7 › Authorization - Audit Log Access › workspace member cannot view workspace audit logs (admin only)
+[1A[2K[132/223] [chromium] › e2e\autosave-race-conditions.spec.ts:64:7 › Auto-Save Race Conditions - Title Field › type-pause-type: stale response does not overwrite local title
+[1A[2K[133/223] [chromium] › e2e\autosave-race-conditions.spec.ts:92:7 › Auto-Save Race Conditions - Title Field › rapid typing with throttle: intermediate saves do not overwrite
+[1A[2K[chromium] › e2e\autosave-race-conditions.spec.ts:92:7 › Auto-Save Race Conditions - Title Field › rapid typing with throttle: intermediate saves do not overwrite
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3348-7477-9f36-80ecbe06ceed; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-334a-70c4-bb12-eab1f6469469; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-334c-767b-8299-9e67a76c632a; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3350-73bf-a6d6-e5d3516220bb; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3350-73bf-a6d6-e8374f2cf842; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3350-73bf-a6d6-ee032d05d779; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3360-76aa-9b53-b39b6b8af909; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-338c-745e-bb3b-f17505e0b685; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-338f-7057-85fb-8f117e8ba32e; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3397-75ad-9e1b-a447c9a73b54
+
+[1A[2K[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3c05-7551-9da2-e71380e7b906; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3397-75ad-9e1b-a447c9a73b54; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-338f-7057-85fb-8f117e8ba32e; trace=01a00ba3-3348-7477-9f36-80ecbe06ceed,id=01a00ba3-3348-7477-9f36-80ecbe06ceed
+
+[1A[2K[134/223] [chromium] › e2e\autosave-race-conditions.spec.ts:119:7 › Auto-Save Race Conditions - Title Field › multiple pause-resume cycles preserve all changes
+[1A[2K[135/223] [chromium] › e2e\autosave-race-conditions.spec.ts:146:7 › Auto-Save Race Conditions - Title Field › issue title: stale response does not overwrite
+[1A[2K[136/223] [chromium] › e2e\autosave-race-conditions.spec.ts:179:7 › Auto-Save Race Conditions - Throttle Behavior › throttle: saves periodically during long typing session
+[1A[2K[137/223] [chromium] › e2e\autosave-race-conditions.spec.ts:229:7 › Auto-Save Race Conditions - Error Recovery › failed save is retried silently
+[1A[2K[138/223] [chromium] › e2e\autosave-race-conditions.spec.ts:277:7 › Auto-Save Race Conditions - Slow Network › slow response does not overwrite faster local changes
+[1A[2K[139/223] [chromium] › e2e\backlinks.spec.ts:45:7 › Backlinks › backlinks panel shows in sidebar
+[1A[2K[140/223] [chromium] › e2e\backlinks.spec.ts:60:7 › Backlinks › creating mention adds backlink
+[1A[2K[141/223] [chromium] › e2e\backlinks.spec.ts:110:7 › Backlinks › removing mention removes backlink
+[1A[2K[chromium] › e2e\backlinks.spec.ts:110:7 › Backlinks › removing mention removes backlink
+No /links POST detected after mention removal: page.waitForResponse: Timeout 5000ms exceeded while waiting for event "response"
+
+[1A[2K[142/223] [chromium] › e2e\backlinks.spec.ts:182:7 › Backlinks › backlinks show correct document info
+[1A[2K[143/223] [chromium] › e2e\backlinks.spec.ts:230:7 › Backlinks › clicking backlink navigates to source document
+[1A[2K[chromium] › e2e\backlinks.spec.ts:230:7 › Backlinks › clicking backlink navigates to source document
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d49-779f-ba73-45d248223881; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d4a-76ad-ba29-1b6617cc2efa; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d4c-733d-a63a-c4297c28c495; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d4c-733d-a63a-cb3e8878b6cb; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d4c-733d-a63a-ce70cfc32eb1; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d55-75ee-9ad3-23aefa8e055a; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d60-76fb-837d-d5e625e5ee65; trace=01a00ba4-2d47-70dd-a0ac-b8f261e7bb60,id=01a00ba4-2d64-774c-8a5f-6fce69a56129
+
+[1A[2K[144/223] [chromium] › e2e\backlinks.spec.ts:294:7 › Backlinks › backlinks update in real-time
+[1A[2K[145/223] [chromium] › e2e\backlinks.spec.ts:371:7 › Backlinks › backlinks panel shows empty state when no backlinks
+[1A[2K[146/223] [chromium] › e2e\backlinks.spec.ts:402:7 › Backlinks › backlinks count updates correctly
+[1A[2K[147/223] [chromium] › e2e\bulk-selection.spec.ts:22:9 › Bulk Selection - List View › Checkbox Visibility › checkbox is hidden by default on each row
+[1A[2K[148/223] [chromium] › e2e\bulk-selection.spec.ts:45:9 › Bulk Selection - List View › Checkbox Visibility › checkbox appears on row hover
+[1A[2K[149/223] [chromium] › e2e\bulk-selection.spec.ts:63:9 › Bulk Selection - List View › Checkbox Visibility › checkbox remains visible when item is selected
+[1A[2K[150/223] [chromium] › e2e\bulk-selection.spec.ts:89:9 › Bulk Selection - List View › Single Selection › clicking checkbox selects the item
+[1A[2K[151/223] [chromium] › e2e\bulk-selection.spec.ts:108:9 › Bulk Selection - List View › Single Selection › clicking checkbox does not navigate to item detail
+[1A[2K[152/223] [chromium] › e2e\bulk-selection.spec.ts:127:9 › Bulk Selection - List View › Single Selection › clicking row (not checkbox) navigates to item detail
+[1A[2K[153/223] [chromium] › e2e\bulk-selection.spec.ts:143:9 › Bulk Selection - List View › Single Selection › selected row shows background highlight
+[1A[2K[154/223] [chromium] › e2e\bulk-selection.spec.ts:161:9 › Bulk Selection - List View › Single Selection › clicking selected checkbox deselects the item
+[1A[2K[155/223] [chromium] › e2e\bulk-selection.spec.ts:187:9 › Bulk Selection - List View › Multi-Selection with Shift+Click › shift+click selects range from last selected to clicked item
+[1A[2K[156/223] [chromium] › e2e\bulk-selection.spec.ts:213:9 › Bulk Selection - List View › Multi-Selection with Shift+Click › shift+click extends selection in reverse order
+[1A[2K[157/223] [chromium] › e2e\bulk-selection.spec.ts:238:9 › Bulk Selection - List View › Multi-Selection with Shift+Click › shift+click adds to existing selection
+[1A[2K[158/223] [chromium] › e2e\bulk-selection.spec.ts:278:9 › Bulk Selection - List View › Cmd/Ctrl+Click Toggle › cmd+click adds single item to selection
+[1A[2K[159/223] [chromium] › e2e\bulk-selection.spec.ts:303:9 › Bulk Selection - List View › Cmd/Ctrl+Click Toggle › cmd+click on selected item removes it from selection
+[1A[2K[160/223] [chromium] › e2e\bulk-selection.spec.ts:341:9 › Bulk Selection - Keyboard Navigation › Focus Management › first row is focusable with Tab
+[1A[2K[161/223] [chromium] › e2e\bulk-selection.spec.ts:356:9 › Bulk Selection - Keyboard Navigation › Focus Management › arrow down moves focus to next row
+[1A[2K[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-080b-76da-8eed-1fab1dd56ced; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-080e-72ea-993c-7428c863461b; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-0810-724d-a8bd-81e7c1500c56; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-0819-7723-ba27-6b94ca3433ae; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-081a-77b6-9267-dd042ffe3b3c; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-081a-77b6-9267-e0ccdead6f5d; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-0825-7759-a45c-15dedb56d112; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-0831-7312-ac75-fbd5bff3d80c; trace=01a00ba5-080b-76da-8eed-1fab1dd56ced,id=01a00ba5-0834-721f-acad-8dacce6e83cd
+
+[1A[2K[162/223] [chromium] › e2e\bulk-selection.spec.ts:382:9 › Bulk Selection - Keyboard Navigation › Focus Management › arrow up moves focus to previous row
+[1A[2K[163/223] [chromium] › e2e\bulk-selection.spec.ts:408:9 › Bulk Selection - Keyboard Navigation › Focus Management › arrow keys do not change selection (focus only)
+[1A[2K[164/223] [chromium] › e2e\bulk-selection.spec.ts:445:9 › Bulk Selection - Keyboard Navigation › Selection with Enter/Space › Enter toggles selection of focused row
+[1A[2K[165/223] [chromium] › e2e\bulk-selection.spec.ts:468:9 › Bulk Selection - Keyboard Navigation › Selection with Enter/Space › Space toggles selection of focused row
+[1A[2K[166/223] [chromium] › e2e\bulk-selection.spec.ts:493:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › shift+down extends selection to next row
+[1A[2K[167/223] [chromium] › e2e\bulk-selection.spec.ts:519:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › shift+up extends selection to previous row
+[1A[2K[168/223] [chromium] › e2e\bulk-selection.spec.ts:545:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › multiple shift+down extends selection incrementally
+[1A[2K[169/223] [chromium] › e2e\bulk-selection.spec.ts:574:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › shift+down then shift+up contracts selection
+[1A[2K[170/223] [chromium] › e2e\bulk-selection.spec.ts:610:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › shift+end selects from current to last row
+[1A[2K[171/223] [chromium] › e2e\bulk-selection.spec.ts:637:9 › Bulk Selection - Keyboard Navigation › Shift+Arrow Range Selection › shift+home selects from first row to current
+[1A[2K[172/223] [chromium] › e2e\bulk-selection.spec.ts:667:9 › Bulk Selection - Keyboard Navigation › Select All and Clear › cmd/ctrl+a selects all visible items
+[1A[2K[173/223] [chromium] › e2e\bulk-selection.spec.ts:688:9 › Bulk Selection - Keyboard Navigation › Select All and Clear › escape clears all selection
+[1A[2K[174/223] [chromium] › e2e\bulk-selection.spec.ts:718:9 › Bulk Selection - Keyboard Navigation › Select All and Clear › cmd/ctrl+a when all selected deselects all
+[1A[2K[175/223] [chromium] › e2e\bulk-selection.spec.ts:751:9 › Global j/k Vim-Style Navigation › j/k Focus Navigation › j key moves focus to first/next item globally
+[1A[2K[176/223] [chromium] › e2e\bulk-selection.spec.ts:784:9 › Global j/k Vim-Style Navigation › j/k Focus Navigation › k key moves focus to previous item
+[1A[2K[177/223] [chromium] › e2e\bulk-selection.spec.ts:812:9 › Global j/k Vim-Style Navigation › j/k Focus Navigation › j/k work without explicitly focusing the table
+[1A[2K[178/223] [chromium] › e2e\bulk-selection.spec.ts:831:9 › Global j/k Vim-Style Navigation › Enter to Open Item › Enter on focused item navigates to issue detail page
+[1A[2K[chromium] › e2e\bulk-selection.spec.ts:831:9 › Global j/k Vim-Style Navigation › Enter to Open Item › Enter on focused item navigates to issue detail page
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3eba-715a-98c0-03a4f986fd01; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ebc-74d7-ba04-df7b82dce224; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ebe-7499-a48f-51f58aad271f; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ec1-765a-bdc0-350f836a05c5; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ec1-765a-bdc0-393b3c93f0e1; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ec2-733c-ac9a-9d94a8c47d8d; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ecb-76e5-ad74-d080faf23979; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3ed8-7598-832f-604d2758a8d5; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3edb-70ee-84ff-45c0b1c68a40; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3edd-762b-a674-1ea75d9c3d15
+
+[1A[2K[179/223] [chromium] › e2e\bulk-selection.spec.ts:857:9 › Global j/k Vim-Style Navigation › Input Field Exclusion › j key navigates when no input is focused
+[1A[2K[180/223] [chromium] › e2e\bulk-selection.spec.ts:884:9 › Global j/k Vim-Style Navigation › Hover-to-Focus › hovering over row sets keyboard focus
+[1A[2K[181/223] [chromium] › e2e\bulk-selection.spec.ts:910:9 › Global j/k Vim-Style Navigation › Hover-to-Focus › Shift+Arrow from hovered item creates selection
+[1A[2K[182/223] [chromium] › e2e\bulk-selection.spec.ts:935:9 › Global j/k Vim-Style Navigation › Breadcrumb and Escape Navigation › navigating from Program shows breadcrumb on issue page
+[1A[2K[chromium] › e2e\bulk-selection.spec.ts:935:9 › Global j/k Vim-Style Navigation › Breadcrumb and Escape Navigation › navigating from Program shows breadcrumb on issue page
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-4698-7728-a8f4-e4b8e86c5faa; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3edd-762b-a674-1ea75d9c3d15; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3edb-70ee-84ff-45c0b1c68a40; trace=01a00ba5-3eba-715a-98c0-03a4f986fd01,id=01a00ba5-3eba-715a-98c0-03a4f986fd01
+
+[1A[2K[183/223] [chromium] › e2e\bulk-selection.spec.ts:974:9 › Global j/k Vim-Style Navigation › Breadcrumb and Escape Navigation › direct URL navigation shows generic back button
+[1A[2K[184/223] [chromium] › e2e\bulk-selection.spec.ts:1004:7 › Bulk Selection - Tab/Filter Behavior › switching tabs clears selection
+[1A[2K[185/223] [chromium] › e2e\bulk-selection.spec.ts:1030:7 › Bulk Selection - Tab/Filter Behavior › selection only applies to visible items
+[1A[2K[186/223] [chromium] › e2e\bulk-selection.spec.ts:1051:7 › Bulk Selection - Tab/Filter Behavior › cmd+a only selects items in current filter
+[1A[2K[187/223] [chromium] › e2e\bulk-selection.spec.ts:1092:9 › Bulk Action Bar › Visibility › bulk action bar is hidden when nothing selected
+[1A[2K[188/223] [chromium] › e2e\bulk-selection.spec.ts:1102:9 › Bulk Action Bar › Visibility › bulk action bar appears when 1+ items selected
+[1A[2K[189/223] [chromium] › e2e\bulk-selection.spec.ts:1119:9 › Bulk Action Bar › Visibility › bulk action bar shows selected count
+[1A[2K[190/223] [chromium] › e2e\bulk-selection.spec.ts:1142:9 › Bulk Action Bar › Visibility › bulk action bar disappears when selection cleared
+[1A[2K[191/223] [chromium] › e2e\bulk-selection.spec.ts:1169:9 › Bulk Action Bar › Actions Available › bulk action bar has Archive button
+[1A[2K[192/223] [chromium] › e2e\bulk-selection.spec.ts:1186:9 › Bulk Action Bar › Actions Available › bulk action bar has Move to Week dropdown
+[1A[2K[193/223] [chromium] › e2e\bulk-selection.spec.ts:1203:9 › Bulk Action Bar › Actions Available › bulk action bar has Delete button
+[1A[2K[194/223] [chromium] › e2e\bulk-selection.spec.ts:1220:9 › Bulk Action Bar › Actions Available › bulk action bar has Change Status dropdown
+[1A[2K[195/223] [chromium] › e2e\bulk-selection.spec.ts:1237:9 › Bulk Action Bar › Actions Available › bulk action bar has Clear Selection button
+[1A[2K[196/223] [chromium] › e2e\bulk-selection.spec.ts:1257:7 › Bulk Actions - Archive › archive action moves selected issues to archived state
+[1A[2K[197/223] [chromium] › e2e\bulk-selection.spec.ts:1286:7 › Bulk Actions - Archive › archived issues do not appear in default views
+[1A[2K[198/223] [chromium] › e2e\bulk-selection.spec.ts:1327:7 › Bulk Actions - Archive › archive shows success toast
+[1A[2K[199/223] [chromium] › e2e\bulk-selection.spec.ts:1327:7 › Bulk Actions - Archive › archive shows success toast (retry #1)
+[1A[2K  2) [chromium] › e2e\bulk-selection.spec.ts:1327:7 › Bulk Actions - Archive › archive shows success toast 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByRole('alert')
+    Expected pattern: [32m/archived/i[39m
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" aria-live="polite" class="px-4 py-2 rounded-lg shadow-lg text-sm animate-in slide-in-from-right-4 fade-in flex items-center gap-2 min-w-[200px] bg-accent/90 text-white">…</div> aka getByText('FleetGraph: 4 new alerts need attentionView')
+        2) <div role="alert" aria-live="polite" class="px-4 py-2 rounded-lg shadow-lg text-sm animate-in slide-in-from-right-4 fade-in flex items-center gap-2 min-w-[200px] bg-green-500/90 text-white">…</div> aka getByText('issue archivedUndo')
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('alert')[22m
+    [2m    2 × locator resolved to <div role="alert" aria-live="polite" class="px-4 py-2 rounded-lg shadow-lg text-sm animate-in slide-in-from-right-4 fade-in flex items-center gap-2 min-w-[200px] bg-accent/90 text-white">…</div>[22m
+    [2m      - unexpected value "FleetGraph: 4 new alerts need attentionView"[22m
+
+
+      1342 |     const toast = page.getByRole('alert');
+      1343 |     await expect(toast).toBeVisible({ timeout: 3000 });
+    > 1344 |     await expect(toast).toContainText(/archived/i);
+           |                         ^
+      1345 |   });
+      1346 |
+      1347 |   test('archive toast has undo button', async ({ page }) => {
+        at C:\dev\shipshape\e2e\bulk-selection.spec.ts:1344:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\bulk-selection-Bulk-Action-ed848-archive-shows-success-toast-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\bulk-selection-Bulk-Action-ed848-archive-shows-success-toast-chromium\error-context.md
+
+
+[1A[2K[200/223] [chromium] › e2e\bulk-selection.spec.ts:1347:7 › Bulk Actions - Archive › archive toast has undo button
+[1A[2K[201/223] [chromium] › e2e\bulk-selection.spec.ts:1367:7 › Bulk Actions - Archive › selection clears after archive action
+[1A[2K[202/223] [chromium] › e2e\bulk-selection.spec.ts:1396:7 › Bulk Actions - Move to Week › move to sprint shows sprint picker dropdown
+[1A[2K[203/223] [chromium] › e2e\bulk-selection.spec.ts:1419:7 › Bulk Actions - Move to Week › move to sprint shows success toast
+[1A[2K[204/223] [chromium] › e2e\bulk-selection.spec.ts:1444:7 › Bulk Actions - Move to Week › can move to "No Week" to unassign
+[1A[2K[205/223] [chromium] › e2e\bulk-selection.spec.ts:1470:7 › Bulk Actions - Move to Week › selection clears after move action
+[1A[2K[206/223] [chromium] › e2e\bulk-selection.spec.ts:1503:7 › Bulk Actions - Delete (Trash) › delete action moves selected issues to trash
+[1A[2K[207/223] [chromium] › e2e\bulk-selection.spec.ts:1529:7 › Bulk Actions - Delete (Trash) › delete shows success toast with undo
+[1A[2K[208/223] [chromium] › e2e\bulk-selection.spec.ts:1550:7 › Bulk Actions - Delete (Trash) › undo restores deleted issues from trash
+[1A[2K[209/223] [chromium] › e2e\bulk-selection.spec.ts:1585:7 › Bulk Actions - Delete (Trash) › selection clears after delete action
+[1A[2K[210/223] [chromium] › e2e\bulk-selection.spec.ts:1610:7 › Bulk Actions - Change Status › change status shows status picker dropdown
+[1A[2K[211/223] [chromium] › e2e\bulk-selection.spec.ts:1635:7 › Bulk Actions - Change Status › selecting status updates all selected issues
+[1A[2K[212/223] [chromium] › e2e\bulk-selection.spec.ts:1672:7 › Bulk Actions - Change Status › change status shows success toast
+[1A[2K[213/223] [chromium] › e2e\bulk-selection.spec.ts:1693:7 › Bulk Actions - Change Status › issues move to correct tab after status change
+[1A[2K[214/223] [chromium] › e2e\bulk-selection.spec.ts:1733:7 › Bulk Actions - Change Status › selection clears after status change
+[1A[2K[215/223] [chromium] › e2e\bulk-selection.spec.ts:1760:9 › Bulk Selection - Kanban View › Card Selection › checkbox appears on kanban card hover
+[1A[2K[216/223] [chromium] › e2e\bulk-selection.spec.ts:1798:9 › Bulk Selection - Kanban View › Card Selection › clicking checkbox selects kanban card
+[1A[2K[217/223] [chromium] › e2e\bulk-selection.spec.ts:1817:9 › Bulk Selection - Kanban View › Card Selection › selected card shows visual distinction
+[1A[2K[218/223] [chromium] › e2e\bulk-selection.spec.ts:1837:9 › Bulk Selection - Kanban View › Card Selection › clicking card (not checkbox) opens detail
+[1A[2K[219/223] [chromium] › e2e\bulk-selection.spec.ts:1857:9 › Bulk Selection - Kanban View › Multi-Select in Kanban › can select cards across multiple columns
+[1A[2K[220/223] [chromium] › e2e\bulk-selection.spec.ts:1891:9 › Bulk Selection - Kanban View › Multi-Select in Kanban › cmd+click toggles individual cards
+[1A[2K[221/223] [chromium] › e2e\bulk-selection.spec.ts:1925:9 › Bulk Selection - Kanban View › Bulk Actions in Kanban › bulk action bar appears with kanban selection
+[1A[2K[222/223] [chromium] › e2e\bulk-selection.spec.ts:1949:9 › Bulk Selection - Kanban View › Bulk Actions in Kanban › archive works from kanban view
+[1A[2K[223/223] [chromium] › e2e\bulk-selection.spec.ts:1975:9 › Bulk Selection - Kanban View › Bulk Actions in Kanban › status change moves cards to correct column
+[1A[2K[224/223] (retries) [chromium] › e2e\bulk-selection.spec.ts:2016:7 › Bulk Selection - Accessibility › list has aria-multiselectable attribute
+[1A[2K[225/223] (retries) [chromium] › e2e\bulk-selection.spec.ts:2026:7 › Bulk Selection - Accessibility › rows have aria-selected attribute
+[1A[2K  2 flaky
+    [chromium] › e2e\accessibility-remediation.spec.ts:1235:9 › Phase 3: Moderate Violations › 3.5-3.11 Additional Moderate Fixes › no nested interactive elements 
+    [chromium] › e2e\bulk-selection.spec.ts:1327:7 › Bulk Actions - Archive › archive shows success toast 
+  221 passed (7.7m)
+SHARD_1_EXIT=0
