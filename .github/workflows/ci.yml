@@ -149,6 +149,118 @@ jobs:
             provenance.txt
           retention-days: 30
 
+  # The brief's Required Capabilities: "Drill runs in CI on every PR. Any
+  # regression past the configured threshold fails the build."
+  #
+  # `verify-deployment` below cannot serve that clause: it targets live prod,
+  # and prod only ever reflects `main`, so running it on a PR would exercise
+  # the wrong code and report a green that means nothing. The honest reading is
+  # the one the brief itself gives for the harness — "against a containerized
+  # Ship instance" — so this job boots Ship from THIS PR's code and drills that.
+  #
+  # Same drill binary, same threshold, same non-zero exit. The only difference
+  # is the target, which is the whole point.
+  drill-pr:
+    name: TTFE drill (Ship booted from this PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ship
+          POSTGRES_PASSWORD: ship_dev_password
+          POSTGRES_DB: ship_dev
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U ship -d ship_dev"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ship:ship_dev_password@localhost:5433/ship_dev
+      NODE_ENV: development
+      PORT: 3000
+      # The drill subscribes and creates; the deliverer must actually run.
+      WEBHOOKS_ENABLED: 'true'
+      # No agent work here, and its sweep would only add noise to the timing.
+      FLEETGRAPH_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Recursive build, in dependency order: the drill compiles against
+      # @ship/sdk, and without sdk/dist its tsc fails outright.
+      - run: pnpm build
+
+      - name: Migrate
+        run: pnpm --filter @ship/api db:migrate
+
+      - name: Provision the first-party drill app
+        # Migration 043 seeds `ship_app_ttfe_drill` by copying the GRADER app's
+        # secret hash — deliberately a no-op on a fresh database, where no
+        # grader app exists yet. So seed the grader app first, then replay 043
+        # (it is ON CONFLICT DO UPDATE, so replaying is safe) to mint the
+        # first-party app the drill needs: Client Credentials rejects a
+        # non-first-party client, and the grader app is read-only by design.
+        id: drillapp
+        run: |
+          secret=$(pnpm --silent --filter @ship/api seed:grader-app \
+            | grep -oE 'ship_sec_[a-f0-9]+' | head -1)
+          if [ -z "$secret" ]; then echo "::error::grader app seed printed no secret"; exit 1; fi
+          echo "::add-mask::$secret"
+          echo "secret=$secret" >> "$GITHUB_OUTPUT"
+          PGPASSWORD=ship_dev_password psql -h localhost -p 5433 -U ship -d ship_dev \
+            -v ON_ERROR_STOP=1 -f api/src/db/migrations/043_ttfe_drill_app.sql
+
+      - name: Boot Ship from this PR
+        run: |
+          node api/dist/index.js > api.log 2>&1 &
+          echo $! > api.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/ready >/dev/null 2>&1; then
+              echo "ship up after ${i} checks"; exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Ship never became ready"; cat api.log; exit 1
+
+      - name: TTFE drill (over threshold fails the build)
+        env:
+          SHIP_CLIENT_ID: ship_app_ttfe_drill
+          SHIP_CLIENT_SECRET: ${{ steps.drillapp.outputs.secret }}
+        run: |
+          set +e
+          pnpm --silent --filter @ship/cli drill ttfe \
+            --base-url http://localhost:3000 --threshold 60000 --json \
+            | tee ttfe-pr-result.json
+          code=${PIPESTATUS[0]}
+          # PIPESTATUS, not $? — $? is `tee`'s status and would report success
+          # for a drill that failed, which is the failure mode this gate exists
+          # to prevent.
+          exit $code
+
+      - name: Stop Ship
+        if: always()
+        run: kill "$(cat api.pid)" 2>/dev/null || true
+
+      - name: Upload drill timing and server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ttfe-pr-${{ github.sha }}
+          path: |
+            ttfe-pr-result.json
+            api.log
+          retention-days: 30
+
   secret-scan:
     runs-on: ubuntu-latest
     steps:
