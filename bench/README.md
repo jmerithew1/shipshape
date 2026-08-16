@@ -38,7 +38,7 @@ behaviour are the durable findings.**
 | **1 — Type safety** | `cat1-types/count-types.mjs` | `node bench/cat1-types/count-types.mjs .` |
 | **2 — Bundle size** | `cat2-bundle/smattr.mjs` | build with `--sourcemap`, then `node bench/cat2-bundle/smattr.mjs web/dist/assets/index-*.js` |
 | **3 — API latency** | `cat3-latency/{go.sh,loadgen.js,baseline.sh,rtt.js}` | `bash bench/cat3-latency/go.sh issues "/api/issues" 10 300 30` |
-| **4 — DB queries** | `cat4-queries/{run_flow.sh,parse.py,explain*.sql}` | enable `log_statement='all'`, run a flow, then `python bench/cat4-queries/parse.py` |
+| **4 — DB queries** | `cat4-queries/{capture_flows.mjs,run_flow.sh,parse.py,explain*.sql}` | enable `log_statement='all'`, then `LABEL=<tag> bash bench/cat4-queries/run_flow.sh <flow> flows/<flow>.urls` |
 | **7 — Accessibility** | `cat7-a11y/{lh.sh,a11y_scan.py,contrast.js}` | `bash bench/cat7-a11y/lh.sh` · `node bench/cat7-a11y/contrast.js` |
 | **8 — Terraform** | `cat8-terraform/drift-demo/` | `bash bench/cat8-terraform/drift-demo/run-drift-demo.sh` |
 | Platform perf | `perf.py` | `python bench/perf.py` |
@@ -51,6 +51,33 @@ unsafe assertion, SQL `AS` inside a template string from a TS `as`, or `x!` from
 
 **Category 2** ships a hand-written VLQ sourcemap attributor because `source-map-explorer` cannot
 read Vite 6 sourcemaps (`refers to generated column Infinity`). It measures post-minification bytes.
+
+**Category 4** measures five flows, defined by the `.urls` files in `cat4-queries/flows/`:
+
+| Flow | Route | Part-1 baseline (cold) |
+| --- | --- | --: |
+| `mainpage` | `/my-week` | 57 |
+| `document` | `/documents/:id` | 64 |
+| `issues` | `/issues` | 61 |
+| `weekboard` | sprint document, Issues tab | 67 |
+| `search` | Cmd-K palette + one `@`-mention query | 57 |
+
+Those files are **generated, not hand-written** — `node bench/cat4-queries/capture_flows.mjs` drives
+the running app in a fresh browser context per flow and records the `/api` calls in issue order. Two
+things it exists to prevent, both of which produced wrong numbers before it did:
+
+- **A soft reload is not a cold load.** The HTTP cache and TanStack Query's in-memory cache both
+  suppress calls silently — an observed `/issues` reload fired 4 requests where a cold load fires 12.
+  A fresh context per flow is the only way the captured set is the real one.
+- **Turn the background schedulers off**: `FLEETGRAPH_ENABLED=false WEBHOOKS_ENABLED=false`. The
+  FleetGraph sweep (every 2 min) and the webhook poller issue their own queries, and any landing
+  between the marker statements are counted as the flow's. With them on, the main page measured 51
+  then 64; with them off, two passes agreed exactly on 46.
+
+`flows/mainpage-audit-2026-07-29.urls` preserves the original audit-era call set. Replaying it is the
+harness's self-check: it must still return **32**. If it does not, distrust the run, not the app.
+
+`API_PORT` overrides the API port (default 3000) for when something else owns 3000.
 
 **Category 3** must respect two things or the numbers are garbage. A **rate limiter caps the API at
 1000 req/60 s** (`api/src/app.ts:81-88`) — a naive `autocannon -d 10 -c 25` issues ~8000 requests and

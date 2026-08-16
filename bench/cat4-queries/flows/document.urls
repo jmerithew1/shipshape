@@ -1,0 +1,20 @@
+# Cold authenticated load of a single wiki document (/documents/:id).
+# Captured 2026-08-16 by bench/cat4-queries/capture_flows.mjs against a FRESH
+# browser context (cold HTTP + query cache), route /documents/c31f1623-1001-4fd2-a9fb-d235c8ef3743.
+# Replayed by run_flow.sh for exact query counting. Regenerate, do not hand-edit.
+/api/auth/me
+/api/auth/session
+/api/auth/session
+/api/accountability/action-items
+/api/agent/findings
+/api/standups/status
+/api/issues
+/api/projects
+/api/programs
+/api/documents?type=wiki
+/api/team/people?includeArchived=true
+/api/documents/c31f1623-1001-4fd2-a9fb-d235c8ef3743
+/api/team/people
+/api/documents/c31f1623-1001-4fd2-a9fb-d235c8ef3743/comments
+/api/documents/c31f1623-1001-4fd2-a9fb-d235c8ef3743/backlinks
+/api/documents/c31f1623-1001-4fd2-a9fb-d235c8ef3743/backlinks

@@ -1,8 +1,14 @@
 # Pre-Search — Week 6 PlugForge
 
-Completed 2026-08-10, before any Week-6 code. AI conversation artifact: this planning session
-(three-lens scoping → cold critic → approved plan at `.claude/plans/`, mirrored in
-`docs/defense-week6.md`). Design-time document; `docs/architecture.md` will be as-shipped.
+Completed 2026-08-10, before any Week-6 code.
+
+**Saved AI conversation artifact: [`docs/presearch-week6-ai-session.md`](docs/presearch-week6-ai-session.md)** —
+the verbatim planning session that produced these answers (three-lens scoping → adversarial cold
+critic → owner-approved plan), mirrored for the defense in `docs/defense-week6.md`. Until
+2026-08-16 this line pointed at `.claude/plans/`, a local agent directory outside the repo: the
+artifact existed and always had, but a grader cloning the repo could not open it. Now committed.
+
+Design-time document; `docs/architecture.md` is the as-shipped source of truth.
 
 ## Phase 1 — Constraints
 

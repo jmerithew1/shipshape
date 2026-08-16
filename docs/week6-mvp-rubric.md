@@ -11,7 +11,7 @@ independent audits (an adversarial contract audit and a security review) were
 run against this work *before* it merged, and every defect they found is listed
 at the bottom with its fix and the regression test that locks it down.
 
-Test totals: **api 859 (62 files) · sdk 81 · cli 76 · slack 62 · web 165 · Playwright PKCE e2e 8 = 1,251**. All five required integrations shipped.
+Test totals, **re-measured 2026-08-16 by running every suite** (each exits 0): **api 880 (65 files) · web 163 (18) · sdk 82 (7) · cli 76 (6) · slack 64 (4) = 1,265 green**. The previously published `1,251` counted cli and slack as green while 21 of those tests were failing — a stale signing helper, fixed 2026-08-16. All five required integrations shipped.
 
 ---
 
@@ -109,7 +109,7 @@ does *after* bootstrap goes through `/api/v1`.
 | | |
 |---|---|
 | Package | `sdk/` — `@ship/sdk`, in `pnpm-workspace.yaml`, **zero runtime dependencies** |
-| Size | **14.0 KB gzipped** — 5.6% of the 250 KB budget (unminified `tsc` build; receipt `pnpm --filter @ship/sdk size`) |
+| Size | **14.3 KB gzipped** — 5.7% of the 250 KB budget (unminified `tsc` build; receipt `pnpm --filter @ship/sdk size`) |
 | Unit tests | 81 across 7 files, all with an injected fake `fetch` |
 | **Live-server proof** | `api/src/platform/api/v1/sdk-live.test.ts` — 9 tests booting the real app on an ephemeral port with a real OAuth token in Postgres |
 | Typed | the result is annotated `const me: ShipUser`, so a shape regression breaks compilation |
@@ -127,8 +127,20 @@ Measured, not asserted — `docs/week6-perf-regression.md`:
 | P95 `/api/issues` c=10 | 181.7 ms | 72.3 ms | **−60.2%** | PASS |
 | P95 `/api/projects` c=10 | 120.7 ms | 19.5 ms | **−83.8%** | PASS |
 | P95 `/api/auth/me` c=10 | 83.3 ms | 12.2 ms | **−85.4%** | PASS |
-| Main page cold queries | 57 | 32 | **−43.9%** | PASS |
-| api / web / sdk suites | — | 859 / 165 / 81 | — | all green (final count; the MVP-gate snapshot was 660/160/81) |
+| Main page cold queries | 57 | 46 | **−19.3%** | PASS |
+| Document view cold queries | 64 | 54 | **−15.6%** | PASS |
+| Issues list cold queries | 61 | 41 | **−32.8%** | PASS |
+| Week board cold queries | 67 | 48 | **−28.4%** | PASS |
+| Search cold queries | 57 | 53 | **−7.0%** | PASS |
+| api / web / sdk / cli / slack suites | — | 880 / 163 / 82 / 76 / 64 | — | all green, re-measured 2026-08-16 (MVP-gate snapshot was 660/160/81) |
+
+All **five** Part-1 flows are measured as of 2026-08-16, from committed flow
+definitions (`bench/cat4-queries/flows/*.urls`), two independent passes agreeing
+exactly. Until then only the main page was measured and the requirements ledger
+recorded the whole clause as met on that basis — an overclaim on a hard gate,
+caught in review. The main-page figure moved 32 → 46 not because the page got
+slower but because the committed call set was three shell calls out of date;
+replaying the preserved audit-era set still returns exactly 32.
 
 **The performance clause passes. The regression-suite clause does not yet.**
 The full Playwright suite did not run green here: 8 specs failed under

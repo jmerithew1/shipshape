@@ -1,16 +1,18 @@
-# Cold authenticated load of the main page (/my-week).
+# Cold authenticated load of the week board (sprint document, Issues tab).
 # Captured 2026-08-16 by bench/cat4-queries/capture_flows.mjs against a FRESH
-# browser context (cold HTTP + query cache), route /my-week.
+# browser context (cold HTTP + query cache), route /documents/aaaaaaaa-0000-4000-8000-000000000001/issues.
 # Replayed by run_flow.sh for exact query counting. Regenerate, do not hand-edit.
 /api/auth/me
-/api/dashboard/my-week
+/api/auth/session
+/api/auth/session
 /api/accountability/action-items
 /api/agent/findings
-/api/auth/session
 /api/standups/status
 /api/issues
 /api/projects
 /api/programs
 /api/documents?type=wiki
 /api/team/people?includeArchived=true
-/api/auth/session
+/api/documents/aaaaaaaa-0000-4000-8000-000000000001
+/api/team/people
+/api/issues?sprint_id=aaaaaaaa-0000-4000-8000-000000000001

@@ -1,0 +1,19 @@
+{
+  "sha": "1d7d236",
+  "label": "rebaseline",
+  "date": "2026-08-14T20:21:59.125Z",
+  "method": "CDP Network.emulateNetworkConditions (Chrome DevTools 3G presets) against the PRODUCTION build via vite preview; API proxied to the live dev API",
+  "profiles": {
+    "regular-3g": {
+      "latency": 100,
+      "downloadThroughput": 96000,
+      "uploadThroughput": 32000
+    },
+    "slow-3g": {
+      "latency": 400,
+      "downloadThroughput": 51200,
+      "uploadThroughput": 51200
+    }
+  },
+  "runs": {}
+}

@@ -9,7 +9,7 @@
  *
  * Slack is always a spy. No test in this file can reach the internet.
  */
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import type { Express } from 'express';
@@ -22,9 +22,24 @@ const SECRET = 'whsec_test_2f0c6a1b9e';
 
 // ── Harness ─────────────────────────────────────────────────────────────────
 
-/** Signs exactly as Ship's deliverer does: HMAC over `${t}.${rawBody}`. */
+/**
+ * Signs exactly as Ship's deliverer does: HMAC over `${t}.${rawBody}` keyed by
+ * the DERIVED key, `sha256(rawSecret)` — the value Ship stores as
+ * `signing_secret_hash` and signs with (`api/src/platform/webhooks/deliverer.ts`
+ * passes `row.signing_secret_hash` to `signPayload`). The receiver verifies via
+ * the SDK's `verifyWebhook`, which derives the same key from the raw secret
+ * (`sdk/src/webhook.ts`).
+ *
+ * This helper keyed the HMAC with the RAW secret until 2026-08-16, which made
+ * every positive-path assertion in this file fail with 401 while the negative
+ * cases still passed — the failure mode that looks like a broken verifier and is
+ * actually a harness that no longer signs like the thing it claims to imitate.
+ * It drifted when `914afaf` added the derivation to the SDK without updating the
+ * two harnesses that hand-roll a signature.
+ */
 function sign(rawBody: string, secret = SECRET, atSeconds = Math.floor(Date.now() / 1000)): string {
-  const mac = createHmac('sha256', secret)
+  const signingKey = createHash('sha256').update(secret, 'utf8').digest('hex');
+  const mac = createHmac('sha256', signingKey)
     .update(String(atSeconds))
     .update('.')
     .update(rawBody)

@@ -1,0 +1,76 @@
+QUERY COUNT: 64
+TOTAL DB TIME (parse+bind+exec): 73.28 ms
+
+--- all queries, slowest first (total ms | exec ms) ---
+    4.98 |     1.51 | SELECT d.id, d.title, d.workspace_id, d.created_at, d.updated_at, d.visibility, d.created_by, d.properties->>'state' AS state, d.properties->>'priority' AS priority, d.properties->>'assignee_id' AS assignee_id, d.propert
+    4.78 |     0.31 | SELECT d.id, d.title, d.workspace_id, (d.properties->>'sprint_number')::int AS sprint_number, w.sprint_start_date, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id, d.properties->>'owne
+    3.83 |     1.06 | SELECT d.id, d.title, d.properties, prog_da.related_id as program_id, d.archived_at, d.created_at, d.updated_at, d.converted_from_id, (d.properties->>'owner_id')::uuid as owner_id, u.name as owner_name, u.email as owner_
+    3.82 |     0.34 | SELECT d.id, d.title, proj.related_id AS project_id, d.properties->>'status' AS status, NULL::timestamptz AS starts_at, NULL::timestamptz AS ends_at FROM documents d LEFT JOIN document_associations proj ON proj.document_
+    3.54 |     0.34 | SELECT d.id, d.title, d.workspace_id, d.updated_at, d.properties->>'state' AS state, d.properties->>'assignee_id' AS assignee_id, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id FROM d
+    3.43 |     0.16 | SELECT d.id, d.title, d.workspace_id, d.updated_at, d.properties->>'due_date' AS due_date, d.properties->>'assignee_id' AS assignee_id, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id 
+    2.92 |     2.05 | SELECT d.id, d.title, d.properties, d.ticket_number, NULL as content, d.created_at, d.updated_at, d.created_by, d.started_at, d.completed_at, d.cancelled_at, d.reopened_at, d.converted_from_id, u.name as assignee_name, C
+    2.65 |     1.32 | SELECT da.document_id, da.related_id as id, da.relationship_type as type, d.title, d.properties->>'color' as color FROM document_associations da LEFT JOIN documents d ON da.related_id = d.id WHERE da.document_id = ANY($1
+    2.24 |     0.40 | UPDATE agent_findings af SET status = 'resolved', resolved_at = NOW(), updated_at = NOW() WHERE af.workspace_id = $1 AND af.resolved_at IS NULL AND ( (af.detector = 'orphan_intake' AND EXISTS ( SELECT 1 FROM documents d 
+    1.99 |     0.80 | SELECT d.id, d.title, d.properties, d.archived_at, d.created_at, d.updated_at, COALESCE((d.properties->>'owner_id')::uuid, d.created_by) as owner_id, u.name as owner_name, u.email as owner_email, (SELECT COUNT(*) FROM do
+    1.93 |     0.90 | SELECT af.id, af.detector, af.severity, af.status, af.title, af.body, af.evidence, af.proposed_action, af.document_id, af.project_id, af.rule_based_only, af.created_at, d.title AS document_title, d.ticket_number FROM age
+    1.76 |     1.23 | SELECT id, workspace_id, document_type, title, parent_id, position, ticket_number, properties, created_at, updated_at, created_by, visibility FROM documents WHERE workspace_id = $1 AND archived_at IS NULL AND deleted_at 
+    1.68 |     0.15 | SELECT DISTINCT s.id as sprint_id FROM documents i JOIN document_associations da ON da.document_id = i.id AND da.relationship_type = 'sprint' JOIN documents s ON s.id = da.related_id AND s.document_type = 'sprint' WHERE 
+    1.57 |     0.12 | SELECT DISTINCT proj.id as project_id, proj.title as project_title, prog.title as program_name FROM documents s JOIN documents proj ON (s.properties->>'project_id')::uuid = proj.id AND proj.document_type = 'project' LEFT
+    1.53 |     0.15 | SELECT DISTINCT ON (project_id) project_id, project_name FROM ( -- Explicit sprint assignee_ids SELECT (s.properties->>'project_id')::uuid as project_id, proj.title as project_name FROM documents s JOIN documents proj ON
+    1.43 |     0.18 | UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status IN ('pending', 'fail
+    1.32 |     0.12 | UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status IN ('pending', 'fail
+    1.27 |     0.37 | SELECT d.id, d.title, d.workspace_id, d.updated_at, d.properties->>'assignee_id' AS assignee_id, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id FROM documents d LEFT JOIN document_ass
+    1.19 |     0.21 | UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status IN ('pending', 'fail
+    1.07 |     0.10 | SELECT DISTINCT ON (project_id) project_id, project_name FROM ( -- Explicit sprint assignee_ids SELECT (s.properties->>'project_id')::uuid as project_id, proj.title as project_name FROM documents s JOIN documents proj ON
+    1.05 |     0.18 | SELECT d.id, d.properties->>'user_id' as user_id, d.title as name, COALESCE(d.properties->>'email', u.email) as email, CASE WHEN d.archived_at IS NOT NULL THEN true ELSE false END as "isArchived", CASE WHEN d.properties-
+    1.02 |     0.28 | SELECT d.id, d.title, d.workspace_id, d.updated_at, d.properties->>'assignee_id' AS assignee_id, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id FROM documents d LEFT JOIN document_ass
+    0.99 |     0.15 | SELECT d.id, d.title, d.workspace_id, proj.related_id AS project_id, proj_doc.properties->>'owner_id' AS project_owner_id FROM documents d LEFT JOIN document_associations wk ON wk.document_id = d.id AND wk.relationship_t
+    0.98 |     0.06 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.96 |     0.03 | SELECT dh.document_id, dh.field, dh.created_at AS changed_at FROM document_history dh JOIN documents d ON d.id = dh.document_id WHERE d.workspace_id = $1 AND dh.created_at > NOW() - INTERVAL '7 days' ORDER BY dh.created_
+    0.92 |     0.69 | INSERT INTO agent_runs (workspace_id, trigger, mode, path, error, latency_ms, findings_count) VALUES ($1,$2,$3,$4,$5,$6,$7)
+    0.89 |     0.10 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.88 |     0.10 | UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status IN ('pending', 'fail
+    0.88 |     0.12 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.84 |     0.18 | SELECT s.id, s.title, s.properties, da.related_id as project_id FROM documents s LEFT JOIN document_associations da ON da.document_id = s.id AND da.relationship_type = 'project' WHERE s.workspace_id = $1 AND s.document_t
+    0.83 |     0.10 | UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status IN ('pending', 'fail
+    0.78 |     0.14 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.76 |     0.09 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.75 |     0.06 | SELECT sprint_start_date FROM workspaces WHERE id = $1
+    0.72 |     0.11 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.64 |     0.13 | SELECT dedup_key FROM agent_findings WHERE workspace_id = $1 AND resolved_at IS NULL
+    0.61 |     0.06 | SELECT da.related_id as sprint_id, COUNT(*) as count FROM document_associations da JOIN documents d ON d.id = da.document_id WHERE da.related_id = ANY($1) AND da.relationship_type = 'sprint' AND d.document_type = 'issue'
+    0.56 |     0.07 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.55 |     0.07 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.55 |     0.08 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.54 |     0.07 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.52 |     0.08 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.51 |     0.13 | SELECT id, title, content, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_plan' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND ar
+    0.49 |     0.12 | SELECT id, title, content, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_retro' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND a
+    0.48 |     0.06 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.47 |     0.02 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.44 |     0.08 | SELECT id FROM documents WHERE workspace_id = $1 AND document_type = 'person' AND (properties->>'user_id')::uuid = $2
+    0.40 |     0.40 | SELECT id FROM workspaces LIMIT 50
+    0.39 |     0.04 | SELECT id, title FROM documents WHERE workspace_id = $1 AND document_type = 'person' AND (properties->>'user_id') = $2 LIMIT 1
+    0.37 |     0.06 | SELECT w.id, w.name, wm.role FROM workspaces w JOIN workspace_memberships wm ON w.id = wm.workspace_id WHERE wm.user_id = $1 AND w.archived_at IS NULL ORDER BY w.name
+    0.37 |     0.05 | SELECT s.id as sprint_id, (s.properties->>'sprint_number')::int as sprint_number, s.properties->'plan_approval' as plan_approval, s.properties->'review_approval' as review_approval, s.title as sprint_title, da.related_id
+    0.34 |     0.06 | SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+    0.31 |     0.08 | SELECT sprint_start_date FROM workspaces WHERE id = $1
+    0.30 |     0.04 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.28 |     0.03 | SELECT w.id, w.name, wm.role FROM workspaces w LEFT JOIN workspace_memberships wm ON w.id = wm.workspace_id AND wm.user_id = $2 WHERE w.id = $1
+    0.27 |     0.05 | SELECT id, title, properties, created_at, updated_at FROM documents WHERE workspace_id = $1 AND document_type = 'standup' AND (properties->>'author_id') = $2 AND (properties->>'date') = ANY($3) AND deleted_at IS NULL ORD
+    0.27 |     0.04 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.26 |     0.06 | SELECT id, title, properties FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_retro' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND archived_at IS NULL AND deleted_at
+    0.23 |     0.06 | SELECT id, content FROM documents WHERE workspace_id = $1 AND document_type = 'weekly_plan' AND (properties->>'person_id') = $2 AND (properties->>'week_number')::int = $3 AND archived_at IS NULL AND deleted_at IS NULL
+    0.22 |     0.04 | SELECT id, created_at, expires_at, last_activity FROM sessions WHERE id = $1
+    0.21 |     0.05 | SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+    0.21 |     0.03 | SELECT id, email, name, is_super_admin FROM users WHERE id = $1
+    0.16 |     0.02 | SELECT id, created_at, expires_at, last_activity FROM sessions WHERE id = $1
+    0.15 |     0.02 | SELECT sprint_start_date FROM workspaces WHERE id = $1
+
+--- duplicate shapes (N+1 candidates) ---
+  x12  SELECT s.id, s.user_id, s.workspace_id, s.expires_at, s.last_activity, s.created_at, u.is_super_admin FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1
+  x5  UPDATE webhook_deliveries d SET status = 'delivering', updated_at = now() WHERE d.id IN ( SELECT c.id FROM webhook_deliveries c JOIN webhook_subscriptions s ON s.id = c.subscription_id WHERE c.status 
+  x5  SELECT role FROM workspace_memberships WHERE workspace_id = $1 AND user_id = $2
+  x3  SELECT sprint_start_date FROM workspaces WHERE id = $1
+  x2  SELECT DISTINCT ON (project_id) project_id, project_name FROM ( -- Explicit sprint assignee_ids SELECT (s.properties->>'project_id')::uuid as project_id, proj.title as project_name FROM documents s JO
+  x2  SELECT id, created_at, expires_at, last_activity FROM sessions WHERE id = $1
