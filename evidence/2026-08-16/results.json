@@ -1,0 +1,67 @@
+{
+  "results": [
+    [
+      "c1",
+      "OpenAPI 3.1 spec served live, generated from routes",
+      "openapi=3.1.0, 11 paths, 13 operations",
+      "c1_openapi-spec-live.png",
+      "MET"
+    ],
+    [
+      "c2",
+      "Every public failure ships the ApiError envelope",
+      "401 keys=code,message,request_id code=unauthorized",
+      "c2_apierror-envelope.png",
+      "MET"
+    ],
+    [
+      "c3",
+      "Readiness asserts platform tables exist",
+      "{\"status\":\"ready\",\"agent_tables\":true,\"platform_tables\":true,\"commit\":\"c203e22d4a75e1699459bd1f41d9a2418ca4526b\"}",
+      "c3_ready-platform-tables.png",
+      "MET"
+    ],
+    [
+      "c4",
+      "Deployed SPA renders (frontend half is live)",
+      "title=\"Ship - Project Management & Documentation\" painted=true",
+      "c4_spa-renders.png",
+      "MET"
+    ],
+    [
+      "c5",
+      "Device Authorization Grant issues a user code",
+      "status=200 user_code=VFR4-47EY interval=5",
+      "c5_device-code.png",
+      "MET"
+    ],
+    [
+      "c6",
+      "Device polling honors authorization_pending then slow_down",
+      "first=authorization_pending immediate-repoll=slow_down",
+      "c5_device-code.png",
+      "MET"
+    ],
+    [
+      "c7",
+      "Authenticated public responses carry X-RateLimit-* headers",
+      "SKIPPED — no SHIP_CLIENT_SECRET, so no token could be minted. Unauthenticated control: status=401 x-ratelimit=[] (expected empty: per-app/per-token limits, authn precedes the limiter)",
+      "c2_apierror-envelope.png",
+      "SKIPPED"
+    ],
+    [
+      "c8",
+      "Webhook routes live and gated behind auth",
+      "status=401 code=unauthorized",
+      "c1_openapi-spec-live.png",
+      "MET"
+    ]
+  ],
+  "consoleLog": [
+    "error: Failed to load resource: the server responded with a status of 401 ()",
+    "error: Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap' violates the following Content Security Policy directive: \"style-src 'self' 'unsafe-inline'\". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.",
+    "info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+    "log: [Schema] Initialized schema version: 2",
+    "error: Failed to load resource: the server responded with a status of 401 ()"
+  ]
+}
