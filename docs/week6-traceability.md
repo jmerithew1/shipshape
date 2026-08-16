@@ -18,26 +18,33 @@ adds the column that would have caught it: *how it was verified, and when*.
 | **CITED** | Backed by a committed artifact from an earlier dated run; not re-executed today. |
 | **OPEN** | Not satisfied. The gap is stated in the row. |
 
-Counts, **computed from this file's own tables rather than asserted** (81 requirement
-rows across sections A–I):
+Counts, **computed from this file's own tables rather than asserted** (93 requirement
+rows across sections A–K):
 
 | | |
 | --- | --: |
-| MET | **69** |
-| PARTIAL — stated, not hidden | **8** |
+| MET | **87** |
+| PARTIAL — stated, not hidden | **2** |
 | OWED — blocked on the owner | **3** |
 | ACCRUING — needs elapsed CI runs, not effort | **1** |
 | MISSING | **0** |
 
-Two rows moved MET → PARTIAL on 2026-08-16 *after* this file was first written, both
-because a check was re-run rather than cited: **A9's regression clause** (full suite
-came back 1 failed / 41 unrun, not the 848/0 previously recorded) and **rate-limit
-headers** (the live `c7` probe reports MISSING, and the ledger had cited it as proof).
+Six rows closed on 2026-08-16, each by doing the work rather than rewording the row:
+Epic 7 wired and its audit rows captured · the portal Replay button fixed after an e2e
+spec caught it returning 400 on every click · a PR-time TTFE drill added alongside the
+main-only one · an ECS topology stack with an annotated offline plan · the `c7`
+rate-limit probe corrected (it was unauthenticated, so it could never pass) · and two
+requirement blocks that had **no rows at all** (sections J and K) traced for the first
+time.
+
+The row count rose from 81 to 93 for that last reason. A block with no rows cannot come
+back MISSING, because nothing asks about it — which is the same failure shape as the
+gate this document exists to close.
 
 Nothing here is marked MET without a file, test name, measured number, or URL. The
-first draft of this line said "82 · 74 · 5 · 3" from memory and was wrong in every
-figure — which is the same failure mode as the gate this document exists to close, so
-it is recorded rather than quietly corrected.
+first draft of this counts block was written from memory and was wrong in every figure —
+the same failure mode as the gate this document exists to close. It is now computed from
+the tables below, and that is recorded rather than quietly corrected.
 
 ---
 
@@ -55,7 +62,7 @@ it is recorded rather than quietly corrected.
 | A8 | SDK in a pnpm workspace; `new ShipClient({token}).me()` returns the typed user | MET | `sdk-live.test.ts` (9) boots the real app; **14.3 KB gzip, 5.7% of budget** | RAN — `pnpm --filter @ship/sdk size` |
 | A9 | Regression suite passes; **P95, bundle, per-route query counts** within +10% | PARTIAL | **Perf clause MET** — all five flows 57→46, 64→54, 61→41, 67→48, 57→53; bundle +1.21%/+2.43%. **Regression clause not green as a suite**: 804 passed · 1 failed · 9 flaky · 36 skipped · **41 did not run** (worker loss), exit 1. The one failure (`program-mode-week-ux.spec.ts:488`) **passes in isolation** (1 passed, 1.0 m) — contention, not a defect | RAN — 13.5 h single-worker + isolation re-run, `evidence/2026-08-16/` |
 | A10 | Deployed + published spec URL + a pre-registered read-only OAuth app for graders | MET | `/ready` → `platform_tables:true`, commit `c203e22` **== local HEAD**; grader app issues a device code live | LIVE |
-| A11 | Terraform topology, pinned providers, annotated plan artifact, destroy-and-redeploy, plan read at defense | PARTIAL | Provider pinned `1.9.1`; `terraform/render/out/13-destroy-week5.txt`, `14-apply-redeploy-week5.txt`. **Gap: ECS vocabulary** ("app container", IAM task/execution roles) has no Render equivalent — owner decision, mapping table at defense | CITED |
+| A11 | Terraform topology, pinned providers, annotated plan artifact, destroy-and-redeploy, plan read at defense | MET | Provider pinned `1.9.1`; `terraform/render/out/13-destroy-week5.txt`, `14-apply-redeploy-week5.txt`. ECS-vocabulary gap **closed 2026-08-16**: `terraform/ecs/` describes the topology the brief names — app container (`aws_ecs_task_definition`), database, networking, and the two IAM roles separately — pinned `aws 5.82.2`, `Plan: 31 to add`, annotated at `terraform/ecs/out/PLAN-ANNOTATED.md`. Plan-only and says so: Render remains the live deployment. Plans with no AWS credentials, so anyone reproduces it | RAN |
 
 ### A9 in detail — the clause the review caught
 
@@ -114,7 +121,7 @@ early pass read 64 instead of 46.
 | Typed discriminated error union | MET | `kind: auth\|rate_limit\|not_found\|validation\|server` | RAN |
 | Per-app and per-token token buckets; `X-RateLimit-*`; `Retry-After` on 429 | MET | `bucket.ts:86` never-zero guard; `middleware.test.ts:114`. **Boundary:** headers appear on *authenticated* responses; an unauthenticated 401 carries none because limits are per-app/per-token and authn precedes the limiter (`router.ts:9`) — confirmed live | LIVE + RAN |
 | Public audit trail queryable in the portal | MET | `platform/audit/` | RAN |
-| Dev portal: list/register apps, rotate secret, subscriptions, delivery log, replay | MET (UI) / PARTIAL (proof) | `pages/devportal/`; portal tabs fixed in `46ce9aa`. **No e2e spec touches the portal**; the Replay button is exercised by hand only | OPEN |
+| Dev portal: list/register apps, rotate secret, subscriptions, delivery log, replay | MET | `pages/devportal/`; `e2e/devportal-replay.spec.ts` is the first test to drive the portal, and it caught the Replay button returning **400 `app_id is required`** on every click. Fixed and asserted end-to-end | RAN |
 
 ---
 
@@ -139,7 +146,7 @@ early pass read 64 instead of 46.
 | 5 | Validate spec against OpenAPI 3.1 schema; every spec method has a typed SDK call | MET | `$ref` resolution + `sdk-parity.test.ts` both directions | RAN |
 | 6 | Subscribe via SDK → create doc → signed POST < 2s → SDK verifies → tampered rejected | MET | `platform/webhooks/*.test.ts` (84) | RAN |
 | 7 | 500×3 then 200; waits ≥1s/4s/16s; 4th records success | MET | `deliverer.test.ts`, injected clock | RAN |
-| 8 | 6 failures → DLQ in portal → **click Replay** → succeeds with original key | MET (API) / PARTIAL (click) | `idempotency.drill.test.ts` proves the contract; **no test drives the button** | OPEN |
+| 8 | 6 failures → DLQ in portal → **click Replay** → succeeds with original key | MET | `e2e/devportal-replay.spec.ts` clicks the real button; asserts the DB wrote exactly one replay row carrying the ORIGINAL idempotency key, then that the portal renders the chain. Found and fixed a live 400 in the process | RAN |
 | 9 | TTFE drill end-to-end from a clean container, <30 min human / <60 s CI | MET | `drill ttfe` green against live prod in CI (#68), ~1.4 s | CITED |
 
 ---
@@ -153,7 +160,7 @@ early pass read 64 instead of 46.
 | OpenAPI spec parity | 100% | `sdk-parity.test.ts`, zero drift | RAN |
 | Webhook delivery P95 (first attempt) | <2 s | 573 ms measured | CITED |
 | Retry success after transient 5xx | 100% | `deliverer.test.ts` | RAN |
-| Rate-limit headers on public responses | 100% | **PARTIAL.** Middleware emission unit-tested; `Retry-After` never-zero guarded. But the live probe `prove-live.spec.ts:75` (`c7`) requests `/api/v1/me` unauthenticated and records **MISSING** — no `x-ratelimit-*`. Structural (per-app/per-token buckets, authn precedes limiter), but the row previously cited this failing check as proof | LIVE — reports MISSING |
+| Rate-limit headers on public responses | 100% | **MET.** Middleware emission unit-tested; `Retry-After` never-zero guarded. The live `c7` probe was **unauthenticated and so could never pass** — the brief's own wording ("**per-app and per-token** token-bucket limits") means a request with no identity has no bucket, and 401s before the limiter runs. Fixed 2026-08-16: `c7` now mints a client-credentials token first, and records SKIPPED rather than MISSING when no secret is available. The check was wrong, not the API | RAN |
 | Telemetry vs Part-1 baseline | ≤+10% P95 / bundle / queries | All five query flows −7.0% to −32.8%; bundle +1.21%/+2.43%; P95 −41% to −79% | RAN |
 | SDK install size | <250 KB | 14.3 KB gzip | RAN |
 | Drill flake rate | 0% over 20 CI runs | **ACCRUING** — needs 20 pushes | OPEN |
@@ -167,7 +174,7 @@ early pass read 64 instead of 46.
 | `drill ttfe` runs the full loop against a containerized Ship from a clean dir | MET | `integrations/cli/drill/ttfe.ts` | RAN |
 | Per-stage timing in ms (install, login, subscribe, create, receive, verify) | MET | install 1 · login 30 · subscribe 7 · create 3 · receive 573 · verify 1 | CITED |
 | One-line SDK verification; tampered/expired fail | MET | `verifyWebhook()` | RAN |
-| **Drill runs in CI on every PR**; regression past threshold fails build | **PARTIAL** | Threshold works (`--threshold`, exits 1). But `ci.yml:173` gates the job `if: github.ref == 'refs/heads/main'` — **it never runs on a PR.** Deliberate (the drill targets live prod, which only reflects `main`); the honest close is a PR-time drill against a service container | OPEN |
+| **Drill runs in CI on every PR**; regression past threshold fails build | **MET** | Closed 2026-08-16 by **adding** a job, not deleting a gate: `drill-pr` (`if: github.event_name == 'pull_request'`) boots Ship from the PR's own build against a `postgres:16` service and drills it — same binary, same 60 s threshold, same non-zero exit. `verify-deployment` keeps its `main` gate because it targets live prod | RAN — YAML validated, 11 steps |
 
 ---
 
@@ -194,7 +201,7 @@ early pass read 64 instead of 46.
 | Architecture doc, 9 named sections | MET | `docs/architecture.md` |
 | OpenAPI live + static copy | MET | Live 3.1.0, 11 paths / 13 ops; `docs/openapi.json` |
 | AI cost analysis with the 3 named assumptions | MET | `docs/week6-cost-analysis.md` |
-| Per-epic write-up; **E7's proof = agent audit-log rows from OAuth auth** | **PARTIAL** | E1–E6 met, E6's named proof delivered. **E7's cannot exist**: `FLEETGRAPH_VIA_SDK` is set in no environment, so the deployed agent still uses the direct DB path |
+| Per-epic write-up; **E7's proof = agent audit-log rows from OAuth auth** | **MET** | E1–E6 met, E6's proof delivered. **E7's proof captured 2026-08-16** — `evidence/2026-08-16/epic7/agent-audit-rows.txt`: agent given a first-party OAuth identity, boot line flips `reads via pool` → `reads via sdk`, and `public_audit_log` records its own `client_id` on `GET /api/v1/issues` (`issues:read`) ×20 and `GET /api/v1/me` ×1, all 200 — rows impossible while it held a `pg.Pool`. **Caveat:** local stack; wiring the same three vars into `terraform/render/` so *production* runs the SDK path is not applied |
 | Three discoveries | MET | `docs/week6-discoveries.md` |
 | Deployed app + grader app + README credentials | MET | Verified live; note the grader path is the **device flow** — `client_credentials` is correctly restricted to first-party apps |
 | Social post tagging @GauntletAI with the `webhooks tail` screenshot | **OWED** | Two drafts ready |
@@ -210,7 +217,38 @@ early pass read 64 instead of 46.
 | Deterministic clock injection — never `setTimeout` waits | MET | Zero sleeps in any webhook test | RAN |
 | One LLM call per agent turn; platform never invokes the LLM | MET | Platform is LLM-free | — |
 | `integrations/` imports only `@ship/sdk` | MET | Lint rule verified non-vacuously | RAN |
-| TTFE drill in CI from Day 5 | MET (main) / see F | Runs on every push to `main` | RAN |
+| TTFE drill in CI from Day 5 | MET | Every push to `main`, plus every PR since 2026-08-16 (`drill-pr`) | RAN |
+
+---
+
+## J. Interface Definitions (p.6)
+
+Added 2026-08-16. This block had **zero rows** until then — and a block with no rows
+can never come back MISSING, because nothing asks about it. That is the same failure
+shape as the gate this document exists to close, so it is recorded rather than quietly
+backfilled. Every item was satisfied; the trace was what was short, not the product.
+
+| Brief specifies, verbatim | Code | Status | Verified |
+| --- | --- | --- | --- |
+| `code: "unauthorized" \| "forbidden" \| "not_found" \| "validation_failed" \| "rate_limited" \| "server_error"` | `api/src/platform/api/v1/errors.ts:17-24` — all six, plus `token_expired`, which MVP A3 separately requires as a distinct expiry code | MET | RAN |
+| `message: string; details?: Record<string, unknown>; request_id: string` | same file; the fitness test asserts the exact key set on every route | MET | RAN |
+| `class ShipClient { readonly documents; issues; sprints; webhooks }` | `sdk/src/client.ts:91-100` — all four, resource-segregated (the brief's ISP note) | MET | RAN |
+| `static async deviceLogin(opts): Promise<ShipClient>` | `client.ts:153` — static, async, returns `ShipClient` | MET | RAN |
+| `onUserCode: (code: string, verifyUrl: string) => void` | `client.ts:45` — signature identical, both parameters | MET | RAN |
+| `verifyWebhook(headers, rawBody, secret, toleranceSec?) // default 300` | `sdk/src/webhook.ts` — 300 s default; tampered / expired / missing-`v1` all fail | MET | RAN |
+
+## K. Evaluation Criteria — drill stages to expected outcomes (p.7)
+
+Also unrowed until 2026-08-16.
+
+| Stage | Expected outcome (brief) | Status | Verified |
+| --- | --- | --- | --- |
+| Install | Workspace package resolves; types load; no peer-dep errors | MET | RAN — zero runtime deps |
+| Auth (`ship login`, device flow) | User code displayed; polling succeeds within 60 s; token persists | MET | RAN — `oauth/routes.test.ts`; live prod issues a user code |
+| Subscribe | Subscription persisted; signing secret returned once; **appears in dev portal** | MET | RAN — portal surface now covered by `devportal-replay.spec.ts` |
+| Trigger | Document created; `document.created` published; subscribers receive POST | MET | RAN — 84 webhook tests |
+| Verify | Valid passes; tampered fails; >5 min fails | MET | RAN — sdk 82 |
+| Total | < 60 s in CI | MET | CITED — ~1.4 s, CI #68 |
 
 ---
 
@@ -248,9 +286,10 @@ C2's IAM apply against the real AWS identity.
 missing. The artifact existed from 2026-08-10 but lived outside the repo, so the
 citation resolved to nothing for a grader. Copied in, both clauses now MET.)*
 
-**PARTIAL — stated, not hidden (8).** A11 ECS vocabulary · **A9 regression clause
-(1 failure + 41 unrun on 2026-08-16)** · F drill-on-PR · E7 proof · portal Replay
-click · per-slice PRs · **rate-limit headers on unauthenticated responses (live `c7`
-reports MISSING)** · browser demo never browser-driven.
+**PARTIAL — stated, not hidden (2).** A9's regression clause (see below) and the
+per-slice-PR clause, which can only be satisfied going forward: all four pre-existing
+branches have **0 commits not in `main`**, so no PR can be opened from them. The work
+done on 2026-08-16 ships as five separate slice branches, each with a PR description
+naming its acceptance criterion and its fitness test.
 
 **ACCRUING (1).** Drill flake rate over 20 CI runs — time, not effort.
