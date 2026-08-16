@@ -17,18 +17,30 @@ deliverable goes missing on submission day.
 | Demo video, 3–5 min | beat-by-beat script + fallback playbook — [`demo-script-week6.md`](demo-script-week6.md) | record it |
 | Social post (@GauntletAI) | two drafts — [`week6-social-post.md`](week6-social-post.md) | post it, with the `ship webhooks tail` screenshot showing a verified signed event arriving |
 | C2 IAM least-privilege | policy + verification commands drafted — [`week6-iam-least-privilege.md`](week6-iam-least-privilege.md) | apply against the real AWS identity; capture allow-works / deny-fails |
+| Open + merge the six PRs | branches pushed to both remotes; descriptions written — [`week6-pull-requests.md`](week6-pull-requests.md) | open each in the web UI and merge bottom-up |
+
+## Closed on 2026-08-16 — each by doing the work, not rewording the row
+
+| Was open | Now | Evidence |
+| --- | --- | --- |
+| Query counts measured on 1 of 5 flows (**the reviewer's finding**) | All five measured: 57→46, 64→54, 61→41, 67→48, 57→53 | `bench/cat4-queries/`, two passes agreeing exactly |
+| TTFE drill never ran on a PR | New `drill-pr` job boots Ship from the PR's own build and drills it; the `main`-only job keeps its gate because it targets live prod | `.github/workflows/ci.yml` |
+| Epic 7 designed, not wired | Wired: boot line flips `reads via pool` → `reads via sdk`, and the agent's `client_id` appears in `public_audit_log` on scoped calls, all 200 | [`evidence/2026-08-16/epic7/agent-audit-rows.txt`](../evidence/2026-08-16/epic7/agent-audit-rows.txt) |
+| Portal Replay click unproven | First e2e to touch the portal — and it caught the button returning **400 on every click**. Fixed | `e2e/devportal-replay.spec.ts` |
+| Terraform lacked the brief's ECS vocabulary | `terraform/ecs/` — app container, database, networking, both IAM roles; `Plan: 31 to add`, annotated | [`terraform/ecs/out/PLAN-ANNOTATED.md`](../terraform/ecs/out/PLAN-ANNOTATED.md) |
+| `c7` rate-limit check reported MISSING | The probe was unauthenticated and could never pass — per-app/per-token buckets need an identity. Now authenticates first | `e2e/prove-live.spec.ts` |
+| cli + slack not run by CI | Both added. This is why 21 failures hid under a green claim for four days | `.github/workflows/ci.yml` |
+| No per-slice PRs | Six slice branches, each with a PR description naming its criterion and fitness test | [`week6-pull-requests.md`](week6-pull-requests.md) |
 
 ## Known open — stated, not hidden
 
 | Item | Status |
 | --- | --- |
-| TTFE drill on pull requests | Runs on every push to `main`, **not** on PRs (`ci.yml:173`). Closing it properly means a PR-time drill against a containerized Ship, not removing the gate |
-| Epic 7 (agent as platform citizen) | Designed, **not wired** — `FLEETGRAPH_VIA_SDK` is set in no environment, so the deployed agent still uses the direct database path and the brief's named proof (audit-log rows showing OAuth app authentication) does not exist |
-| Portal "Replay" click | The delivery/replay contract is tested; the button is exercised by hand only — no e2e spec touches the dev portal |
-| Playwright full suite | Not green on 2026-08-16: 1 failure (`program-mode-week-ux.spec.ts:488`) + 41 tests lost to worker death. The 6 modifier failures fixed on 08-14 stay fixed |
-| `X-RateLimit-*` on unauthenticated responses | Live check `prove-live.spec.ts` `c7` reports **MISSING**. Headers are emitted for authenticated requests; per-app/per-token buckets mean a pre-auth 401 has no bucket. Close it by authenticating the probe, or by emitting headers pre-auth |
-| Drill flake rate 0% over 20 CI runs | Accruing — needs 20 pushes, not effort |
-| Per-slice PRs | Five branches on the mirror, but work landed as described commits rather than one PR per slice, so no PR carries the acceptance-criterion + fitness-test confirmation |
+| Epic 7 in **production** | Proven on the local stack. Putting the deployed agent on the SDK path needs three variables in `terraform/render/` and an apply; not done, so prod still runs the Week-5 pool path |
+| Drill flake rate 0% over 20 CI runs | Accruing — needs 20 CI runs to exist. Not compressible by effort |
+| C2 IAM least-privilege **apply** | Policy, rationale and allow/deny commands drafted; running them needs the real AWS identity |
+| Browser SDK demo | Built and type-checked, never driven in a real browser — Ship has no rendered consent screen |
+
 
 ---
 
@@ -63,7 +75,8 @@ that one value ties a client-visible failure to its server-side audit row.
 | Architecture document (9 required sections) | [`docs/architecture.md`](architecture.md) |
 | MVP rubric — every hard-gate item with evidence | [`docs/week6-mvp-rubric.md`](week6-mvp-rubric.md) |
 | Requirement → evidence ledger (authoritative status) | [`docs/week6-requirements.md`](week6-requirements.md) |
-| **Requirement traceability — all 81 rows, each with how and when it was verified** | [`docs/week6-traceability.md`](week6-traceability.md) |
+| Per-slice PR descriptions (criterion + fitness test each) | [`docs/week6-pull-requests.md`](week6-pull-requests.md) |
+| **Requirement traceability — all 105 rows, each with how and when it was verified** | [`docs/week6-traceability.md`](week6-traceability.md) |
 | Pre-Search, all three phases | [`PRESEARCH-W6.md`](../PRESEARCH-W6.md) |
 | Pre-Search saved AI conversation (the required reference artifact) | [`docs/presearch-week6-ai-session.md`](presearch-week6-ai-session.md) |
 | Decisions, each with a `Rejected:` clause | [`DECISIONS.md`](../DECISIONS.md) |

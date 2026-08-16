@@ -1,0 +1,648 @@
+npm notice run ship@0.0.0 npx
+npm notice run playwright test --shard=4/4 --workers=1 --reporter=line
+
+[Memory] Total: 31.7GB, Available: 9.3GB
+
+Building API for tests...
+
+> ship@0.0.0 build:api C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/api build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/api@0.0.0 build C:\dev\shipshape\api
+> tsc && node scripts/copy-db-assets.mjs
+
+[copy-db-assets] schema.sql + 48 migrations -> dist/db
+✓ API build complete
+
+Building Web for tests (enables lightweight preview servers)...
+
+> ship@0.0.0 build:web C:\dev\shipshape
+> pnpm run build:shared && pnpm --filter @ship/web build
+
+
+> ship@0.0.0 build:shared C:\dev\shipshape
+> pnpm --filter @ship/shared build
+
+
+> @ship/shared@0.0.0 build C:\dev\shipshape\shared
+> tsc
+
+
+> @ship/web@0.0.0 build C:\dev\shipshape\web
+> tsc && cross-env VITE_API_URL= vite build
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m✓[39m 992 modules transformed.
+rendering chunks...
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/services/upload.ts is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx, C:/dev/shipshape/web/src/components/editor/ImageUpload.tsx, dynamic import will not move module into another chunk.
+[39m
+[33m[plugin vite:reporter] 
+(!) C:/dev/shipshape/web/src/components/editor/FileAttachment.tsx is dynamically imported by C:/dev/shipshape/web/src/components/editor/SlashCommands.tsx but also statically imported by C:/dev/shipshape/web/src/components/Editor.tsx, dynamic import will not move module into another chunk.
+[39m
+computing gzip size...
+[2mdist/[22m[32mindex.html                                      [39m[1m[2m  4.62 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+[2mdist/[22m[35massets/PropertyRow-BHH8rdGj.css                 [39m[1m[2m  1.41 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[2mdist/[22m[35massets/index-dh9xpZHs.css                       [39m[1m[2m 67.65 kB[22m[1m[22m[2m │ gzip:  13.11 kB[22m
+[2mdist/[22m[36massets/WeekStandupsTab-D_8-THNN.js              [39m[1m[2m  0.20 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
+[2mdist/[22m[36massets/arrow_drop_down-HVNFDeuO.js              [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/arrow_drop_up-mIl70Tyz.js                [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/remove-DEbZ6HGh.js                       [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/drag_handle-BdVTBwtn.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_rewind-BWs8GGxs.js                  [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/fast_forward-CD42DXLI.js                 [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/add-DgX1JCzH.js                          [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/file_download-DdEwT8EH.js                [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/home-B_b62FoP.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/flag-uvBf-jHq.js                         [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/file_upload-BdRy4-UN.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/send-D-amHORC.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/menu-CHTCcyUs.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/filter_list-BoZmj4kh.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/format_quote-jbW-uJQE.js                 [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/format_size-C_T0x8eD.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/near_me-Hw4FYHWf.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/warning-CTTT7Ikx.js                      [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2mdist/[22m[36massets/expand_more-Cnjzllt3.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/text_fields-CCybwO5p.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/expand_less-DC8fCbY-.js                  [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_before-CBgAFLRU.js              [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/navigate_next-D6DhJHMC.js                [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/check-r9feVqoy.js                        [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/park-6YxrQIih.js                         [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_upward-BynEgwti.js                 [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_forward-BJVxqi-r.js                [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_back-Phbsxpm0.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/arrow_downward-DYcR2sDG.js               [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/bookmark-Cine3fvV.js                     [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/first_page-Dr-XSaAq.js                   [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/last_page-Cq5c_gDp.js                    [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/priority_high-Dl809KxB.js                [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/shield-BXzdirjH.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/school-Be5b-zH5.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/store-DzoxMFgu.js                        [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/account_balance-C1gye20j.js              [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/trending_down-ChWnoqQE.js                [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/trending_up-BZckwBDM.js                  [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/delete-Bhtqu_fp.js                       [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/code-CAcOzaI4.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/list-B5xQOLZq.js                         [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/remove_circle-hg7utHja.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/statusColors-CQb8KAr2.js                 [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2mdist/[22m[36massets/navigate_far_before-C7kwX5el.js          [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/folder-BoEZMxuF.js                       [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_parking-BG6gmFRn.js                [39m[1m[2m  0.29 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/check_box_outline_blank-TvJTs9li.js      [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/star-ChonzwAR.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/navigate_far_next-DkxhCRJf.js            [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/error-CWPthUJE.js                        [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/info-CmIW1Jxe.js                         [39m[1m[2m  0.30 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/add_circle-BZ1c63_L.js                   [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/announcement-McqbrGkC.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/local_pharmacy-DUdf2kcY.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/chevron_left-B5xJpPa8.js                 [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/close-CJwhkv57.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/chevron_right-BFHK7-gz.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/login-C5gOj0E6.js                        [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/unfold_more-CfytoPsn.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/folder_open-D3zAfjOA.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hospital-BqIkUbIt.js                     [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/verified_user-BWFtWtP5.js                [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail-DGmHLULD.js                         [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/unfold_less-BGZ8Vneq.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/calendar_today-DM4UmJXb.js               [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/logout-gPXlODTL.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/person-BqDJGNOg.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/chat-7I4As458.js                         [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/comment-Ds1cRs90.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hotel-DwpM3xHa.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/check_circle-CTPLQylL.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/image-CulV63M8.js                        [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_cafe-BlQXSmWp.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/save_alt-B0ay32tO.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/flight-AXdpWfi8.js                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/location_on-W9nSeJSK.js                  [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/assessment-DRfHBcjc.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/clothes-obs4JLMV.js                      [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/mail_outline-f7Ng5i5T.js                 [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/security-nQQJgQAg.js                     [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/sort_arrow-CaHoCAx7.js                   [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/local_hospital-DMgap8mu.js               [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/grid_view-CgiszwpP.js                    [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/credit_card-Ddd_4gY1.js                  [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/topic-DAb2_9O5.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/camping-DwDlMrw-.js                      [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/backpack-IsXxUZ-A.js                     [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/content_copy-DtCaTb3X.js                 [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/label-CMMbgKQ0.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/launch-eQhsZ_4E.js                       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/forum-DlN_1LVI.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/radio_button_unchecked-B69J1Xvv.js       [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/event-Dlskbv6g.js                        [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/toggle_on-BNiJLM6i.js                    [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/edit-0xVQvdqw.js                         [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/hourglass_empty-Bs7IplZ3.js              [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/toggle_off-DOWUqp4P.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/restaurant-DAVZm8dw.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/spellcheck-8mDY6Tgu.js                   [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/star_half-BPZB1sfU.js                    [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/filter_alt-CtCeImWu.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/print-2wjDZAvX.js                        [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/undo-Bf4I8qZJ.js                         [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/more_vert-KZPEZGFs.js                    [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/local_police-Cs44ph0a.js                 [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/location_city-CT2BTe79.js                [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/more_horiz-rIlv_l8G.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/report-CToTlRzF.js                       [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/accessibility_new-2_9wcfLm.js            [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/cloud-DEyK6KmR.js                        [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/work-CGfLbhcc.js                         [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/science-C2iuLo6j.js                      [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/push_pin-C1cDLiAb.js                     [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/notifications-4ROxefkl.js                [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/add_circle_outline-D_IQrT1E.js           [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/lightbulb-BtYEI1VB.js                    [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/upload_file-DARvbIRt.js                  [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/wifi-B-LccDhE.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/deck-CRHWAhiV.js                         [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/device_thermostat-D9ds-dRX.js            [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/medical_services-CtMS_o7F.js             [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/favorite-CvKEN40e.js                     [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/cancel-DjmNQuz5.js                       [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/error_outline-chFlUWLq.js                [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/timer-DHR9XhkY.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/build-xhPytrp3.js                        [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/check_circle_outline-BqN3gON7.js         [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/local_library-Bja4tA6A.js                [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/map-DqotMf3p.js                          [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/star_outline-C4fUcNiH.js                 [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/x-eUfb2cHv.js                            [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/tornado-BudLmZLE.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/directions-Au34SIwP.js                   [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/military_tech-D8_tJPDy.js                [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/search-BfrOFeDG.js                       [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/contact_page-FffUUGDS.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/rss_feed-Bkwsac_E.js                     [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/history-BWqa5Eod.js                      [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/photo_camera-DM1Y0_bY.js                 [39m[1m[2m  0.40 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/notifications_none-Ckkp4yBT.js           [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/zoom_out_map-D6cqgz7b.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/attach_file-txXckhnC.js                  [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/info_outline-L6tsmkvz.js                 [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/zoom_out-D4EFr-wN.js                     [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/directions_walk-BZcCWjks.js              [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/visibility-DrqphPDL.js                   [39m[1m[2m  0.41 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/link-CGVlLRgk.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/eco-Bc_TE6LC.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/ProjectIssuesTab-B7yC8VHG.js             [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/api-V00hMNUq.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[36massets/schedule-6ykn7Yz_.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/loop-znwFc4Wb.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/lock-Cat4m7r9.js                         [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/keyboard-CX0v0PAJ.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/facebook-zKgN81l6.js                     [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/rain-5G_n6muO.js                         [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/alarm-CuOhoako.js                        [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_open-CtWLHOK-.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/account_circle-CUsvABGa.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/autorenew-D41IbE9J.js                    [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/highlight_off-CVJ1S_cr.js                [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/do_not_disturb-Bgjo7Ltw.js               [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/phone-BPpLl4Qt.js                        [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/verified-D4jKgAnd.js                     [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/local_offer-OmZZkrxc.js                  [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/checkroom-C7r_ailD.js                    [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/help_outline-U_5alNn7.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/severe_weather-bzbvx40v.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/emoji_events-BEdAYJHf.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/file_present-Co63CSbw.js                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/thumb_down_alt-BU7Dl9z5.js               [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/account_box-B3pmrouV.js                  [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/thumb_up_alt-DerxXXCj.js                 [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/zoom_in-BqwmaDDJ.js                      [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/identification-DhnxzcbP.js               [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/shopping_basket-2mVSlas_.js              [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/help-CW5ls_NZ.js                         [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/my_location-QjJCMWcV.js                  [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/translate-Dhxw0EFz.js                    [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/people-DncbrfWt.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/update-7nosyWQv.js                       [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/closed_caption-BjNB5Hin.js               [39m[1m[2m  0.48 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/sentiment_neutral-rAoAE8eK.js            [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[36massets/lock_outline-B6hhO_D3.js                 [39m[1m[2m  0.49 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/public-CMnMg48j.js                       [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/safety_divider-Bmq7wOZs.js               [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/local_grocery_store-CZL-6wCG.js          [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/accessible_forward-DLLfLH6l.js           [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/group_add-DPAUwY3c.js                    [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/hurricane-BN6AaP3S.js                    [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/link_off-BeSMh4T9.js                     [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_laundry_service-BAn3K2J7.js        [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/social_distance-ClMmhBwP.js              [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/directions_bus-VVvXT4oN.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/volume_off-X3uhIskJ.js                   [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/directions_car-CrEoXR11.js               [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/lightbulb_outline-D9WgzbEF.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/notifications_off-CWuxLPT3.js            [39m[1m[2m  0.53 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_gas_station-DlQkPlwM.js            [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/local_taxi-DNkuqsvm.js                   [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/alternate_email-CV0abM4e.js              [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/flickr-Bo9yBI_x.js                       [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/favorite_border-BFiJfqmF.js              [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/fax-BK5rgUDE.js                          [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/sanitizer-D0rUbfOx.js                    [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/campaign-C1XorLs4.js                     [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/attach_money-CqaMMkrB.js                 [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_very_dissatisfied-CGxZMsBb.js  [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/electrical_services-BfPDf2ta.js          [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/share-BgtWBYNr.js                        [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/bedding-DVipDxWn.js                      [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+[2mdist/[22m[36massets/bug_report-88VHEfqa.js                   [39m[1m[2m  0.56 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/ProgramIssuesTab-iaK4RL2x.js             [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/youtube-DNSht_ch.js                      [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/notifications_active-Dvme-6L9.js         [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied-CAp04Nyu.js          [39m[1m[2m  0.58 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/connect_without_contact-mV2RPinY.js      [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/sentiment_dissatisfied-DzwR6nxs.js       [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[36massets/local_fire_department-BSRVp49H.js        [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/clean_hands-Camj5idT.js                  [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/construction-BLD26QbF.js                 [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/bathtub-OpNLsd2Q.js                      [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/construction_worker-CQFRjYxT.js          [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/support_agent-D0k6H5rq.js                [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/support-wiypqTZ7.js                      [39m[1m[2m  0.64 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/sentiment_satisfied_alt-BTCzQ1-o.js      [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/wash-C5wZbHUo.js                         [39m[1m[2m  0.66 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/linkedin-C1ON9p4g.js                     [39m[1m[2m  0.67 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/directions_bike-DuRrfEmI.js              [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/insights-CF773tYo.js                     [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/github-Crqf1KnE.js                       [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/visibility_off-BGiEMayU.js               [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/hearing-CRA1CFkX.js                      [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/groups-CEQLamN4.js                       [39m[1m[2m  0.70 kB[22m[1m[22m[2m │ gzip:   0.43 kB[22m
+[2mdist/[22m[36massets/twitter-CmKss-yG.js                      [39m[1m[2m  0.72 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/snow-allbJEoV.js                         [39m[1m[2m  0.74 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/pets-BT19Jb_F.js                         [39m[1m[2m  0.76 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/do_not_touch-B8rem3kC.js                 [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/flooding-CIa5ERVN.js                     [39m[1m[2m  0.81 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[36massets/masks-D9FTmR9t.js                        [39m[1m[2m  0.82 kB[22m[1m[22m[2m │ gzip:   0.51 kB[22m
+[2mdist/[22m[36massets/soap-BSk75tvj.js                         [39m[1m[2m  0.83 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/settings-DgbESV0h.js                     [39m[1m[2m  0.89 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
+[2mdist/[22m[36massets/reduce_capacity-BoPAbttF.js              [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/language-oi_BR4SI.js                     [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/WeekIssuesTab-t6xShfqg.js                [39m[1m[2m  1.32 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[2mdist/[22m[36massets/coronavirus-COlOJ77r.js                  [39m[1m[2m  1.62 kB[22m[1m[22m[2m │ gzip:   0.65 kB[22m
+[2mdist/[22m[36massets/instagram-4rJo0E1l.js                    [39m[1m[2m  1.67 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
+[2mdist/[22m[36massets/fingerprint-C1gEwuvm.js                  [39m[1m[2m  1.80 kB[22m[1m[22m[2m │ gzip:   0.94 kB[22m
+[2mdist/[22m[36massets/ProgramOverviewTab-JjLIPuAJ.js           [39m[1m[2m  1.82 kB[22m[1m[22m[2m │ gzip:   0.88 kB[22m
+[2mdist/[22m[36massets/WeekOverviewTab-B8IK1ah8.js              [39m[1m[2m  1.98 kB[22m[1m[22m[2m │ gzip:   0.97 kB[22m
+[2mdist/[22m[36massets/WeekPlanningTab-oea2-io0.js              [39m[1m[2m  2.99 kB[22m[1m[22m[2m │ gzip:   1.49 kB[22m
+[2mdist/[22m[36massets/ProjectDetailsTab-Cf83Cf_f.js            [39m[1m[2m  3.69 kB[22m[1m[22m[2m │ gzip:   1.53 kB[22m
+[2mdist/[22m[36massets/ProgramProjectsTab-N8tJICCv.js           [39m[1m[2m  4.40 kB[22m[1m[22m[2m │ gzip:   1.55 kB[22m
+[2mdist/[22m[36massets/PersonEditor-C514u6G0.js                 [39m[1m[2m  5.50 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
+[2mdist/[22m[36massets/ProjectWeeksTab-YTin2a_W.js              [39m[1m[2m  6.65 kB[22m[1m[22m[2m │ gzip:   2.31 kB[22m
+[2mdist/[22m[36massets/ProjectRetroTab-BYDeEOA0.js              [39m[1m[2m  9.08 kB[22m[1m[22m[2m │ gzip:   2.42 kB[22m
+[2mdist/[22m[36massets/StandupFeed-CDPzZj-k.js                  [39m[1m[2m  9.69 kB[22m[1m[22m[2m │ gzip:   2.91 kB[22m
+[2mdist/[22m[36massets/WeekReviewTab-CwFyLrvk.js                [39m[1m[2m 12.68 kB[22m[1m[22m[2m │ gzip:   3.69 kB[22m
+[2mdist/[22m[36massets/ProgramWeeksTab-BpInwLGX.js              [39m[1m[2m 16.83 kB[22m[1m[22m[2m │ gzip:   5.56 kB[22m
+[2mdist/[22m[36massets/UnifiedDocumentPage-B8OXGasE.js          [39m[1m[2m136.49 kB[22m[1m[22m[2m │ gzip:  36.39 kB[22m
+[2mdist/[22m[36massets/emoji-picker-react.esm-BG5lA7kT.js       [39m[1m[2m271.11 kB[22m[1m[22m[2m │ gzip:  64.10 kB[22m
+[2mdist/[22m[36massets/PropertyRow-DDYTJw1S.js                  [39m[1m[33m836.84 kB[39m[22m[2m │ gzip: 261.99 kB[22m
+[2mdist/[22m[36massets/index-mr73hY3O.js                        [39m[1m[33m863.55 kB[39m[22m[2m │ gzip: 235.48 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 8.45s[39m
+✓ Web build complete
+
+✓ Global setup complete. Starting tests...
+
+
+Running 223 tests using 1 worker, shard 4 of 4
+
+[1A[2K
+
+[1A[2K[1/223] [chromium] › e2e\axe-scan.spec.ts:92:7 › axe-core: three most important pages › login page has no Critical/Serious violations
+[1A[2K[2/223] [chromium] › e2e\axe-scan.spec.ts:101:7 › axe-core: three most important pages › document list has no Critical/Serious violations
+[1A[2K[3/223] [chromium] › e2e\axe-scan.spec.ts:112:7 › axe-core: three most important pages › main page (my-week) has no Critical/Serious violations
+[1A[2K
+
+[1A[2K[4/223] [chromium] › e2e\collab-convergence.spec.ts:110:7 › concurrent two-user editing › edits at different positions converge on both editors
+[1A[2K[5/223] [chromium] › e2e\collab-convergence.spec.ts:182:7 › concurrent two-user editing › same-position concurrent edits lose no characters
+[1A[2K
+
+[1A[2K[6/223] [chromium] › e2e\keyboard-traversal.spec.ts:135:7 › real keyboard traversal › login form is fully reachable with real Tab keys
+[1A[2K[7/223] [chromium] › e2e\keyboard-traversal.spec.ts:160:7 › real keyboard traversal › Enter submits the login form from the keyboard alone
+[1A[2K[8/223] [chromium] › e2e\keyboard-traversal.spec.ts:173:7 › real keyboard traversal › document list has no keyboard trap in 100 real Tab presses
+[1A[2K[9/223] [chromium] › e2e\keyboard-traversal.spec.ts:198:7 › real keyboard traversal › editor is reachable from the keyboard on a document page
+[1A[2K
+
+[1A[2K[10/223] [chromium] › e2e\network-3g.spec.ts:153:9 › 3G throttled-network behaviour › cold login page renders under regular-3g
+[1A[2K[11/223] [chromium] › e2e\network-3g.spec.ts:180:9 › 3G throttled-network behaviour › authenticated docs → editor flow completes under regular-3g
+[1A[2K[12/223] [chromium] › e2e\network-3g.spec.ts:153:9 › 3G throttled-network behaviour › cold login page renders under slow-3g
+[1A[2K[13/223] [chromium] › e2e\network-3g.spec.ts:180:9 › 3G throttled-network behaviour › authenticated docs → editor flow completes under slow-3g
+[1A[2K[14/223] [chromium] › e2e\prove-live.spec.ts:18:5 › live verification walk
+[1A[2K[chromium] › e2e\prove-live.spec.ts:18:5 › live verification walk
+c1 MET | openapi=3.1.0, 11 paths, 13 operations
+
+[1A[2Kc2 MET | 401 keys=code,message,request_id code=unauthorized
+
+[1A[2Kc3 MET | {"status":"ready","agent_tables":true,"platform_tables":true,"commit":"c203e22d4a75e1699459bd1f41d9a2418ca4526b"}
+
+[1A[2Kc4 MET | title="Ship - Project Management & Documentation" painted=true
+
+[1A[2Kc5 MET | status=200 user_code=MDVR-G255 interval=5
+
+[1A[2Kc6 MET | first=authorization_pending immediate-repoll=slow_down
+
+[1A[2Kc7 SKIPPED | SKIPPED — no SHIP_CLIENT_SECRET, so no token could be minted. Unauthenticated control: status=401 x-ratelimit=[] (expected empty: per-app/per-token limits, authn precedes the limiter)
+
+[1A[2Kc8 MET | status=401 code=unauthorized
+
+[1A[2KCONSOLE: error: Failed to load resource: the server responded with a status of 401 () || error: Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. || info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold || log: [Schema] Initialized schema version: 2 || error: Failed to load resource: the server responded with a status of 401 ()
+
+[1A[2K[15/223] [chromium] › e2e\security.spec.ts:197:7 › Security - XSS Prevention › XSS via markdown link injection
+[1A[2K[16/223] [chromium] › e2e\security.spec.ts:217:7 › Security - XSS Prevention › XSS via data: URI in links
+[1A[2K[17/223] [chromium] › e2e\security.spec.ts:251:7 › Security - File Upload Validation › file upload validates content type
+[1A[2K[18/223] [chromium] › e2e\security.spec.ts:303:7 › Security - File Upload Validation › file upload rejects executable files
+[1A[2K[19/223] [chromium] › e2e\security.spec.ts:344:7 › Security - File Upload Validation › no directory traversal in file paths
+[1A[2K[20/223] [chromium] › e2e\security.spec.ts:385:7 › Security - CSRF Protection › CSRF tokens are validated on state-changing requests
+[1A[2K[21/223] [chromium] › e2e\security.spec.ts:410:7 › Security - CSRF Protection › CSRF tokens prevent cross-origin requests
+[1A[2K[22/223] [chromium] › e2e\security.spec.ts:439:7 › Security - Authentication and Authorization › authenticated routes require auth
+[1A[2K[23/223] [chromium] › e2e\security.spec.ts:457:7 › Security - Authentication and Authorization › API routes require authentication
+[1A[2K[24/223] [chromium] › e2e\security.spec.ts:472:7 › Security - Authentication and Authorization › users cannot access other workspaces
+[1A[2K[25/223] [chromium] › e2e\security.spec.ts:487:7 › Security - Authentication and Authorization › file URLs are workspace-scoped
+[1A[2K[26/223] [chromium] › e2e\security.spec.ts:504:7 › Security - Session Management › session expires after inactivity
+[1A[2K[27/223] [chromium] › e2e\security.spec.ts:524:7 › Security - Session Management › logout clears session completely
+[1A[2K[28/223] [chromium] › e2e\session-timeout.spec.ts:29:7 › Session Timeout Warning › shows warning modal when 60 seconds remain before timeout
+[1A[2K[29/223] [chromium] › e2e\session-timeout.spec.ts:45:7 › Session Timeout Warning › warning modal displays correct title text
+[1A[2K[30/223] [chromium] › e2e\session-timeout.spec.ts:58:7 › Session Timeout Warning › warning modal displays explanatory message about inactivity
+[1A[2K[31/223] [chromium] › e2e\session-timeout.spec.ts:71:7 › Session Timeout Warning › displays countdown timer in warning modal
+[1A[2K[32/223] [chromium] › e2e\session-timeout.spec.ts:86:7 › Session Timeout Warning › countdown timer format is MM:SS or M:SS
+[1A[2K[33/223] [chromium] › e2e\session-timeout.spec.ts:101:7 › Session Timeout Warning › countdown timer updates every second
+[1A[2K[34/223] [chromium] › e2e\session-timeout.spec.ts:122:7 › Session Timeout Warning › modal has "Stay Logged In" button
+[1A[2K[35/223] [chromium] › e2e\session-timeout.spec.ts:136:7 › Session Timeout Warning › clicking "Stay Logged In" dismisses modal and resets timer
+[1A[2K[36/223] [chromium] › e2e\session-timeout.spec.ts:155:7 › Session Timeout Warning › any user activity (mouse move) dismisses modal and resets timer
+[1A[2K[37/223] [chromium] › e2e\session-timeout.spec.ts:171:7 › Session Timeout Warning › any user activity (keypress) dismisses modal and resets timer
+[1A[2K[38/223] [chromium] › e2e\session-timeout.spec.ts:187:7 › Session Timeout Warning › any user activity (scroll) dismisses modal and resets timer
+[1A[2K[39/223] [chromium] › e2e\session-timeout.spec.ts:205:7 › Session Timeout Warning › logs user out when countdown reaches zero
+[1A[2K[40/223] [chromium] › e2e\session-timeout.spec.ts:225:7 › Session Timeout Warning › shows session expired message after forced logout
+[1A[2K[41/223] [chromium] › e2e\session-timeout.spec.ts:242:7 › Session Timeout Warning › session expired message mentions inactivity as reason
+[1A[2K[42/223] [chromium] › e2e\session-timeout.spec.ts:253:7 › Timer Reset Behavior › rapid clicks on Stay Logged In do not cause duplicate API calls
+[1A[2K[43/223] [chromium] › e2e\session-timeout.spec.ts:297:7 › Timer Reset Behavior › timer survives page navigation within app
+[1A[2K[44/223] [chromium] › e2e\session-timeout.spec.ts:317:7 › Timer Reset Behavior › timer resets on page refresh
+[1A[2K[45/223] [chromium] › e2e\session-timeout.spec.ts:343:7 › 12-Hour Absolute Timeout › shows 5-minute warning before absolute session timeout
+[1A[2K[46/223] [chromium] › e2e\session-timeout.spec.ts:357:7 › 12-Hour Absolute Timeout › absolute timeout warning has different message than inactivity warning
+[1A[2K[47/223] [chromium] › e2e\session-timeout.spec.ts:375:7 › 12-Hour Absolute Timeout › absolute timeout warning says session WILL end, not can be extended
+[1A[2K[48/223] [chromium] › e2e\session-timeout.spec.ts:393:7 › 12-Hour Absolute Timeout › clicking I Understand on absolute warning does NOT extend session
+[1A[2K[49/223] [chromium] › e2e\session-timeout.spec.ts:417:7 › 12-Hour Absolute Timeout › logs user out at 12-hour mark regardless of activity
+[1A[2K[50/223] [chromium] › e2e\session-timeout.spec.ts:446:7 › 12-Hour Absolute Timeout › absolute timeout takes precedence if it occurs before inactivity timeout
+[1A[2K[51/223] [chromium] › e2e\session-timeout.spec.ts:465:7 › 401 Error Handling › shows "session expired" message on login page after timeout
+[1A[2K[52/223] [chromium] › e2e\session-timeout.spec.ts:473:7 › 401 Error Handling › returns user to original page after re-login
+[1A[2K[53/223] [chromium] › e2e\session-timeout.spec.ts:487:7 › 401 Error Handling › returnTo only works for same-origin URLs (security)
+[1A[2K[54/223] [chromium] › e2e\session-timeout.spec.ts:505:7 › 401 Error Handling › API calls without valid session return 401
+[1A[2K[55/223] [chromium] › e2e\session-timeout.spec.ts:515:7 › Activity Tracking › mouse activity resets inactivity timer
+[1A[2K[56/223] [chromium] › e2e\session-timeout.spec.ts:535:7 › Activity Tracking › keyboard activity resets inactivity timer
+[1A[2K[57/223] [chromium] › e2e\session-timeout.spec.ts:555:7 › Activity Tracking › editor typing resets inactivity timer
+[1A[2K[58/223] [chromium] › e2e\session-timeout.spec.ts:582:7 › Activity Tracking › scroll activity resets inactivity timer
+[1A[2K[59/223] [chromium] › e2e\session-timeout.spec.ts:604:7 › Activity Tracking › throttled activity still resets timer (activity within throttle window is ignored but initial activity counts)
+[1A[2K[60/223] [chromium] › e2e\session-timeout.spec.ts:629:7 › Extend Session API › Stay Logged In calls extend session endpoint
+[1A[2K[61/223] [chromium] › e2e\session-timeout.spec.ts:673:7 › Accessibility › warning modal has role="alertdialog"
+[1A[2K[62/223] [chromium] › e2e\session-timeout.spec.ts:687:7 › Accessibility › warning modal has aria-modal="true"
+[1A[2K[63/223] [chromium] › e2e\session-timeout.spec.ts:700:7 › Accessibility › warning modal has descriptive aria-labelledby
+[1A[2K[64/223] [chromium] › e2e\session-timeout.spec.ts:718:7 › Accessibility › warning modal has aria-describedby for description
+[1A[2K[65/223] [chromium] › e2e\session-timeout.spec.ts:736:7 › Accessibility › focus moves to modal when it appears
+[1A[2K[66/223] [chromium] › e2e\session-timeout.spec.ts:759:7 › Accessibility › focus moves to Stay Logged In button specifically
+[1A[2K[67/223] [chromium] › e2e\session-timeout.spec.ts:778:7 › Accessibility › focus is trapped within modal
+[1A[2K[68/223] [chromium] › e2e\session-timeout.spec.ts:810:7 › Accessibility › focus returns to previous element after modal closes
+[1A[2K[69/223] [chromium] › e2e\session-timeout.spec.ts:843:7 › Accessibility › countdown is announced to screen readers at key intervals
+[1A[2K[70/223] [chromium] › e2e\session-timeout.spec.ts:865:7 › Accessibility › modal backdrop blocks interaction with page behind
+[1A[2K[71/223] [chromium] › e2e\session-timeout.spec.ts:882:7 › Accessibility › Escape key triggers Stay Logged In behavior
+[1A[2K[72/223] [chromium] › e2e\session-timeout.spec.ts:909:7 › Accessibility › Enter key on Stay Logged In button works
+[1A[2K[73/223] [chromium] › e2e\session-timeout.spec.ts:941:7 › Edge Cases › handles computer sleep/wake gracefully
+[1A[2K[74/223] [chromium] › e2e\session-timeout.spec.ts:956:7 › Edge Cases › warning does not appear if user is already on login page
+[1A[2K[75/223] [chromium] › e2e\session-timeout.spec.ts:970:7 › Edge Cases › warning does not appear during initial login flow
+[1A[2K[76/223] [chromium] › e2e\session-timeout.spec.ts:988:7 › Edge Cases › race condition: user clicks Stay Logged In as timer expires
+[1A[2K[77/223] [chromium] › e2e\session-timeout.spec.ts:1028:7 › Edge Cases › modal renders on top of other UI elements (z-index)
+[1A[2K[78/223] [chromium] › e2e\session-timeout.spec.ts:1054:7 › Edge Cases › modal does not conflict with command palette
+[1A[2K[79/223] [chromium] › e2e\session-timeout.spec.ts:1078:7 › Session Info API › GET /api/auth/session returns session metadata
+[1A[2K[80/223] [chromium] › e2e\session-timeout.spec.ts:1099:7 › Session Info API › GET /api/auth/session returns 401 when not authenticated
+[1A[2K[81/223] [chromium] › e2e\session-timeout.spec.ts:1107:7 › Session Info API › session info expiresAt is accurate
+[1A[2K[82/223] [chromium] › e2e\session-timeout.spec.ts:1133:7 › Visual Verification › warning modal is visually centered on screen
+[1A[2K[83/223] [chromium] › e2e\session-timeout.spec.ts:1157:7 › Visual Verification › warning modal has visible backdrop
+[1A[2K[84/223] [chromium] › e2e\session-timeout.spec.ts:1174:7 › Visual Verification › countdown timer is prominently displayed
+[1A[2K[85/223] [chromium] › e2e\session-timeout.spec.ts:1196:7 › Visual Verification › Stay Logged In button has clear visual affordance
+[1A[2K[86/223] [chromium] › e2e\spike-isolated.spec.ts:15:7 › Isolated Environment Spike › login page shows with seeded database (proves isolation + seeding)
+[1A[2K[87/223] [chromium] › e2e\spike-isolated.spec.ts:28:7 › Isolated Environment Spike › API health endpoint responds (proves API + DB work)
+[1A[2K[88/223] [chromium] › e2e\spike-isolated.spec.ts:38:7 › Isolated Environment Spike › API routes work through Vite proxy
+[1A[2K[89/223] [chromium] › e2e\spike-isolated.spec.ts:47:7 › Isolated Environment Spike › can login with seeded credentials
+[1A[2K[chromium] › e2e\spike-isolated.spec.ts:47:7 › Isolated Environment Spike › can login with seeded credentials
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdbd-720b-af88-a0c5ee11e411; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdc4-74ee-936e-ab5adcd1161e; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdca-74fb-bfbd-d0c5931022c0; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdca-74fb-bfbd-d4aa87d6895b; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdcb-709d-bf04-48d998f34d58; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdd4-7178-bd53-34902377978c; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fde6-745a-86c8-b16351c65cce; trace=01a00bc5-fd9e-74e9-9f4c-3cfbfdc563bf,id=01a00bc5-fdec-765f-bc41-6c4ff8ca3225
+
+[1A[2K[90/223] [chromium] › e2e\status-colors-accessibility.spec.ts:21:9 › Status Colors Accessibility › Issues List View › status badges use accessible color classes
+[1A[2K[91/223] [chromium] › e2e\status-colors-accessibility.spec.ts:32:9 › Status Colors Accessibility › Issues List View › priority indicators use accessible color classes
+[1A[2K[92/223] [chromium] › e2e\status-colors-accessibility.spec.ts:45:9 › Status Colors Accessibility › Program View › issue status badges use accessible colors
+[1A[2K[93/223] [chromium] › e2e\status-colors-accessibility.spec.ts:64:9 › Status Colors Accessibility › Program View › sprint status badges use accessible colors
+[1A[2K[94/223] [chromium] › e2e\status-colors-accessibility.spec.ts:82:9 › Status Colors Accessibility › Week View › sprint status uses accessible colors
+[1A[2K[95/223] [chromium] › e2e\status-colors-accessibility.spec.ts:95:9 › Status Colors Accessibility › Feedback Editor › feedback status badges use accessible colors
+[1A[2K[96/223] [chromium] › e2e\status-colors-accessibility.spec.ts:112:7 › Centralized Status Colors › status colors are imported from shared utility
+[1A[2K[97/223] [chromium] › e2e\status-overview-heatmap.spec.ts:15:7 › Status Overview Heatmap › can navigate to Status Overview via Teams sidebar
+[1A[2K[98/223] [chromium] › e2e\status-overview-heatmap.spec.ts:29:7 › Status Overview Heatmap › displays legend with status colors
+[1A[2K[99/223] [chromium] › e2e\status-overview-heatmap.spec.ts:44:7 › Status Overview Heatmap › displays programs with people directly underneath
+[1A[2K[100/223] [chromium] › e2e\status-overview-heatmap.spec.ts:57:7 › Status Overview Heatmap › shows people directly under programs without expansion
+[1A[2K[101/223] [chromium] › e2e\status-overview-heatmap.spec.ts:69:7 › Status Overview Heatmap › displays split cells for plan/retro status
+[1A[2K[102/223] [chromium] › e2e\status-overview-heatmap.spec.ts:88:7 › Status Overview Heatmap › clicking plan cell navigates to weekly plan document
+[1A[2K[103/223] [chromium] › e2e\status-overview-heatmap.spec.ts:109:7 › Status Overview Heatmap › clicking retro cell navigates to weekly retro document
+[1A[2K[chromium] › e2e\status-overview-heatmap.spec.ts:109:7 › Status Overview Heatmap › clicking retro cell navigates to weekly retro document
+[Worker 1] API ERROR: Retro analysis error: CredentialsProviderError: Could not load credentials from any providers
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:145:15
+    at C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:72:26
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async provider (C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+credential-provider-node@3.972.6\node_modules\[4m@aws-sdk\credential-provider-node[24m\dist-cjs\index.js:39:13)
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@smithy+core@3.22.1\node_modules\[4m@smithy\core[24m\dist-cjs\index.js:62:23
+    at async C:\dev\shipshape\node_modules\[4m.pnpm[24m\@aws-sdk+middleware-logger@3.972.3\node_modules\[4m@aws-sdk\middleware-logger[24m\dist-cjs\index.js:5:26
+    at async callBedrock [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:200:22[90m)[39m
+    at async analyzeRetro [90m(file:///C:/dev/shipshape/api/[39mdist/services/ai-analysis.js:285:30[90m)[39m
+    at async [90mfile:///C:/dev/shipshape/api/[39mdist/routes/ai.js:56:24 {
+  tryNextLink: [33mfalse[39m
+}
+
+[1A[2K[104/223] [chromium] › e2e\status-overview-heatmap.spec.ts:130:7 › Status Overview Heatmap › Show archived checkbox is present
+[1A[2K[105/223] [chromium] › e2e\status-overview-heatmap.spec.ts:138:7 › Status Overview Heatmap › displays week columns with dates
+[1A[2K[106/223] [chromium] › e2e\status-overview-heatmap.spec.ts:152:7 › Status Overview Heatmap › API returns accountability-grid-v3 data structure
+[1A[2K[107/223] [chromium] › e2e\status-overview-heatmap.spec.ts:189:7 › Status Overview Heatmap › non-admin users see appropriate content
+[1A[2K[108/223] [chromium] › e2e\syntax-highlighting.spec.ts:31:7 › Syntax Highlighting - Code Blocks › can create code block via triple backticks
+[1A[2K[109/223] [chromium] › e2e\syntax-highlighting.spec.ts:47:7 › Syntax Highlighting - Code Blocks › can create code block via slash command
+[1A[2K[110/223] [chromium] › e2e\syntax-highlighting.spec.ts:67:7 › Syntax Highlighting - Code Blocks › can select programming language for code block
+[1A[2K[111/223] [chromium] › e2e\syntax-highlighting.spec.ts:92:7 › Syntax Highlighting - Code Blocks › syntax highlighting renders for JavaScript
+[1A[2K[112/223] [chromium] › e2e\syntax-highlighting.spec.ts:124:7 › Syntax Highlighting - Code Blocks › can edit code inside code block
+[1A[2K[113/223] [chromium] › e2e\syntax-highlighting.spec.ts:154:7 › Syntax Highlighting - Code Blocks › code block content persists after save
+[1A[2K[114/223] [chromium] › e2e\syntax-highlighting.spec.ts:189:7 › Syntax Highlighting - Code Blocks › can create multiple code blocks in same document
+[1A[2K[115/223] [chromium] › e2e\syntax-highlighting.spec.ts:224:7 › Syntax Highlighting - Code Blocks › pressing Enter inside code block creates new line, not new paragraph
+[1A[2K[116/223] [chromium] › e2e\syntax-highlighting.spec.ts:252:7 › Syntax Highlighting - Code Blocks › code block maintains multiline content
+[1A[2K[117/223] [chromium] › e2e\tables.spec.ts:50:7 › Tables › should create table via /table command
+[1A[2K[118/223] [chromium] › e2e\tables.spec.ts:72:7 › Tables › should add rows to table
+[1A[2K[119/223] [chromium] › e2e\tables.spec.ts:112:7 › Tables › should add columns to table
+[1A[2K[120/223] [chromium] › e2e\tables.spec.ts:153:7 › Tables › should delete rows from table
+[1A[2K[121/223] [chromium] › e2e\tables.spec.ts:195:7 › Tables › should delete columns from table
+[1A[2K[122/223] [chromium] › e2e\tables.spec.ts:238:7 › Tables › should navigate cells with Tab key
+[1A[2K[123/223] [chromium] › e2e\tables.spec.ts:275:7 › Tables › should edit cell content
+[1A[2K[124/223] [chromium] › e2e\tables.spec.ts:303:7 › Tables › should show header row styling
+[1A[2K[125/223] [chromium] › e2e\tables.spec.ts:330:7 › Tables › should select entire table
+[1A[2K[126/223] [chromium] › e2e\tables.spec.ts:375:7 › Tables › should delete entire table
+[1A[2K[127/223] [chromium] › e2e\tables.spec.ts:418:7 › Tables › should persist table after reload
+[1A[2K[128/223] [chromium] › e2e\tables.spec.ts:455:7 › Tables › should navigate with Shift+Tab to go backwards
+[1A[2K[129/223] [chromium] › e2e\tables.spec.ts:500:7 › Tables › should support column resizing
+[1A[2K[130/223] [chromium] › e2e\team-mode.spec.ts:15:7 › Team Mode (Phase 7) › can navigate to Teams mode via icon rail
+[1A[2K[131/223] [chromium] › e2e\team-mode.spec.ts:23:7 › Team Mode (Phase 7) › Teams mode shows header with team member count
+[1A[2K[132/223] [chromium] › e2e\team-mode.spec.ts:33:7 › Team Mode (Phase 7) › Team grid displays logged-in user
+[1A[2K[133/223] [chromium] › e2e\team-mode.spec.ts:43:7 › Team Mode (Phase 7) › Team grid displays sprint columns
+[1A[2K[134/223] [chromium] › e2e\team-mode.spec.ts:53:7 › Team Mode (Phase 7) › Current sprint column is highlighted
+[1A[2K[135/223] [chromium] › e2e\team-mode.spec.ts:66:7 › Team Mode (Phase 7) › sprint columns can be scrolled horizontally
+[1A[2K[136/223] [chromium] › e2e\team-mode.spec.ts:93:7 › Team Mode (Phase 7) › API returns team grid data structure
+[1A[2K[137/223] [chromium] › e2e\team-mode.spec.ts:129:7 › Team Mode (Phase 7) › grid cells are clickable and empty cells exist
+[1A[2K[138/223] [chromium] › e2e\team-mode.spec.ts:149:7 › Team Mode (Phase 7) › can click cell to open program selector
+[1A[2K[139/223] [chromium] › e2e\team-mode.spec.ts:186:7 › Team Mode (Phase 7) › program selector can be closed with Escape
+[1A[2K[140/223] [chromium] › e2e\team-mode.spec.ts:229:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › displays Unassigned group for people without current sprint assignment
+[1A[2K[141/223] [chromium] › e2e\team-mode.spec.ts:245:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › people are sorted alphabetically within groups
+[1A[2K[142/223] [chromium] › e2e\team-mode.spec.ts:268:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › project cells display with colored badge
+[1A[2K[143/223] [chromium] › e2e\team-mode.spec.ts:280:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › clicking cell opens project dropdown grouped by program
+[1A[2K[144/223] [chromium] › e2e\team-mode.spec.ts:302:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › selecting project updates cell and shows badge
+[1A[2K[145/223] [chromium] › e2e\team-mode.spec.ts:335:9 › Team Mode (Phase 7) › Assignments View - Program Grouping › selecting None clears the assignment
+[1A[2K[146/223] [chromium] › e2e\team-mode.spec.ts:381:9 › Team Mode (Phase 7) › Assignments View - Collapse/Expand › clicking program header collapses the group
+[1A[2K[147/223] [chromium] › e2e\team-mode.spec.ts:408:9 › Team Mode (Phase 7) › Assignments View - Collapse/Expand › clicking collapsed header expands the group
+[1A[2K[148/223] [chromium] › e2e\team-mode.spec.ts:434:9 › Team Mode (Phase 7) › Assignments View - Collapse/Expand › collapsed state shows member count in parentheses
+[1A[2K[149/223] [chromium] › e2e\team-mode.spec.ts:460:9 › Team Mode (Phase 7) › Assignments View - Instant Regrouping › changing current sprint assignment regroups person
+[1A[2K[150/223] [chromium] › e2e\toc.spec.ts:54:7 › Table of Contents (TOC) › can create TOC via /toc command
+[1A[2K[151/223] [chromium] › e2e\toc.spec.ts:75:7 › Table of Contents (TOC) › TOC shows document headings
+[1A[2K[152/223] [chromium] › e2e\toc.spec.ts:109:7 › Table of Contents (TOC) › TOC updates when heading added
+[1A[2K[153/223] [chromium] › e2e\toc.spec.ts:145:7 › Table of Contents (TOC) › TOC updates when heading removed
+[1A[2K[154/223] [chromium] › e2e\toc.spec.ts:193:7 › Table of Contents (TOC) › TOC updates when heading renamed
+[1A[2K[155/223] [chromium] › e2e\toc.spec.ts:247:7 › Table of Contents (TOC) › clicking TOC item scrolls to heading
+[1A[2K[156/223] [chromium] › e2e\toc.spec.ts:298:7 › Table of Contents (TOC) › TOC handles multiple heading levels
+[1A[2K[157/223] [chromium] › e2e\toc.spec.ts:347:7 › Table of Contents (TOC) › TOC persists after page reload
+[1A[2K[158/223] [chromium] › e2e\toc.spec.ts:396:7 › Table of Contents (TOC) › empty document TOC shows "No headings" message
+[1A[2K[159/223] [chromium] › e2e\toggle.spec.ts:50:7 › Toggle (Collapsible) › should create toggle via slash command
+[1A[2K[160/223] [chromium] › e2e\toggle.spec.ts:72:7 › Toggle (Collapsible) › should expand and collapse toggle
+[1A[2K[161/223] [chromium] › e2e\toggle.spec.ts:123:7 › Toggle (Collapsible) › should edit toggle title
+[1A[2K[chromium] › e2e\toggle.spec.ts:123:7 › Toggle (Collapsible) › should edit toggle title
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d246-7057-96d8-a437e1f71158; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d249-74cb-bece-1ae510a8eb4d; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d24b-73ff-86d7-0ff0e3a2072e; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d24d-76dd-a14c-a0e029b4b8aa; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d24d-76dd-a14c-a6ce6815ad50; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d24d-76dd-a14c-a90f86efbb83; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d253-70ef-a88f-e57296e08afa; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d25d-7752-b740-1d5ee51ed1d5; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d25e-70ec-8a4f-264aacefe4eb; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d261-738a-a413-d34fc6763b12
+
+[1A[2K[162/223] [chromium] › e2e\toggle.spec.ts:151:7 › Toggle (Collapsible) › should edit toggle content
+[1A[2K[163/223] [chromium] › e2e\toggle.spec.ts:191:7 › Toggle (Collapsible) › should support nested content in toggle
+[1A[2K[chromium] › e2e\toggle.spec.ts:191:7 › Toggle (Collapsible) › should support nested content in toggle
+[Worker 1] API ERROR: Failed to Failed to send multipart request. Received status [429]: Too Many Requests. Message: {"error":"Too many requests: tenant exceeded usage limits: Monthly unique traces usage limit exceeded"}
+
+Context: trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-db35-715b-a1da-966ad9fec289; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d261-738a-a413-d34fc6763b12; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d25e-70ec-8a4f-264aacefe4eb; trace=01a00bc7-d246-7057-96d8-a437e1f71158,id=01a00bc7-d246-7057-96d8-a437e1f71158
+
+[1A[2K[164/223] [chromium] › e2e\toggle.spec.ts:236:7 › Toggle (Collapsible) › should persist toggle state after reload
+[1A[2K[165/223] [chromium] › e2e\toggle.spec.ts:273:7 › Toggle (Collapsible) › should support keyboard navigation
+[1A[2K[166/223] [chromium] › e2e\toggle.spec.ts:312:7 › Toggle (Collapsible) › should show collapse indicator icon
+[1A[2K[167/223] [chromium] › e2e\tooltips.spec.ts:13:7 › Icon Tooltips › rail icons show tooltips on hover
+[1A[2K[168/223] [chromium] › e2e\tooltips.spec.ts:33:7 › Icon Tooltips › new document button shows tooltip on hover
+[1A[2K[169/223] [chromium] › e2e\tooltips.spec.ts:57:7 › Icon Tooltips › document tree delete button shows tooltip on hover
+[1A[2K[170/223] [chromium] › e2e\tooltips.spec.ts:86:7 › Icon Tooltips › command palette close button shows tooltip on hover
+[1A[2K[171/223] [chromium] › e2e\weekly-accountability.spec.ts:78:7 › Weekly Plan API › POST /weekly-plans creates new weekly plan document
+[1A[2K[172/223] [chromium] › e2e\weekly-accountability.spec.ts:106:7 › Weekly Plan API › POST /weekly-plans is idempotent - returns existing document
+[1A[2K[173/223] [chromium] › e2e\weekly-accountability.spec.ts:138:7 › Weekly Plan API › GET /weekly-plans queries plans by person and project
+[1A[2K[174/223] [chromium] › e2e\weekly-accountability.spec.ts:170:7 › Weekly Plan API › GET /weekly-plans/:id returns specific plan
+[1A[2K[175/223] [chromium] › e2e\weekly-accountability.spec.ts:195:7 › Weekly Plan API › POST /weekly-plans returns 404 for non-existent person
+[1A[2K[176/223] [chromium] › e2e\weekly-accountability.spec.ts:213:7 › Weekly Plan API › POST /weekly-plans returns 404 for non-existent project
+[1A[2K[177/223] [chromium] › e2e\weekly-accountability.spec.ts:233:7 › Weekly Retro API › POST /weekly-retros creates new weekly retro document
+[1A[2K[178/223] [chromium] › e2e\weekly-accountability.spec.ts:261:7 › Weekly Retro API › POST /weekly-retros is idempotent - returns existing document
+[1A[2K[179/223] [chromium] › e2e\weekly-accountability.spec.ts:293:7 › Weekly Retro API › GET /weekly-retros queries retros by person and project
+[1A[2K[180/223] [chromium] › e2e\weekly-accountability.spec.ts:325:7 › Weekly Retro API › GET /weekly-retros/:id returns specific retro
+[1A[2K[181/223] [chromium] › e2e\weekly-accountability.spec.ts:352:7 › Project Allocation Grid API › GET /project-allocation-grid/:projectId returns grid data structure
+[1A[2K[182/223] [chromium] › e2e\weekly-accountability.spec.ts:384:7 › Project Allocation Grid API › Allocation grid shows person with assigned issues and plan/retro status
+[1A[2K[183/223] [chromium] › e2e\weekly-accountability.spec.ts:384:7 › Project Allocation Grid API › Allocation grid shows person with assigned issues and plan/retro status (retry #1)
+[1A[2K  1) [chromium] › e2e\weekly-accountability.spec.ts:384:7 › Project Allocation Grid API › Allocation grid shows person with assigned issues and plan/retro status 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"caa910bf-002c-4de2-af74-d87da29a4298"[39m
+    Received: [31mnull[39m
+
+      467 |     if (week1Data) {
+      468 |       expect(week1Data.isAllocated).toBe(true);
+    > 469 |       expect(week1Data.planId).toBe(plan.id);
+          |                                ^
+      470 |     }
+      471 |   });
+      472 |
+        at C:\dev\shipshape\e2e\weekly-accountability.spec.ts:469:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\weekly-accountability-Proj-b046a-ssues-and-plan-retro-status-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\weekly-accountability-Proj-b046a-ssues-and-plan-retro-status-chromium\error-context.md
+
+
+[1A[2K[184/223] [chromium] › e2e\weekly-accountability.spec.ts:473:7 › Project Allocation Grid API › Allocation grid returns 404 for non-existent project
+[1A[2K[185/223] [chromium] › e2e\weekly-accountability.spec.ts:487:7 › Content Version History API › GET /weekly-plans/:id/history returns empty array for new document
+[1A[2K[186/223] [chromium] › e2e\weekly-accountability.spec.ts:517:7 › Content Version History API › GET /weekly-retros/:id/history returns empty array for new document
+[1A[2K[187/223] [chromium] › e2e\weekly-accountability.spec.ts:547:7 › Content Version History API › GET /weekly-plans/:id/history returns 404 for non-existent plan
+[1A[2K[188/223] [chromium] › e2e\weekly-accountability.spec.ts:562:7 › Content Version History API › GET /weekly-retros/:id/history returns 404 for non-existent retro
+[1A[2K[189/223] [chromium] › e2e\weekly-accountability.spec.ts:579:7 › Weekly Plan/Retro Document Navigation › Weekly plan document can be fetched and navigated to
+[1A[2K[190/223] [chromium] › e2e\weekly-accountability.spec.ts:605:7 › Weekly Plan/Retro Document Navigation › Weekly retro document can be fetched and navigated to
+[1A[2K[191/223] [chromium] › e2e\weeks.spec.ts:22:7 › Weeks - Issue Editor Integration › Weeks tab shows in program view
+[1A[2K[192/223] [chromium] › e2e\weeks.spec.ts:33:7 › Weeks - Issue Editor Integration › can assign issue to sprint via sprint picker in issue editor
+[1A[2K[193/223] [chromium] › e2e\weeks.spec.ts:99:7 › Week Planning Page › Start Week button is visible on planning sprint
+[1A[2K[194/223] [chromium] › e2e\wiki-document-properties.spec.ts:14:9 › Wiki Document Properties Sidebar › Maintainer Field › displays maintainer field in properties sidebar
+[1A[2K[195/223] [chromium] › e2e\wiki-document-properties.spec.ts:35:9 › Wiki Document Properties Sidebar › Maintainer Field › defaults to document creator when maintainer is not explicitly set
+[1A[2K[196/223] [chromium] › e2e\wiki-document-properties.spec.ts:56:9 › Wiki Document Properties Sidebar › Maintainer Field › can change maintainer via person combobox
+[1A[2K[197/223] [chromium] › e2e\wiki-document-properties.spec.ts:86:9 › Wiki Document Properties Sidebar › Maintainer Field › persists maintainer change after page reload
+[1A[2K[198/223] [chromium] › e2e\wiki-document-properties.spec.ts:121:9 › Wiki Document Properties Sidebar › Maintainer Field › shows person avatar/initials for maintainer
+[1A[2K[199/223] [chromium] › e2e\wiki-document-properties.spec.ts:150:9 › Wiki Document Properties Sidebar › Timestamps › displays created date in properties sidebar
+[1A[2K[200/223] [chromium] › e2e\wiki-document-properties.spec.ts:175:9 › Wiki Document Properties Sidebar › Timestamps › displays updated date in properties sidebar
+[1A[2K[201/223] [chromium] › e2e\wiki-document-properties.spec.ts:200:9 › Wiki Document Properties Sidebar › Timestamps › updated date changes after editing document
+[1A[2K[202/223] [chromium] › e2e\wiki-document-properties.spec.ts:241:9 › Wiki Document Properties Sidebar › Properties Sidebar Layout › properties sidebar is visible for wiki documents
+[1A[2K[203/223] [chromium] › e2e\wiki-document-properties.spec.ts:265:9 › Wiki Document Properties Sidebar › Properties Sidebar Layout › maintains consistent layout with other document types
+[1A[2K[204/223] [chromium] › e2e\workspaces.spec.ts:23:7 › Workspace Switcher › shows workspace switcher button in icon rail
+[1A[2K[205/223] [chromium] › e2e\workspaces.spec.ts:29:7 › Workspace Switcher › clicking workspace switcher opens dropdown
+[1A[2K[206/223] [chromium] › e2e\workspaces.spec.ts:38:7 › Workspace Switcher › dropdown shows available workspaces with roles
+[1A[2K[207/223] [chromium] › e2e\workspaces.spec.ts:47:7 › Workspace Switcher › super admin sees Admin Dashboard link
+[1A[2K[208/223] [chromium] › e2e\workspaces.spec.ts:61:7 › Admin Dashboard › super admin can access admin dashboard
+[1A[2K[209/223] [chromium] › e2e\workspaces.spec.ts:74:7 › Admin Dashboard › admin dashboard shows workspaces tab by default
+[1A[2K[210/223] [chromium] › e2e\workspaces.spec.ts:85:7 › Admin Dashboard › can create a new workspace
+[1A[2K[211/223] [chromium] › e2e\workspaces.spec.ts:102:7 › Admin Dashboard › shows users tab with user list
+[1A[2K[212/223] [chromium] › e2e\workspaces.spec.ts:114:7 › Admin Dashboard › shows audit logs tab
+[1A[2K[213/223] [chromium] › e2e\workspaces.spec.ts:126:7 › Admin Dashboard › can export audit logs
+[1A[2K[214/223] [chromium] › e2e\workspaces.spec.ts:142:7 › Workspace Settings › workspace admin can access settings
+[1A[2K[215/223] [chromium] › e2e\workspaces.spec.ts:149:7 › Workspace Settings › shows members tab with member list
+[1A[2K[216/223] [chromium] › e2e\workspaces.spec.ts:161:7 › Workspace Settings › shows pending invites tab
+[1A[2K[217/223] [chromium] › e2e\workspaces.spec.ts:172:7 › Workspace Settings › can send an invite
+[1A[2K[218/223] [chromium] › e2e\workspaces.spec.ts:187:7 › Workspace Settings › shows audit logs tab
+[1A[2K[chromium] › e2e\workspaces.spec.ts:187:7 › Workspace Settings › shows audit logs tab
+[Worker 2] API ERROR: [LANGSMITH]: Failed to fetch info on supported operations. Falling back to batch operations and default limits. Info: Unspecified status code The operation was aborted due to timeout
+
+[1A[2K[219/223] [chromium] › e2e\workspaces.spec.ts:205:7 › Workspace Isolation › documents are scoped to current workspace
+[1A[2K[220/223] [chromium] › e2e\workspaces.spec.ts:213:7 › Workspace Isolation › switching workspaces shows different documents
+[1A[2K[221/223] [chromium] › e2e\workspaces.spec.ts:229:7 › Non-Admin Access Control › non-super-admin cannot access /admin
+[1A[2K[222/223] [chromium] › e2e\workspaces.spec.ts:239:7 › Non-Admin Access Control › non-workspace-admin sees permission denied on settings
+[1A[2K[223/223] [chromium] › e2e\workspaces.spec.ts:251:7 › Invite Accept Flow › invalid invite token shows error
+[1A[2K[224/223] (retries) [chromium] › e2e\workspaces.spec.ts:258:7 › Invite Accept Flow › invite page shows login prompt when not authenticated
+[1A[2K  1 flaky
+    [chromium] › e2e\weekly-accountability.spec.ts:384:7 › Project Allocation Grid API › Allocation grid shows person with assigned issues and plan/retro status 
+  25 skipped
+  197 passed (6.6m)
+SHARD_4_EXIT=0

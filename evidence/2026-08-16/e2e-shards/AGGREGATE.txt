@@ -1,0 +1,27 @@
+Playwright — full suite in 4 sequential shards, 2026-08-16
+npx playwright test --shard=N/4 --workers=1
+
+shard    result
+1         221 passed (7.7m)
+2         9 skipped 210 passed (15.8m)
+3         1 failed 3 flaky 2 skipped 217 passed (15.7m)
+4         25 skipped 197 passed (6.6m)
+
+AGGREGATE: 845 passed | 1 failed | 3 flaky | 36 skipped | 0 DID NOT RUN
+
+The 41 'did not run' from the single-process run are GONE. That was the point
+of sharding: a crashed worker costs one shard, not the tail of the run.
+
+The one failure is e2e/performance.spec.ts:228 'rapid typing does not cause lag'
+-- a typing-LATENCY benchmark, the most contention-sensitive test in the suite,
+and it ran while pre-push hooks were executing full vitest suites on the same
+machine. It passes in isolation on a quiet machine:
+  1 passed (54.5s) -- 'Rapid typing duration: 2789ms for 200 characters'
+
+Note it is a DIFFERENT test from the single-process run's failure
+(program-mode-week-ux.spec.ts:488), which also passes in isolation:
+  1 passed (56.4s)
+
+Two runs, two different failures, each passing alone. That is the signature of
+machine contention, not of a defect. It is NOT a claim that the suite is green
+on this hardware -- it is a claim about why it is not.

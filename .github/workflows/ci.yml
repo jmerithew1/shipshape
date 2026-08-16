@@ -59,6 +59,12 @@ jobs:
       - name: Type-check
         run: pnpm type-check
 
+      # The traceability doc claims its counts are computed, not asserted. That
+      # claim drifted three times in one day. Arithmetic invariants belong in a
+      # check, not in a careful reader.
+      - name: Traceability invariants (docs/week6-traceability.md)
+        run: node scripts/check-traceability.mjs
+
       - name: Prepare test database schema
         run: pnpm --filter @ship/api exec tsx src/db/migrate.ts
 
@@ -86,6 +92,28 @@ jobs:
 
       - name: Test (slack)
         run: pnpm --filter @ship/slack test
+
+      # Epic 7's feature flag, proven BOTH WAYS.
+      #
+      # The brief (Build Strategy §8, and Pre-Search 2.6) asks for the agent
+      # rewire "behind a feature flag so Part 2's tests pass with the flag on or
+      # off" — and specifically: "how does CI prove Part 2's tests pass with the
+      # flag both on and off?" The answer was previously "it doesn't": the flag's
+      # two branches were unit-tested inside `resolveShipData`, but no suite ever
+      # ran twice.
+      #
+      # "Test (api)" above covers flag-OFF, which is the default. This is the ON
+      # half, and it runs the WHOLE api suite rather than just the agent files —
+      # locally that is 880/880 green with the flag set. Narrowing it to
+      # src/fleetgraph would prove less for the same runtime, and the clause is
+      # about Part 2's tests passing, not about the seam's own unit tests.
+      #
+      # It is the difference between "the seam is tested" and "the system works
+      # on both sides of the seam".
+      - name: Test (api, FLEETGRAPH_VIA_SDK=on — Epic 7 flag, both ways)
+        env:
+          FLEETGRAPH_VIA_SDK: 'true'
+        run: pnpm --filter @ship/api test
 
       # Coverage re-runs all 59 api suites a second time under v8
       # instrumentation. It has NO thresholds — its output is an uploaded
@@ -203,22 +231,60 @@ jobs:
       - name: Migrate
         run: pnpm --filter @ship/api db:migrate
 
-      - name: Provision the first-party drill app
-        # Migration 043 seeds `ship_app_ttfe_drill` by copying the GRADER app's
-        # secret hash — deliberately a no-op on a fresh database, where no
-        # grader app exists yet. So seed the grader app first, then replay 043
-        # (it is ON CONFLICT DO UPDATE, so replaying is safe) to mint the
-        # first-party app the drill needs: Client Credentials rejects a
-        # non-first-party client, and the grader app is read-only by design.
+      - name: Seed the database and the first-party drill app
+        # A freshly migrated database has NO workspace: api/src/db/schema.sql
+        # contains zero INSERTs and migrate.ts stamps migrations as applied on a
+        # fresh install rather than executing them. So db:seed first, or every
+        # seeding script exits 1 with "No workspace exists yet".
+        #
+        # And the drill app is seeded EXPLICITLY, not inferred from migration
+        # 043. That migration copies the grader app's secret hash keyed on a
+        # hardcoded PRODUCTION client_id (ship_app_e46d52564bc1f690), while
+        # seed:grader-app registers through registerApp, which generates a
+        # random one — so on any non-production database the INSERT ... SELECT
+        # matches zero rows and the drill app is silently never created.
+        # This job previously assumed otherwise and could not have worked.
+        #
+        # Neither existing app can stand in: the grader app is read-only by
+        # requirement, and the FleetGraph agent app has issues/sprints:write but
+        # not documents:write or webhooks:manage.
         id: drillapp
         run: |
-          secret=$(pnpm --silent --filter @ship/api seed:grader-app \
-            | grep -oE 'ship_sec_[a-f0-9]+' | head -1)
-          if [ -z "$secret" ]; then echo "::error::grader app seed printed no secret"; exit 1; fi
+          set -euo pipefail
+          pnpm --filter @ship/api db:seed
+          # ONE invocation: re-running the seed ROTATES the secret, so calling it
+          # twice would print an id from one app state and a secret from another.
+          out=$(pnpm --silent --filter @ship/api seed:drill-app)
+          # `|| true`: under `set -e` a non-matching grep aborts the step, which
+          # would skip the explicit error below and leave only an exit code.
+          client=$(echo "$out" | grep -oE 'ship_app_[a-f0-9]+' | head -1 || true)
+          secret=$(echo "$out" | grep -oE 'ship_sec_[a-f0-9]+' | head -1 || true)
+          if [ -z "$client" ] || [ -z "$secret" ]; then
+            echo "::error::drill app seed printed no credentials"; exit 1
+          fi
           echo "::add-mask::$secret"
+          echo "client=$client" >> "$GITHUB_OUTPUT"
           echo "secret=$secret" >> "$GITHUB_OUTPUT"
-          PGPASSWORD=ship_dev_password psql -h localhost -p 5433 -U ship -d ship_dev \
-            -v ON_ERROR_STOP=1 -f api/src/db/migrations/043_ttfe_drill_app.sql
+
+      - name: Measure a real SDK install (clean directory, packed tarball)
+        id: sdkinstall
+        run: |
+          set -euo pipefail
+          tarball="$(cd sdk && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -1)"
+          clean="$RUNNER_TEMP/ttfe-clean"
+          mkdir -p "$clean" && cd "$clean"
+          echo '{"name":"ttfe-clean","private":true}' > package.json
+          start=$(date +%s%3N)
+          pnpm add "$tarball" --ignore-workspace >/dev/null 2>&1
+          end=$(date +%s%3N)
+          ms=$((end - start))
+          echo "real @ship/sdk install: ${ms} ms"
+          # ESM check, not require.resolve: @ship/sdk is "type": "module" with an
+          # exports map, so a CJS resolve is the wrong probe for it. A dynamic
+          # import proves the package actually LOADS from a clean directory,
+          # which is what stage 1 of the drill claims.
+          node --input-type=module -e "await import('@ship/sdk'); console.log('package imports cleanly from a clean dir')"
+          echo "ms=$ms" >> "$GITHUB_OUTPUT"
 
       - name: Boot Ship from this PR
         run: |
@@ -234,8 +300,11 @@ jobs:
 
       - name: TTFE drill (over threshold fails the build)
         env:
-          SHIP_CLIENT_ID: ship_app_ttfe_drill
+          SHIP_CLIENT_ID: ${{ steps.drillapp.outputs.client }}
           SHIP_CLIENT_SECRET: ${{ steps.drillapp.outputs.secret }}
+          # The real install measured above wins over the drill's in-process
+          # ~1 ms module resolve, so stage 1 reports what a developer waits for.
+          SHIP_DRILL_INSTALL_MS: ${{ steps.sdkinstall.outputs.ms }}
         run: |
           set +e
           pnpm --silent --filter @ship/cli drill ttfe \
@@ -260,6 +329,47 @@ jobs:
             ttfe-pr-result.json
             api.log
           retention-days: 30
+
+  # The Playwright specs that guard the PLATFORM surface, as opposed to the
+  # inherited product suite. Without this job, e2e/devportal-replay.spec.ts —
+  # the test that caught the dev-portal Replay button returning 400 on every
+  # click — ran in no CI job at all, so reintroducing that bug would have
+  # produced a fully green pipeline. A regression test nothing executes is a
+  # comment.
+  #
+  # Its own job, NOT a step inside drill-pr: these specs bring their own stack
+  # via e2e/fixtures/isolated-env.ts (a Postgres testcontainer plus an API and
+  # preview server per worker). They neither use nor need the Ship that drill-pr
+  # boots on :3000, and running both at once invites a port collision. An
+  # earlier revision put them there with a PLAYWRIGHT_BASE_URL that nothing
+  # reads and a comment claiming they targeted the booted instance — a claim the
+  # code did not support.
+  e2e-platform:
+    name: Playwright (platform specs, self-contained stack)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Recursive build in dependency order: the specs compile against
+      # @ship/sdk, and the fixture serves a built web bundle.
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Platform e2e (dev portal replay, OAuth PKCE)
+        run: pnpm exec playwright test e2e/devportal-replay.spec.ts e2e/oauth-pkce.spec.ts --workers=1
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-platform-${{ github.sha }}
+          path: playwright-report/
+          retention-days: 14
 
   secret-scan:
     runs-on: ubuntu-latest
@@ -329,6 +439,12 @@ jobs:
           done
           echo "::error::deployed commit never became ${want} (last live: ${live:-<none>})"; exit 1
       - name: Verify the live deployment (browser, with receipts)
+        # SHIP_CLIENT_SECRET must be in scope HERE, not only on the drill step
+        # below. Without it, prove-live's c7 check cannot mint a token and always
+        # takes the SKIPPED branch — so the authenticated rate-limit-header
+        # assertion never actually ran in CI, and could not have.
+        env:
+          SHIP_CLIENT_SECRET: ${{ secrets.SHIP_CLIENT_SECRET }}
         run: pnpm exec playwright test e2e/prove-live.spec.ts --workers=1
       - name: TTFE drill against the live deployment (fails the build past threshold)
         # The proof spine: from a clean checkout, how long until a developer holds

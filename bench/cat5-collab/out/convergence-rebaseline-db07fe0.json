@@ -1,0 +1,6 @@
+{
+  "sha": "db07fe0",
+  "label": "rebaseline",
+  "date": "2026-08-16T18:10:18.974Z",
+  "method": "two Playwright contexts, two distinct users, same /documents/:id (same Yjs room) over live dev servers"
+}
