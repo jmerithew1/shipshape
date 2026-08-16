@@ -52,10 +52,11 @@ verified before acting:
    PARTIAL with the reason, rather than MET with a number that does not mean what the
    row says it means.
 
-One audit finding was **refuted** and is recorded so the correction is not lost: the
-`evidence/2026-08-12/c5`/`c6` citation is not a dead path — `c6` is a check inside
-`results.json` (`first=authorization_pending immediate-repoll=slow_down`) sharing c5's
-screenshot. Verified before acting.
+One audit finding was **refuted** and is recorded so the correction is not lost. The
+ledger's `c5`/`c6` reference is not a dead path: both are checks *inside*
+`evidence/2026-08-12/results.json` (`c6` = `first=authorization_pending
+immediate-repoll=slow_down`), and `c6` shares `c5`'s screenshot. The shorthand invited
+the misreading, so both docs now name the file explicitly.
 
 Nothing here is marked MET without a file, test name, measured number, or URL.
 
@@ -73,7 +74,7 @@ Nothing here is marked MET without a file, test name, measured number, or URL.
 | A6 | ScopeRegistry scopes-as-data; 403 names the missing scope | MET | `scopes/registry.ts` (7 scopes); `details.missing_scope` | RAN |
 | A7 | OpenAPI 3.1 at `/api/v1/openapi.json`, generated, schema-validated in a unit test | MET | Route factory registers spec + handler in one call; live spec is **3.1.0, 11 paths, 13 operations**, real JSON not an SPA fallback | LIVE + RAN |
 | A8 | SDK in a pnpm workspace; `new ShipClient({token}).me()` returns the typed user | MET | `sdk-live.test.ts` (9) boots the real app; **14.3 KB gzip, 5.7% of budget** | RAN — `pnpm --filter @ship/sdk size` |
-| A9 | Regression suite passes; **P95, bundle, per-route query counts** within +10% | PARTIAL | **Perf clause MET** — all five flows 57→46, 64→54, 61→41, 67→48, 57→53; bundle +1.21%/+2.43%. **Regression clause: every test now executes, but no clean whole-suite green.** Sharded 4× sequential: **845 passed · 1 failed · 3 flaky · 36 skipped · 0 did not run** — the 41 worker-death losses eliminated. The failure is a typing-**latency** benchmark (`performance.spec.ts:228`) that passes in isolation, and it is a *different* test from the single-process run's failure (`program-mode-week-ux.spec.ts:488`, also passes alone). Two runs, two different failures, each green solo = contention. PARTIAL because a single uninterrupted green run has not been produced on this hardware | RAN — `evidence/2026-08-16/e2e-shards/` |
+| A9 | Regression suite passes; **P95, bundle, per-route query counts** within +10% | PARTIAL | **Perf clause MET** — all five flows 57→46, 64→54, 61→41, 67→48, 57→53; bundle +1.21%/+2.43%. **Regression clause, measured three ways and reported honestly.** (1) Single process, machine busy: 804 passed · 1 failed · **41 did not run**. (2) **Four sequential shards: 845 passed · 1 failed · 0 did not run** — every test in the suite executed. (3) Single process, quiet machine, 38.9 min: 799 passed · 2 failed · **47 did not run**. So the single-process runner loses 41–47 tests to worker death *regardless of machine load*, while sharding loses none — the runner is the variable, not the code. Across all three runs **four different tests failed and none repeated**, and every one passes in isolation (`performance.spec.ts:228`, `program-mode-week-ux.spec.ts:488`, `:369`, `drag-handle.spec.ts:300`). **What this row claims:** the six modifier failures from 08-14 stay fixed, every test executes under sharding, and no test has been shown to fail on its own merits. **What it does not claim:** a single uninterrupted green whole-suite run, which this hardware has not produced. Rounding that up is the move that put a hard gate on one measurement out of five | RAN — `evidence/2026-08-16/e2e-shards/`, `e2e-full-quiet.txt` |
 | A10 | Deployed + published spec URL + a pre-registered read-only OAuth app for graders | MET | `/ready` → `platform_tables:true`, commit `c203e22` **== local HEAD**; grader app issues a device code live | LIVE |
 | A11 | Terraform topology, pinned providers, annotated plan artifact, destroy-and-redeploy, plan read at defense | MET | Provider pinned `1.9.1`; `terraform/render/out/13-destroy-week5.txt`, `14-apply-redeploy-week5.txt`. ECS-vocabulary gap **closed 2026-08-16**: `terraform/ecs/` describes the topology the brief names — app container (`aws_ecs_task_definition`), database, networking, and the two IAM roles separately — pinned `aws 5.82.2`, `Plan: 31 to add`, annotated at `terraform/ecs/out/PLAN-ANNOTATED.md`. Plan-only and says so: Render remains the live deployment. Plans with no AWS credentials, so anyone reproduces it | RAN |
 
@@ -304,7 +305,7 @@ but presented as a current finding, which is its own small version of the defect
 document is about.
 
 One citation is shorthand rather than a path, and is worth reading correctly:
-`evidence/2026-08-12/c5`/`c6` refers to **checks c5 and c6 inside `results.json`**, not
+`checks `c5`/`c6` inside `evidence/2026-08-12/results.json` refers to **checks c5 and c6 inside `results.json`**, not
 to files named `c5` and `c6`. Only `c1_*.png` … `c5_*.png` exist as images; c6 shares
 c5's screenshot. An audit flagged it as a dead citation; it is not, but the shorthand
 invited the reading.
