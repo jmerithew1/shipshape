@@ -73,11 +73,51 @@ test('live verification walk', async ({ page, request }) => {
     j1.error === 'authorization_pending' && j2.error === 'slow_down' ? 'MET' : 'PARTIAL']);
 
   // c7 — X-RateLimit-* headers (named verbatim by the assignment)
-  const r3 = await request.get(`${BASE}/api/v1/me`);
-  const hdrs = r3.headers();
-  const xs = Object.keys(hdrs).filter((k) => k.toLowerCase().startsWith('x-ratelimit')).sort();
-  results.push(['c7', 'Public responses carry X-RateLimit-* headers', `present=${xs.join(',')}`,
-    'c2_apierror-envelope.png', xs.length >= 3 ? 'MET' : 'MISSING']);
+  //
+  // This probe was UNAUTHENTICATED until 2026-08-16 and so could never pass:
+  // it reported MISSING while the ledger cited it as proof the headers ship.
+  // The check was wrong, not the API. The brief's own wording settles it —
+  // "Per-app and per-token token-bucket limits. Public responses carry
+  // X-RateLimit-*" — so a bucket is a property of an identity. A request that
+  // has not authenticated has no app and no token, hence no bucket to report,
+  // and it 401s before the limiter runs at all (authn precedes ratelimit in
+  // the v1 middleware order).
+  //
+  // So: authenticate, then assert. Client credentials as the first-party drill
+  // app, the identity CI's TTFE drill already uses. Without that secret the row
+  // records SKIPPED — "could not run" is a different claim from "failed", and
+  // conflating them is what produced the false red.
+  const drillSecret = process.env.SHIP_CLIENT_SECRET;
+  if (drillSecret) {
+    const tokenRes = await request.post(`${BASE}/oauth/token`, {
+      form: {
+        grant_type: 'client_credentials',
+        client_id: 'ship_app_ttfe_drill',
+        client_secret: drillSecret,
+        scope: 'documents:read',
+      },
+    });
+    const token = (await tokenRes.json()).access_token as string | undefined;
+    const r3 = await request.get(`${BASE}/api/v1/me`, {
+      headers: token ? { authorization: `Bearer ${token}` } : {},
+    });
+    const xs = Object.keys(r3.headers())
+      .filter((k) => k.toLowerCase().startsWith('x-ratelimit'))
+      .sort();
+    results.push(['c7', 'Authenticated public responses carry X-RateLimit-* headers',
+      `status=${r3.status()} present=${xs.join(',')}`,
+      'c2_apierror-envelope.png', xs.length >= 3 ? 'MET' : 'MISSING']);
+  } else {
+    const r3 = await request.get(`${BASE}/api/v1/me`);
+    const pre = Object.keys(r3.headers())
+      .filter((k) => k.toLowerCase().startsWith('x-ratelimit'))
+      .sort();
+    results.push(['c7', 'Authenticated public responses carry X-RateLimit-* headers',
+      `SKIPPED — no SHIP_CLIENT_SECRET, so no token could be minted. ` +
+      `Unauthenticated control: status=${r3.status()} x-ratelimit=[${pre.join(',')}] ` +
+      `(expected empty: per-app/per-token limits, authn precedes the limiter)`,
+      'c2_apierror-envelope.png', 'SKIPPED']);
+  }
 
   // c8 — webhook routes live and gated
   const r4 = await request.get(`${BASE}/api/v1/webhooks`);

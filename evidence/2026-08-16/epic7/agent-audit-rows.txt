@@ -1,0 +1,22 @@
+Epic 7 — the agent's audit-log rows showing OAuth app authentication
+Captured 2026-08-16T17:03:11Z against the local stack.
+
+The brief names this as Epic 7's required proof. Until 2026-08-16 it could not
+exist: FLEETGRAPH_VIA_SDK was set in no environment, so the deployed agent read
+through a direct pg.Pool and produced no audit rows at all.
+
+Boot line with the flag ON (contrast: 'reads via pool' when unset):
+[fleetgraph] enabled — sweep every 1m, LLM configured, reads via sdk
+
+Agent OAuth app: ship_app_f26e5f6156922280 (first-party, client_credentials, RFC 6749 4.4)
+
+SELECT client_id, method, route, scope_used, status, count(*)
+  FROM public_audit_log WHERE client_id = 'ship_app_f26e5f6156922280'
+  GROUP BY 1,2,3,4,5 ORDER BY 3;
+
+         client_id         | method |     route      |   scope_used   | status | count 
+---------------------------+--------+----------------+----------------+--------+-------
+ ship_app_f26e5f6156922280 | GET    | /api/v1/issues | issues:read    |    200 |    20
+ ship_app_f26e5f6156922280 | GET    | /api/v1/me     | documents:read |    200 |     1
+(2 rows)
+
