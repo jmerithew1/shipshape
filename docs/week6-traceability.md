@@ -54,30 +54,6 @@ screenshot. Verified before acting.
 
 Nothing here is marked MET without a file, test name, measured number, or URL.
 
---- | --: |
-| MET | **87** |
-| PARTIAL — stated, not hidden | **2** |
-| OWED — blocked on the owner | **3** |
-| ACCRUING — needs elapsed CI runs, not effort | **1** |
-| MISSING | **0** |
-
-Six rows closed on 2026-08-16, each by doing the work rather than rewording the row:
-Epic 7 wired and its audit rows captured · the portal Replay button fixed after an e2e
-spec caught it returning 400 on every click · a PR-time TTFE drill added alongside the
-main-only one · an ECS topology stack with an annotated offline plan · the `c7`
-rate-limit probe corrected (it was unauthenticated, so it could never pass) · and two
-requirement blocks that had **no rows at all** (sections J and K) traced for the first
-time.
-
-The row count rose from 81 to 93 for that last reason. A block with no rows cannot come
-back MISSING, because nothing asks about it — which is the same failure shape as the
-gate this document exists to close.
-
-Nothing here is marked MET without a file, test name, measured number, or URL. The
-first draft of this counts block was written from memory and was wrong in every figure —
-the same failure mode as the gate this document exists to close. It is now computed from
-the tables below, and that is recorded rather than quietly corrected.
-
 ---
 
 ## A. MVP hard gate — "All items required to pass"

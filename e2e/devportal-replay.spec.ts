@@ -159,13 +159,22 @@ test.describe('Developer portal — Replay', () => {
           'subscriber dedupe it against the delivery it already processed'
       ).toBe(ORIGINAL_IDEMPOTENCY_KEY);
 
-      // The endpoint must have ACCEPTED it. Without this, a future regression
-      // that 400s could still look green for a moment if a stale row existed —
-      // and a 400 here is exactly the bug this spec was written to catch.
+      // The endpoint must have ACCEPTED it, and we must have SEEN it answer.
+      //
+      // This was `replayResponses.every(r => r.startsWith('2'))`, which is
+      // vacuously true on an empty array: if the response listener never fired —
+      // wrong URL filter, listener deleted, body still pending — the assertion
+      // passed while observing nothing. Requiring at least one recorded response
+      // is what makes it capable of failing, which is the whole point of the
+      // check. A 400 here is exactly the bug this spec was written to catch.
       expect(
-        replayResponses.every((r) => r.startsWith('2')),
-        `every /replay response should be 2xx, got: ${replayResponses.join(' || ')}`
-      ).toBe(true);
+        replayResponses.length,
+        'the /replay response listener recorded nothing — it cannot vouch for anything'
+      ).toBeGreaterThan(0);
+      expect(
+        replayResponses.filter((r) => !r.startsWith('2')),
+        'every /replay response should be 2xx'
+      ).toEqual([]);
 
       // ── And that the operator can see it ──────────────────────────────────
       // Reloaded rather than awaited in place: what matters is that the portal

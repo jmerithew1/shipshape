@@ -1,13 +1,24 @@
 /**
  * prove-it: live-deployment verification with receipts.
- * Runs against the DEPLOYED instance, not localhost. Writes dated, immutable
- * screenshots under evidence/<date>/ — one per claim.
+ * Runs against the DEPLOYED instance, not localhost. Writes dated screenshots
+ * under evidence/<today>/ — one per claim.
+ *
+ * `OUT` was hardcoded to `evidence/2026-08-12` until 2026-08-16, so the header
+ * promised "dated, immutable" evidence while every run silently overwrote the
+ * 12th's receipts with the current day's observations. A file stamped with one
+ * date containing another day's data is worse than no file: it is a receipt that
+ * lies about when it was taken. Three separate runs during one audit rewrote the
+ * same `results.json` (`user_code` went EGG8-2YEF → 7VCH-2FHP → MDVR-G255)
+ * before anyone noticed.
+ *
+ * Now the directory is derived from the run date, so each run lands beside the
+ * others instead of on top of them.
  */
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 
 const BASE = 'https://ship-api-r1om.onrender.com';
-const OUT = 'evidence/2026-08-12';
+const OUT = `evidence/${new Date().toISOString().slice(0, 10)}`;
 const CLIENT_ID = 'ship_app_e46d52564bc1f690';
 const results: string[][] = [];
 const consoleLog: string[] = [];
@@ -128,5 +139,18 @@ test('live verification walk', async ({ page, request }) => {
   fs.writeFileSync(`${OUT}/results.json`, JSON.stringify({ results, consoleLog }, null, 2));
   for (const row of results) console.log(row[0], row[4], '|', row[2]);
   console.log('CONSOLE:', consoleLog.length ? consoleLog.slice(0, 6).join(' || ') : 'clean across the walk');
-  expect(results.filter((r) => r[4] === 'MET').length).toBeGreaterThan(0);
+  // This assertion used to be `MET.length > 0` — seven of the eight checks could
+  // report MISSING and the spec still passed, which made the whole walk
+  // unfalsifiable and the CI step's claim ("fails the run if production is not
+  // actually serving") untrue. Fail on any check that is genuinely bad.
+  //
+  // SKIPPED is deliberately tolerated and is NOT the same as MISSING: c7 needs a
+  // client-credentials secret to mint a token, and a fork PR has no secrets.
+  // "Could not run" must not read as "failed" — collapsing those two is what
+  // produced the false red c7 reported for weeks.
+  const bad = results.filter((r) => r[4] === 'MISSING' || r[4] === 'PARTIAL');
+  expect(
+    bad.map((r) => `${r[0]}=${r[4]} (${r[2]})`),
+    'every live check must be MET or explicitly SKIPPED'
+  ).toEqual([]);
 });

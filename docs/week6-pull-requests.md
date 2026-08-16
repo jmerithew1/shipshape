@@ -9,7 +9,7 @@ fitness test passed."*
 have **0 commits not in `main`** — they are fully merged, so GitHub has nothing to
 compare and no PR can be opened from them. Retroactive PRs are not possible, and
 fabricating branch history to produce them would be worse than the gap. The clause is
-therefore satisfied going forward, with the six slices below.
+therefore satisfied going forward, with the seven slices below.
 
 Open each against the branch beneath it (a stack), then merge bottom-up.
 
@@ -57,8 +57,7 @@ and had never run on a PR.
 live prod, which only reflects `main`, so a PR run there would report a green that means
 nothing. Same binary, same 60 s threshold, same non-zero exit.
 
-**Fitness test confirmation.** Workflow YAML validated (11 steps); the drill's own
-threshold behaviour is the gate. **This PR's CI run is the proof the clause now holds.**
+**Fitness test confirmation.** Workflow YAML validated (13 steps). **The proof this clause holds is this PR's own CI run — it has not happened yet, and the row stays PARTIAL until it does.** An audit found the first version of this job could never have worked: migration 043 mints the drill app by copying the *production* grader app's secret hash, keyed on a hardcoded prod `client_id`, so on any fresh database it matches zero rows. A new `seed:drill-app` script registers the app explicitly instead.
 
 ## 4. `fix/devportal-replay-app-id` → `ci/drill-on-every-pr`
 
@@ -111,10 +110,14 @@ locally with the unauthenticated control observation recorded.
 
 **Acceptance criterion advanced.** Submission — requirement-to-evidence traceability.
 
-**What changed.** Ledger and traceability updated to what now exists. Two requirement
-blocks that had **zero rows** are traced for the first time (Interface Definitions;
-drill-stage evaluation table) — both fully satisfied, and neither could ever have come
-back MISSING because nothing asked about them.
+**What changed.** Ledger and traceability updated to what now exists, then corrected
+again by two independent audits. **Twelve** brief clauses had zero rows and are traced
+for the first time (sections J, K, L — Interface Definitions, the drill-stage table, and
+the technical-stack clauses). Section E had no Status column, so a script counting the
+file inferred MET for nine rows.
 
-**Fitness test confirmation.** Counts computed from the file's own tables rather than
-asserted: 93 rows, 87 MET / 2 PARTIAL / 3 OWED / 1 ACCRUING / 0 MISSING.
+**Fitness test confirmation.** Counts computed from the file's own tables: **105 rows,
+92 MET / 9 PARTIAL / 3 OWED / 1 ACCRUING / 0 MISSING**. The PARTIAL count went **up**,
+from 2 to 9, because the audit found rows softer than the brief — a PKCE "P95" that was
+a file duration, a webhook "P95" that was one sample, a TTFE "clean container" install
+measured at 1 ms. That direction is the point.

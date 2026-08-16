@@ -76,7 +76,7 @@ that one value ties a client-visible failure to its server-side audit row.
 | MVP rubric — every hard-gate item with evidence | [`docs/week6-mvp-rubric.md`](week6-mvp-rubric.md) |
 | Requirement → evidence ledger (authoritative status) | [`docs/week6-requirements.md`](week6-requirements.md) |
 | Per-slice PR descriptions (criterion + fitness test each) | [`docs/week6-pull-requests.md`](week6-pull-requests.md) |
-| **Requirement traceability — all 93 rows, each with how and when it was verified** | [`docs/week6-traceability.md`](week6-traceability.md) |
+| **Requirement traceability — all 105 rows, each with how and when it was verified** | [`docs/week6-traceability.md`](week6-traceability.md) |
 | Pre-Search, all three phases | [`PRESEARCH-W6.md`](../PRESEARCH-W6.md) |
 | Pre-Search saved AI conversation (the required reference artifact) | [`docs/presearch-week6-ai-session.md`](presearch-week6-ai-session.md) |
 | Decisions, each with a `Rejected:` clause | [`DECISIONS.md`](../DECISIONS.md) |

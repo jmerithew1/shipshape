@@ -9,6 +9,15 @@ terraform {
       # must be pinned."
       version = "5.82.2"
     }
+
+    # `random_password` pulls hashicorp/random. Declaring only `aws` left this
+    # one to IMPLICIT inference at whatever version happened to resolve — which
+    # is exactly the unpinned provider the brief forbids, hiding behind a
+    # resource nobody thinks of as a dependency. Found by audit, 2026-08-16.
+    random = {
+      source  = "hashicorp/random"
+      version = "3.9.0"
+    }
   }
 }
 

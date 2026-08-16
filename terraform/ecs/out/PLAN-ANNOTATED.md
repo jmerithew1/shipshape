@@ -23,10 +23,17 @@ asked for and the fact that it is not the deployment is stated here.
 
 It plans **without AWS credentials**: the provider sets `skip_credentials_validation`,
 `skip_requesting_account_id` and `skip_metadata_api_check`, and the stack contains no
-`data` sources. Anyone with a checkout reproduces this artifact exactly. That
-constraint is why networking is declared inline in `network.tf` instead of reusing
-`../modules/vpc` — that module opens with `data "aws_availability_zones"`, and the
-first plan attempt failed on precisely that call after planning the other 23 resources.
+`data` sources. **Both** providers are pinned exactly (`aws 5.82.2`, `random 3.9.0`) and
+`.terraform.lock.hcl` is force-added past `terraform/.gitignore`, so a fresh checkout
+resolves the same versions. Until 2026-08-16 only `aws` was declared — `random_password`
+pulled `hashicorp/random` by implicit inference at whatever version resolved, which is
+exactly the unpinned provider the brief forbids, hiding behind a resource nobody thinks
+of as a dependency.
+
+That same no-credentials constraint is why networking is declared inline in `network.tf`
+rather than reusing `../modules/vpc`: that module opens with
+`data "aws_availability_zones"`, and the first plan attempt died on exactly that call
+after successfully planning every other resource in the stack.
 
 ## The 31 resources, by what they do
 
@@ -55,21 +62,30 @@ This is the part most worth being able to explain out loud.
 | `aws_iam_role.task` | The **running application** | Everything the app can be tricked into calling. This is the role an SSRF or RCE inherits. |
 | `aws_iam_role_policy.task_runtime` | — | `ssm:GetParameter*` under `/ship/prod/*` only, `kms:Decrypt` conditioned on `kms:ViaService = ssm`, and `logs:` on this log group alone. Derived from the calls the code actually makes, not from a convenient managed policy. |
 
-### Database (4)
+### Database (5)
 
 `aws_db_instance.postgres` (Postgres 16.4, encrypted, 7-day backups),
 `aws_db_subnet_group.postgres` (private subnets only), `aws_secretsmanager_secret.db_url`
 + `_version`, and `random_password.db` — the password is generated and never declared in
 a variable, a `.tfvars`, or this file.
 
+### Logs (1)
+
+`aws_cloudwatch_log_group.app`, 30-day retention, and the only log resource the task role
+can write to.
+
 **`deletion_protection = true` is set on exactly one resource, and it is this one.** The
 destroy-and-redeploy exercise proves the *config* is the source of truth; data is the one
 thing the config cannot re-derive.
 
-### Networking (16) and security groups (2)
+### Networking (14) and security groups (2)
 
 VPC, an internet gateway, 2 public + 2 private subnets across 2 AZs, one NAT gateway with
-its EIP, 2 route tables and their 4 associations.
+its EIP, 2 route tables and their 4 associations — 14.
+
+Section totals: app container 4 + IAM 5 + database 5 + logs 1 + networking 14 + security
+groups 2 = **31**. An earlier revision of this page said 4 and 16, two errors that happened
+to cancel to the right total — which is how a wrong breakdown survives a correct sum.
 
 One NAT gateway rather than one per AZ: cheaper, and a single-AZ NAT outage degrades
 egress rather than serving. That is a stated tradeoff, not an oversight.
@@ -93,3 +109,17 @@ The security groups are where the topology is actually enforced:
   ingress; a serving build adds an ALB, its security group, and an ACM certificate. This
   stack describes the topology the brief enumerates, and stops there rather than
   half-building an internet-facing surface it never applies.
+- **"Never appears in state" would be false, so it is not claimed.** The task definition
+  genuinely never carries the connection string — it arrives as a `secrets` reference
+  resolved by the execution role. But `random_password.db.result`,
+  `aws_db_instance.postgres.password` and the Secrets Manager `secret_string` are all
+  persisted **in plaintext in Terraform state**, and in `ecs.tfplan`. `(sensitive value)`
+  in the plan output is a *display* mask, not storage. That is why
+  `terraform/ecs/*.tfstate*` is gitignored, and why a real deployment of this stack needs
+  a remote backend with encryption rather than local state.
+- **`IMMUTABLE` tags and a `:latest` default contradict each other.** `main.tf` sets
+  `image_tag_mutability = "IMMUTABLE"` and then defaults the container image to
+  `…:latest`. Under IMMUTABLE, `:latest` can be pushed exactly once and never moved, so
+  the default deployment path breaks on the second deploy. The default exists to keep the
+  plan self-contained; a real deploy passes an immutable digest via `container_image`.
+  Naming it here rather than leaving a reader to hit it.
