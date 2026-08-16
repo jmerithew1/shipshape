@@ -1,0 +1,12 @@
+# Cold authenticated load of the main page (/my-week), traced from a real
+# browser session on 2026-07-29. GET /api requests in issue order.
+# Replayed by run_flow.sh for exact query counting.
+/api/auth/me
+/api/dashboard/my-week
+/api/auth/session
+/api/issues
+/api/projects
+/api/programs
+/api/documents?type=wiki
+/api/team/people?includeArchived=true
+/api/auth/session

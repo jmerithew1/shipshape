@@ -8,7 +8,7 @@
  * hard-codes the digest it expects would still pass if verifyWebhook were
  * replaced with `return true`.
  */
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { ShipError, type DeliveryListParams, type Page, type ShipWebhookDelivery } from '@ship/sdk';
 import { deliveryFilter, runTail, verdictFor, type DeliveryLister } from './tail.js';
@@ -16,8 +16,15 @@ import { LISTENING_LINE } from './output.js';
 
 const SECRET = 'whsec_test_2f6a1c9e';
 
+/**
+ * Signs as Ship's deliverer does: HMAC keyed by the DERIVED key `sha256(rawSecret)`
+ * (Ship's `signing_secret_hash`), which is what `verifyWebhook` re-derives from the
+ * raw secret. Keyed by the raw secret until 2026-08-16, which failed every
+ * genuinely-signed assertion here while the tamper/expiry cases still passed.
+ */
 function sign(rawBody: string, secret = SECRET, atSeconds = Math.floor(Date.now() / 1000)): string {
-  const mac = createHmac('sha256', secret)
+  const signingKey = createHash('sha256').update(secret, 'utf8').digest('hex');
+  const mac = createHmac('sha256', signingKey)
     .update(String(atSeconds))
     .update('.')
     .update(rawBody)

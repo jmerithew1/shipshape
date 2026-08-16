@@ -19,13 +19,22 @@
 | P95 `/api/issues` c=10 | 181.7 ms | 106.8 ms | **−41.2%** | +10% | **PASS** |
 | P95 `/api/projects` c=10 | 120.7 ms | 25.4 ms | **−79.0%** | +10% | **PASS** |
 | P95 `/api/auth/me` c=10 | 83.3 ms | 19.8 ms | **−76.2%** | +10% | **PASS** |
-| Queries — main page (cold) | 57 | 32 | **−43.9%** | +10% | **PASS** |
+| Queries — main page (cold) | 57 | 46 | **−19.3%** | +10% | **PASS** |
+| Queries — document view (cold) | 64 | 54 | **−15.6%** | +10% | **PASS** |
+| Queries — issues list (cold) | 61 | 41 | **−32.8%** | +10% | **PASS** |
+| Queries — week board (cold) | 67 | 48 | **−28.4%** | +10% | **PASS** |
+| Queries — search (cold) | 57 | 53 | **−7.0%** | +10% | **PASS** |
 | API vitest suite | — | 649 / 649 passed | — | all green | **PASS** |
 | Web vitest suite | — | 160 / 160 passed | — | all green | **PASS** |
 | **Playwright regression suite** | — | **816 passed, 8 failed, 45 did not run**; **6 fail reproducibly** on serial re-run | — | all green | **FAIL — see §6** |
 
 **The +10% budget holds on bundle size, P95 latency and query counts.** Nothing Week 6 changed
 regressed any of them.
+
+**Correction, 2026-08-16.** An earlier revision of this report measured **one** of the five
+Category-4 flows and the requirements ledger recorded the whole query-count clause as met. One
+measurement was generalised to five; that was an overclaim on a hard gate, it was caught in review,
+and it is now fixed — all five flows are measured, from committed flow definitions, in §4.
 
 **The Playwright clause of the gate is NOT satisfied.** The parallel run gave 8 failures and 45 tests
 that never ran (worker crashes); a serial re-run cleared 2 as flakiness but left **6 reproducible
@@ -218,21 +227,74 @@ Method per `AUDIT_REPORT.md` Category 4: `ALTER SYSTEM SET log_statement='all'` 
 Enabling statement logging on `ship_dev` was **not** disruptive here: it is a local dev container,
 its only consumer was the dev API, and no load test ran concurrently (serialisation rule respected).
 
-| Flow | Baseline | Measured | Delta | Verdict |
+**All five flows are now measured.** The four that previously read *not measured* were blocked on a
+missing artifact, not a missing capability: only `flows/mainpage.urls` was ever committed, and the
+other four call sets existed solely as a number in `AUDIT_REPORT.md`. That gap is closed by an
+instrument — `bench/cat4-queries/capture_flows.mjs` — which regenerates every flow definition from
+the running app, so the next person does not inherit the same hole.
+
+| Flow | Baseline (cold) | Measured | Delta | Verdict |
 | --- | --: | --: | --: | :-- |
-| Load main page (`/my-week`, cold) | 57 | **32** | **−43.9%** | **PASS** |
-| View a document (`/documents/:id`) | 16 | *not measured* | — | §8 |
-| List issues (`/issues`) | 13 | *not measured* | — | §8 |
-| Load sprint board (week Issues tab) | 19 | *not measured* | — | §8 |
-| Search content (Cmd-K + `@`-mention) | 9 | *not measured* | — | §8 |
+| Load main page (`/my-week`, cold) | 57 | **46** | **−19.3%** | **PASS** |
+| View a document (`/documents/:id`) | 64 | **54** | **−15.6%** | **PASS** |
+| List issues (`/issues`) | 61 | **41** | **−32.8%** | **PASS** |
+| Load week board (sprint Issues tab) | 67 | **48** | **−28.4%** | **PASS** |
+| Search content (Cmd-K + `@`-mention) | 57 | **53** | **−7.0%** | **PASS** |
 
-All 9 URLs in the flow returned **HTTP 200**; total DB time 15.02 ms across 32 queries. The count
-reproduces the previously committed post-audit run
-(`bench/cat4-queries/out/after-9c00675_mainpage.txt` = 32) **exactly** — independent evidence that
-the instrument is stable and the number real.
+Baselines are the audit's **cold** totals (`AUDIT_REPORT.md` Category 4): its per-flow figure plus
+the 48-query app-shell tax it measured separately — 16+48, 13+48, 19+48, 9+48. The main page was
+already a cold total at 57. Every URL in every run returned **HTTP 200**; artifacts are
+`bench/cat4-queries/out/w6final-{a,b}_*.txt`.
 
-Query counts are the most trustworthy metric in this report: unlike latency, a count is immune to CPU
-contention, thermal state and competing processes.
+### 4.1 Two findings that change how these numbers should be read
+
+**The call sets are today's, not 2026-07-29's — and today's are strictly larger.** Regenerating
+`mainpage.urls` reproduced all 9 of the audit's original URLs *and* added three the app has since
+grown: `/api/accountability/action-items`, `/api/agent/findings`, `/api/standups/status`. Every flow
+therefore pays a heavier shell than the baseline did, which makes each delta above **conservative** —
+the flows are doing more work than the baseline's and still coming in under it. The audit-era call
+set is preserved verbatim at `flows/mainpage-audit-2026-07-29.urls` rather than overwritten.
+
+**The instrument is validated against its own history.** Replaying that preserved audit-era file
+today returns **32** — byte-identical to the previously committed
+`out/after-9c00675_mainpage.txt` and to the 2026-08-12 run
+(`out/w6final-control_mainpage-audit.txt`). That matters twice over: it proves the harness still
+measures what it measured before, and it proves the counts are **volume-insensitive** — 32 held at
+today's 626 documents / 61 sprints exactly as it did at the pinned 557 / 35. Without that control,
+comparing today's numbers against the audit's would be an assumption; with it, it is a measurement.
+
+### 4.2 Background schedulers had to be disabled, and this was found the hard way
+
+The first two passes did **not** reproduce: main page came back 51, then 64. The cause is that
+FleetGraph's 2-minute sweep and the webhook delivery poller issue their own queries, and any that
+land between the marker statements are counted as if the flow had issued them. Both are post-audit
+features the Part-1 baseline never had, so counting them would inflate every flow by a random amount.
+
+Re-run with `FLEETGRAPH_ENABLED=false WEBHOOKS_ENABLED=false`, two independent passes agreed
+**exactly** on all five flows — 46 / 54 / 41 / 48 / 53, twice. Both the noisy and the quiet passes
+are committed (`w6final-{r1,r2}` and `w6final-{a,b}`) rather than the quiet ones alone:
+
+| Flow | noisy r1 | noisy r2 | quiet A | quiet B |
+| --- | --: | --: | --: | --: |
+| main page | 51 | 64 | **46** | **46** |
+| document | 61 | 60 | **54** | **54** |
+| issues | 46 | 45 | **41** | **41** |
+| week board | 53 | 54 | **48** | **48** |
+| search | 59 | 60 | **53** | **53** |
+
+Query counts remain the most trustworthy metric in this report — but only once the instrument
+measures the flow rather than the machine. A count is immune to CPU contention and thermal state; it
+is *not* immune to a cron firing inside the measurement window, and the first draft of this section
+would have reported a number that was 39% background noise.
+
+### 4.3 One flow definition was corrected mid-measurement
+
+The first `search` capture issued three `/api/search/mentions` requests, one per keystroke, and
+scored **+17.5% — a gate failure.** The baseline defines that flow as "Cmd-K + `@`-mention",
+singular, at 9 queries. Three mention queries measure a flow the baseline never measured, and each
+extra one costs ~4 queries. The capture was corrected to one request and the flow now scores −7.0%.
+Recorded here because the correction moved a FAIL to a PASS, and a reader is entitled to check that
+the flow definition was matched to the baseline rather than tuned to the budget.
 
 ---
 
@@ -437,7 +499,6 @@ bundle size, P95 latency or query counts, and the +10% budget holds.** The claim
 
 | Item | Reason |
 | --- | --- |
-| **4 of 5 Category-4 flows** (document view 16, issues list 13, week board 19, search 9) | Only `bench/cat4-queries/flows/mainpage.urls` is committed. The other four were traced from a live browser session during the audit and never checked in. Authoring replacements would count a *different* call set than the baseline measured, so the delta would be meaningless. **This is a reproducibility gap in the committed harness, not a property of this branch.** |
 | **`main` as a controlled A/B** | The task forbids creating or switching branches. Week-6 attribution is therefore *structural* (diff inspection + the targeted bearer probe), not experimental — except the bundle, where the empty `web/` diff is a proof, not an inference. |
 | **c = 50 latency tier** | Baseline records it; dropped for time given the margin at c=10 and c=25. |
 | **`/api/accountability/action-items`** | Two of the baseline's five endpoints were skipped for time/rate-limit budget; the three measured include the control and the two heaviest. |

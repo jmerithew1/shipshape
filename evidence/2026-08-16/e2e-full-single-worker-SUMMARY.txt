@@ -1,0 +1,30 @@
+[962/891] (retries) [chromium] › e2e\network-3g.spec.ts:180:9 › 3G throttled-network behaviour › authenticated docs → editor flow completes under regular-3g
+[963/891] (retries) [chromium] › e2e\network-3g.spec.ts:153:9 › 3G throttled-network behaviour › cold login page renders under slow-3g
+[964/891] (retries) [chromium] › e2e\network-3g.spec.ts:180:9 › 3G throttled-network behaviour › authenticated docs → editor flow completes under slow-3g
+[965/891] (retries) [chromium] › e2e\prove-live.spec.ts:18:5 › live verification walk
+[chromium] › e2e\prove-live.spec.ts:18:5 › live verification walk
+c1 MET | openapi=3.1.0, 11 paths, 13 operations
+c2 MET | 401 keys=code,message,request_id code=unauthorized
+c3 MET | {"status":"ready","agent_tables":true,"platform_tables":true,"commit":"c203e22d4a75e1699459bd1f41d9a2418ca4526b"}
+c4 MET | title="Ship - Project Management & Documentation" painted=true
+c5 MET | status=200 user_code=EGG8-2YEF interval=5
+c6 MET | first=authorization_pending immediate-repoll=slow_down
+c7 MISSING | present=
+c8 MET | status=401 code=unauthorized
+CONSOLE: error: Failed to load resource: the server responded with a status of 401 () || error: Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. || info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold || log: [Schema] Initialized schema version: 2 || error: Failed to load resource: the server responded with a status of 401 ()
+  1 failed
+    [chromium] › e2e\program-mode-week-ux.spec.ts:488:7 › Phase 3: Week Creation UX › owner selection shows availability indicators 
+  9 flaky
+    [chromium] › e2e\bulk-selection.spec.ts:1327:7 › Bulk Actions - Archive › archive shows success toast 
+    [chromium] › e2e\edge-cases.spec.ts:221:7 › Edge Cases › handles many mentions in one document (20+ mentions) 
+    [chromium] › e2e\my-week-stale-data.spec.ts:28:7 › My Week - stale data after editing plan/retro › plan edits are visible on /my-week after navigating back 
+    [chromium] › e2e\my-week-stale-data.spec.ts:63:7 › My Week - stale data after editing plan/retro › retro edits are visible on /my-week after navigating back 
+    [chromium] › e2e\program-mode-week-ux.spec.ts:369:7 › Phase 2: Weeks Tab UI › clicking sprint card selects it in the chart 
+    [chromium] › e2e\project-weeks.spec.ts:178:7 › Project Weeks Tab › project link in Properties sidebar navigates back to project 
+    [chromium] › e2e\request-changes-api.spec.ts:266:7 › Request Changes Authorization › non-admin, non-accountable user gets 403 on request-retro-changes 
+    [chromium] › e2e\session-timeout.spec.ts:629:7 › Extend Session API › Stay Logged In calls extend session endpoint 
+    [chromium] › e2e\weekly-accountability.spec.ts:384:7 › Project Allocation Grid API › Allocation grid shows person with assigned issues and plan/retro status 
+  36 skipped
+  41 did not run
+  804 passed (13.5h)
+E2E_EXIT=1

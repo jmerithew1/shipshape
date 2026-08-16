@@ -19,12 +19,17 @@ SD="$(cd "$(dirname "$0")" && pwd -W)"
 cd "$SD"; mkdir -p out
 NAME="$1"; URLFILE="$2"
 LABEL=${LABEL:-run}
+# Port is overridable because the pinned conditions (bench/README.md) assume the
+# API owns :3000, and it may not -- another project's dev server can hold it.
+# Query counts do not depend on the port; the default keeps every prior
+# invocation byte-identical.
+PORT=${API_PORT:-3000}
 PG="docker exec shipshape-postgres-1 psql -U ship -d ship_dev"
 J="$SD/j_flow.txt"; rm -f "$J"
 
 # fresh session (login limiter: only failed attempts count)
-TOK=$(curl -s -c "$J" -b "$J" http://127.0.0.1:3000/api/csrf-token | sed -E 's/.*"token":"([^"]+)".*/\1/')
-curl -s -c "$J" -b "$J" -X POST http://127.0.0.1:3000/api/auth/login \
+TOK=$(curl -s -c "$J" -b "$J" http://127.0.0.1:${PORT}/api/csrf-token | sed -E 's/.*"token":"([^"]+)".*/\1/')
+curl -s -c "$J" -b "$J" -X POST http://127.0.0.1:${PORT}/api/auth/login \
   -H "Content-Type: application/json" -H "X-CSRF-Token: $TOK" \
   -d '{"email":"dev@ship.local","password":"admin123"}' -o /dev/null
 SID=$(grep session_id "$J" | awk '{print $7}' | tr -d '\r\n ')
@@ -39,7 +44,7 @@ while IFS= read -r u; do
   case "$u" in \#*) continue ;; esac
   # explicit Cookie header: the jar's cookie is scoped to 127.0.0.1 and would
   # not be sent to localhost (domain mismatch -> silent 401s)
-  code=$(curl -s -o "out/resp_${NAME}.tmp" -w "%{http_code}" -H "Cookie: session_id=${SID}" "http://localhost:3000${u}")
+  code=$(curl -s -o "out/resp_${NAME}.tmp" -w "%{http_code}" -H "Cookie: session_id=${SID}" "http://localhost:${PORT}${u}")
   sz=$(wc -c < "out/resp_${NAME}.tmp")
   echo "  ${code}  ${sz}B  ${u}"
 done < "$URLFILE"

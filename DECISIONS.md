@@ -5,6 +5,129 @@ Week 5 (FleetGraph) entries begin here. Each entry ends with an explicit
 
 ---
 
+## 2026-08-16 — W6: re-running two cited checks moved A9 and the rate-limit row from MET to PARTIAL
+
+The traceability pass re-executed checks the ledger had been citing. Two came back
+differently than recorded, and both rows are now PARTIAL.
+
+**1. The Playwright suite is not green here.** The ledger recorded `848 passed · 0
+failed · 7 flaky · 36 skipped, exit 0` from 08-14. A full single-worker re-run on
+08-16 gave **804 passed · 1 failed · 9 flaky · 36 skipped · 41 did not run, exit 1**.
+The failure is `program-mode-week-ux.spec.ts:488` ("owner selection shows availability
+indicators") — a frontend test, **not** one of the six modifier failures fixed on
+08-14, which stay fixed. The 41 "did not run" are worker loss, which is also why the
+passed count fell to 804. The six-failure fix was real; "the suite is green" was a
+snapshot, and snapshots expire.
+
+**2. A live check cited as passing evidence reports MISSING.** The performance-targets
+row read "`x-ratelimit-*` family verified live in prod (`results.json` c7)". Reading
+`e2e/prove-live.spec.ts:75-80`: c7 requests `GET /api/v1/me` **unauthenticated** and
+asserts ≥3 `x-ratelimit-*` headers. Today it records `c7 MISSING | present=`, and an
+independent curl against prod agrees. The cause is structural, not a regression —
+limits are per-app and per-token and authn runs before the limiter (`router.ts:9`), so
+a pre-auth 401 has no bucket to report. The defect is the citation, not the product:
+a row claimed MET on the strength of a check that fails.
+
+**The pattern across all three of today's findings** — the query-count gate, the 21
+stale-harness failures, and these two — is the same and worth naming once: **every one
+was a claim whose evidence had not been re-executed since it was written.** None was a
+broken feature. The ledger's house rule ("a row only moves to MET with a file:line,
+test name, CI run, or URL") is necessary but not sufficient; a citation also needs a
+date and a re-run, which is what `docs/week6-traceability.md` now records per row.
+
+**Rejected:** authenticating the c7 probe today so it passes (it would close the gap by
+changing the measurement on submission day, and the brief's wording — "public
+responses" — plausibly wants the headers pre-auth, which is a product decision, not a
+test edit); re-running Playwright until a green appears (the 08-14 run was already that
+argument, and 13.5 h per attempt makes it a bad trade); quietly keeping A9 at MET on
+the strength of the older run.
+
+---
+
+## 2026-08-16 — W6: two test harnesses had drifted from the signature contract; 21 tests were failing under a "green" claim
+
+An audit sweep ran the suites instead of quoting them, and found **`@ship/cli`
+3/76 failing and `@ship/slack` 18/64 failing** while the ledger, the rubric and
+the submission index all reported both green.
+
+**Root cause.** `914afaf` fixed `verifyWebhook` to key the HMAC with the DERIVED
+key `sha256(rawSecret)` — which is what Ship actually signs with, since
+`deliverer.ts:281` passes `row.signing_secret_hash`. That commit updated the
+SDK's own test helper (`sdk/src/webhook.test.ts`, whose comment even names the
+trap: a helper and a verifier that agree with each other but not with real Ship
+deliveries) and did **not** update the two integration harnesses that hand-roll
+a signature. Both kept keying with the raw secret.
+
+**The product was correct the whole time.** Only the harnesses were wrong. The
+failure shape is what made it survive: every genuinely-signed assertion returned
+401 while every tamper / expiry / wrong-secret case still passed, so the suite
+read as a broken verifier rather than a broken harness. Fixed by deriving the key
+in both `sign()` helpers; all three clients of the signature contract now derive.
+cli 76/76 and slack 64/64.
+
+**What this cost, and the rule it argues for.** A green claim was carried forward
+for days without re-running the thing it described — and a rebuild of the SDK,
+the obvious first hypothesis, does not fix it, so the drift was invisible to a
+casual check. Test counts published in a ledger are a measurement with an expiry
+date. Re-measured totals: api 880 · web 163 · sdk 82 · cli 76 · slack 64 =
+**1,265**, replacing a published 1,251 that counted 21 failing tests as passing
+and had web 2 too high.
+
+**Rejected:** relaxing the assertions or marking the suites `.skip` to reach green
+(would have destroyed the only proof the integrations verify real signatures);
+changing `verifyWebhook` back to the raw secret to satisfy the harnesses (the
+harnesses were wrong, not the SDK — the deliverer's key is the arbiter).
+
+---
+
+## 2026-08-16 — W6: Category-4 query counts measured for all five flows; four ledger rows corrected
+
+Reviewer feedback on the Week-6 submission flagged one hard-gate failure: per-route
+query counts were measured for **one** of the five Part-1 flows, the other four read
+*not measured* in `docs/week6-perf-regression.md`, and the requirements ledger recorded
+the clause as MET anyway. The feedback is correct. One measurement was generalised to
+five, which is precisely what the ledger's own house rule forbids.
+
+**Closed by an instrument, not a transcription.** The reason four flows went unmeasured
+was that their call sets were traced from a browser session during the audit and never
+committed, so nobody could re-run them. `bench/cat4-queries/capture_flows.mjs` now
+generates every flow definition from the running app, so the gap cannot silently reopen.
+All five flows measured, two passes agreeing exactly: main page 57→46, document 64→54,
+issues 61→41, week board 67→48, search 57→53. Every flow PASS.
+
+Three method calls worth recording, because each changed a number:
+
+1. **Background schedulers off** (`FLEETGRAPH_ENABLED=false WEBHOOKS_ENABLED=false`).
+   Both are post-audit features; their queries land between the marker statements and
+   are counted as the flow's. With them on the main page read 51, then 64; with them off,
+   46 twice. The first draft of this measurement would have been 39% background noise.
+2. **The audit-era call set is preserved** (`flows/mainpage-audit-2026-07-29.urls`), not
+   overwritten. Replaying it still returns exactly 32 — which validates the instrument
+   against its own history and shows the counts are volume-insensitive at the 2026-08-16
+   dataset (626 documents / 61 sprints, drifted from the pinned 557 / 35). Without that
+   control the whole comparison is an assumption.
+3. **One flow definition was corrected mid-measurement.** The first `search` capture fired
+   a mention request per keystroke and scored +17.5%, a gate failure. The baseline defines
+   that flow as one `@`-mention. Corrected to one request: −7.0%. Recorded because the fix
+   moved a FAIL to a PASS and a reader is owed the chance to check it was matched to the
+   baseline rather than tuned to the budget.
+
+**The same audit found three more rows claiming more than their evidence showed**, all
+now corrected: the TTFE drill row said "in CI on every PR" when `ci.yml:173` gates it to
+`main` only; the per-epic write-up said MET when Epic 7's brief-specified proof (agent
+audit-log rows from OAuth authentication) cannot exist because `FLEETGRAPH_VIA_SDK` is set
+in no environment; and D8 claimed the portal Replay click when no test drives it.
+
+**Rejected:** re-seeding `ship_dev` to the pinned 557/35 volume (destroys live dev data;
+the mainpage control proves counts are volume-insensitive, which is cheaper and stronger
+evidence); a worktree A/B against pre-Week-6 code (the gate asks for comparison against
+the Part-1 baseline, which is what was done, and time was the binding constraint);
+deleting the `if: github.ref == 'refs/heads/main'` gate to make the drill "run on PRs"
+(it targets live prod, so a PR run would report a green that means nothing — the honest
+fix is a containerized PR-time drill, left open).
+
+---
+
 ## 2026-08-10 — W6: Terraform topology = the live Render stack; IAM exercise on the real SSM identity
 
 The graded deployment is already IaC: `terraform/render/` (pinned provider,
