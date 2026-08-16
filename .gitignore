@@ -140,3 +140,8 @@ bench/**/j_*.txt
 bench/**/pglog*.txt
 bench/cat1-types/raw.json
 web/dist-sourcemap-tmp/
+
+# ECS topology stack: keep the config and the plan artifacts, never the
+# provider binaries or local state.
+terraform/ecs/.terraform/
+terraform/ecs/*.tfstate*
