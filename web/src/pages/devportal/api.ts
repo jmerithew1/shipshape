@@ -328,8 +328,24 @@ export function useDeliveries(appId: string | null, cursor: string | null) {
 export function useReplayDelivery(appId: string | null) {
   const queryClient = useQueryClient();
   return useMutation<WebhookDelivery, Error, string>({
-    mutationFn: async (deliveryId) =>
-      readV1<WebhookDelivery>(await apiPost(`${WEBHOOK_BASE}/deliveries/${deliveryId}/replay`)),
+    // `app_id` is REQUIRED by the route — it is how the handler scopes the
+    // replay to a workspace before touching any webhook row, so omitting it is
+    // a 400, not a default. This call omitted it until 2026-08-16: the Replay
+    // button answered `400 validation_failed: app_id is required` on every
+    // click, and that button is what the brief's Testing Scenario 8 ends by
+    // asking a grader to press. `appId` was already in scope — used to
+    // invalidate the cache on success, just never sent.
+    //
+    // Caught by e2e/devportal-replay.spec.ts, the first test to click it. The
+    // API-level idempotency drill covers the replay contract and passed
+    // throughout; no amount of that can see a client that never reaches the
+    // endpoint.
+    mutationFn: async (deliveryId) => {
+      if (!appId) throw new Error('Select an app before replaying a delivery.');
+      return readV1<WebhookDelivery>(
+        await apiPost(`${WEBHOOK_BASE}/deliveries/${deliveryId}/replay`, { app_id: appId })
+      );
+    },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['devportal', 'deliveries', appId] }),
   });
