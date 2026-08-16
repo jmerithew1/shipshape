@@ -87,6 +87,28 @@ jobs:
       - name: Test (slack)
         run: pnpm --filter @ship/slack test
 
+      # Epic 7's feature flag, proven BOTH WAYS.
+      #
+      # The brief (Build Strategy §8, and Pre-Search 2.6) asks for the agent
+      # rewire "behind a feature flag so Part 2's tests pass with the flag on or
+      # off" — and specifically: "how does CI prove Part 2's tests pass with the
+      # flag both on and off?" The answer was previously "it doesn't": the flag's
+      # two branches were unit-tested inside `resolveShipData`, but no suite ever
+      # ran twice.
+      #
+      # "Test (api)" above covers flag-OFF, which is the default. This is the ON
+      # half, and it runs the WHOLE api suite rather than just the agent files —
+      # locally that is 880/880 green with the flag set. Narrowing it to
+      # src/fleetgraph would prove less for the same runtime, and the clause is
+      # about Part 2's tests passing, not about the seam's own unit tests.
+      #
+      # It is the difference between "the seam is tested" and "the system works
+      # on both sides of the seam".
+      - name: Test (api, FLEETGRAPH_VIA_SDK=on — Epic 7 flag, both ways)
+        env:
+          FLEETGRAPH_VIA_SDK: 'true'
+        run: pnpm --filter @ship/api test
+
       # Coverage re-runs all 59 api suites a second time under v8
       # instrumentation. It has NO thresholds — its output is an uploaded
       # report, not a gate — while `Test (api)` above is the actual
@@ -220,6 +242,31 @@ jobs:
           PGPASSWORD=ship_dev_password psql -h localhost -p 5433 -U ship -d ship_dev \
             -v ON_ERROR_STOP=1 -f api/src/db/migrations/043_ttfe_drill_app.sql
 
+      # The brief's TTFE stage 1 is "pnpm install @ship/sdk" on a CLEAN machine.
+      # The drill's own in-process timing reports ~1 ms for that stage, which is
+      # a dynamic import resolving inside the workspace — not an install, and
+      # reporting it as one overstates the drill. `SHIP_DRILL_INSTALL_MS` exists
+      # precisely so CI can measure the real thing and have it win.
+      #
+      # Pack the SDK and install the tarball into an empty directory outside the
+      # workspace, so pnpm cannot resolve it via the workspace link. That is the
+      # number a developer following the published docs would actually wait for.
+      - name: Measure a real SDK install (clean directory, packed tarball)
+        id: sdkinstall
+        run: |
+          set -euo pipefail
+          tarball="$(cd sdk && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -1)"
+          clean="$RUNNER_TEMP/ttfe-clean"
+          mkdir -p "$clean" && cd "$clean"
+          echo '{"name":"ttfe-clean","private":true}' > package.json
+          start=$(date +%s%3N)
+          pnpm add "$tarball" --ignore-workspace >/dev/null 2>&1
+          end=$(date +%s%3N)
+          ms=$((end - start))
+          echo "real @ship/sdk install: ${ms} ms"
+          node -e "require.resolve('@ship/sdk')" && echo "package resolves from a clean dir"
+          echo "ms=$ms" >> "$GITHUB_OUTPUT"
+
       - name: Boot Ship from this PR
         run: |
           node api/dist/index.js > api.log 2>&1 &
@@ -236,6 +283,9 @@ jobs:
         env:
           SHIP_CLIENT_ID: ship_app_ttfe_drill
           SHIP_CLIENT_SECRET: ${{ steps.drillapp.outputs.secret }}
+          # The real install measured above wins over the drill's in-process
+          # ~1 ms module resolve, so stage 1 reports what a developer waits for.
+          SHIP_DRILL_INSTALL_MS: ${{ steps.sdkinstall.outputs.ms }}
         run: |
           set +e
           pnpm --silent --filter @ship/cli drill ttfe \
